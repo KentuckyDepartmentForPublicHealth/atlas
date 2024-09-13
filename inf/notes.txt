@@ -1,0 +1,104 @@
+dd
+axitamm/braintumoratlas
+pediatric brain tumor
+gene expression atlas; only 1 available in the world
+incentive
+brain tumor diversity
+
+70 diff kinds of brain tumors
+no other organ can produce this many;
+other organs, can produce tops 5
+panoram; pediatric mortality
+worldwide: TARGET; cancer genome atlas, int. cancer genome consortium (have left out kids)
+tumor transcriptomic atlas; (brain tumor samples from world);
+gene probe -> gene expression; rna data
+expanded atlas to include adults (compare/contrast children vs. kids)
+ignore R code;
+gene expression data (first column lines up with below)
+atlas_data.csv (has all metadata) for gene expression data
+Q. Do i have to link?
+
+TSNE plot (non linear); 20,000 x 7,000 samples (150M data data points)
+TSA linear
+PCA linear; non linear (reduction) to make it 2 dimensions
+tsne1 vs tsne2 roughly equiv to x, y
+
+glioVis explore
+
+gliovis.bioinfo.cnio.es (doesnt allow comparison between studies and between cancers)
+"here is data for x"
+study A vs study C; didnt do batch comparisons
+only 2 kinds of cancers
+
+
+data and metadata in background
+brain tumor atlas
+
+selectInput (rawnames, col names) "only look at metablastomas"
+
+Gene:
+compare gene across all cancers -> plot / data
+compare survival...
+correlations..
+clunky, not synthesized.. elaborate
+'be prepared for massive traffic'
+
+data
+gene -> rds
+atlas data csv
+
+compare all tumors at once; scientists cannot compare data from 2 studies
+which cancer types do you want? instead of picking the study? 52 cancer types.
+
+BACKGROUND: SEND ME
+
+"Brain Tumor Atlas"
+Transcriptomic [Atlas of Nervous System Tumors]
+Gene Expression Atlas for Nervous System Tumors
+
+INPUTS:
+diagnosis (one or multiple) (cols in CSV..
+optional (filter: age? cut into groups)
+provide numeric age if left blank
+
+CLINICAL DATA: variables ("useless")
+!!! IMPORT !!! TUMOR DATA & PATIENT DATA
+
+
+return -> original histoloy; final diagnsosis (pick one or the other, orign hist or final diagnosis)
+
+further select on: compartment, location, grade, user select one or more genes.. (user provided list?; have to match what is available in the list)
+
+OUTPUTS:
+
+PLOT; BOXPLOT
+
+X axis: selected cancers.. Y axis: mRNA (value in atlas data frame)
+
+SURVIVAL:
+kaplan meier hazard ratio optimal cutoff
+takes available survival data
+binary based on median, high or low
+tells which value influences -> optimal cutoff
+
+survival tab replicated for every gene they have
+
+(perhaps limit 5 genes.. for survival.. so plot doesn't blow up)
+
+mainly scientific community
+
+THEMING COLORS: DARK MODE/LIGHT MODE..
+
+make language lay,
+
+panaram.. dark mode..
+
+"i want hue" "colorblind friendly" medialab.github.io
+
+'modifiable over time.. working on a second atlas.."
+
+(615) 403-5704
+
+interactivity: TSNE plot. plotly.. select points -> show raw data
+
+
