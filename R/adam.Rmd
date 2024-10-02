@@ -10,7 +10,9 @@ atlasData <- read_csv('/mnt/KDPH/PQI/PQI Data Analytics/BrainTumorAtlas-main/Atl
 # windows
 source('../../adam-utils/sysOpsLibsFuncs.R')
 geneExpressionData <- readRDS("P:/PQI/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds")
-
+# atlasData <- read_csv('dat/Atlas_Data.csv')
+# save(atlasData, file = 'dat/atlasData.RData')
+load(file = 'dat/atlasData.RData')
 
 
 
