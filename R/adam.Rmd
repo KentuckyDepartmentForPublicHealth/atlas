@@ -1,0 +1,18 @@
+
+
+```{r}
+
+# ubuntu
+source('/home/adam/Sandbox/adam-utils/sysOpsLibsFuncs.R')
+geneExpressionData <- readRDS('/mnt/KDPH/PQI/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds')
+atlasData <- read_csv('/mnt/KDPH/PQI/PQI Data Analytics/BrainTumorAtlas-main/Atlas_Data.csv')
+
+# windows
+source('../../adam-utils/sysOpsLibsFuncs.R')
+geneExpressionData <- readRDS("P:/PQI/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds")
+
+
+
+
+```
+
