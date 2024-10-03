@@ -27,7 +27,13 @@ plot(fit, xlab="Time", ylab="Survival", main="JDE Data", col=c(1), lty=c(1),conf
 ```
 
 
+```{r}
+jde.survival$Age.Groups <- jde.surv$Age..grouped.
+fit2 <- survfit(Surv(Overall.survival..months.,Vital.status)~strata(Age.Groups), data=jde.survival);fit2
+plot(fit2, xlab="Time", ylab="Survival", main="JDE Data", col=c(1:4), lty=c(1),conf.int = F)
+legend("bottomleft",title = "Age Groups", 0.7, legend=c("10-20","20-40","40-60","60-80"), lty=1, col=1:4)
 
+```
 
 
 
