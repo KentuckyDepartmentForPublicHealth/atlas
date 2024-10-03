@@ -1,6 +1,6 @@
 
 
-```{r}
+```{r data}
 
 # ubuntu
 source('/home/adam/Sandbox/adam-utils/sysOpsLibsFuncs.R')

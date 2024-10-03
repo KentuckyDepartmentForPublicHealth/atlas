@@ -78,6 +78,15 @@ ui <- page_navbar(id = 'navBar',
   ),
 
 
+# debug -------------------------------------------------------------------
+
+  nav_panel(
+    title = "Debug", icon = icon('bug'),
+    align = "left",
+    verbatimTextOutput('sessionInputVariables')
+  ),
+
+
 # mode toggle -------------------------------------------------------------
 
   
