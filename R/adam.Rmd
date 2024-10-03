@@ -18,3 +18,39 @@ load(file = 'dat/atlasData.RData')
 
 ```
 
+
+```{r cross-reference}
+
+examine <- geneExpressionData %>% 
+  select(AGZ_001_U133_2.CEL)
+
+examineOther <- atlasData %>% 
+  filter(Filename %in% 'AGZ_001_U133_2.CEL')
+
+rownames(examine) %>% length() %>% unique()
+```
+
+
+```{r adapt-from-hn}
+#atlas<-readRDS("C:/Users/henry/Downloads/ExpData.rds")
+mean.frame <- data.frame(colMeans(geneExpressionData))
+jde.mean<- data.frame(mean.frame[1:170,])
+# jde.hist <- read.csv("C:/Users/henry/Downloads/hist.csv")
+jde.data<- bind_cols(jde.mean,hist)
+colnames(jde.data)[colnames(jde.data) == "mean.frame.1.170..."] <- "Mean"
+boxplot(Mean ~ Histology, data = jde.data,
+        main = "Boxplot by Histology", 
+        xlab = "Histology", 
+        ylab = "mRNA Expression (log2)")
+```
+
+
+
+```{r adapt-from-hn}
+# jde.surv<- read.csv("C:/Users/henry/Downloads/jde survival.csv")
+jde.survival<- jde_survival[, c("Vital status","Overall survival (months)","Original histology"), drop=F]
+# jde.survival$`Overall survival (months)` <- as.numeric(jde.survival$`Overall survival (months)`)
+fit<- survfit(Surv(`Overall survival (months)`,`Vital status`)~1, data=jde.survival)
+plot(fit, xlab="Time", ylab="Survival", main="JDE Data", col=c(1), lty=c(1),conf.int = F)
+```
+
