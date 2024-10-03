@@ -1,0 +1,10 @@
+name: atlas
+title:
+username: kdph
+account: kdph
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12916003
+bundleId: 9179830
+url: https://kdph.shinyapps.io/atlas/
+version: 1
