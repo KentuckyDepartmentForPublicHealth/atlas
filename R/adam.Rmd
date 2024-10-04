@@ -72,3 +72,11 @@ legend("bottomleft",title = "Age Groups", 0.7, legend=c("10-20","20-40","40-60",
 
 ```
 
+
+```{r freqs}
+
+
+map(atlasData[, "Diagnosis class", drop = F], ~ freq(.x) %>% head())
+
+```
+

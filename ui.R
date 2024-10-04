@@ -46,7 +46,7 @@ ui <- page_navbar(id = 'navBar',
       tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
       tags$link(rel = "shortcut icon", href = "favicon.ico")
     ),
-    span(img(src = "main-banner-bigger.png"), style = 'text-align: center;'),
+    span(img(src = "main-banner-bigger.png"), style = 'text-align: center; width = "15%";'),
     # span(img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "30%"), style = 'text-align: center;'),
     h2('This is a heading'),
     tags$blockquote("This study introduces a comprehensive atlas that integrates gene expression and clinical data from thousands of nervous system samples, both neoplastic (tumorous) and non-neoplastic. It addresses the current gap in resources for studying a wide range of nervous system tumors, especially rare types across various regions and age groups. The atlas allows for in-depth comparative analysis of gene expression and reveals that patterns in DNA methylation also extend to gene expression differences across tumor types. Additionally, it identifies specific brain tumors, like certain gliomas, that need further diagnostic clarification, and the methods used can be applied to other rare diseases."),
@@ -76,11 +76,12 @@ ui <- page_navbar(id = 'navBar',
 49 comprehensive and robust comparative gene expression analyses.",
     
     span(tagList(
-      img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "30%"), 
+      img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "50%"), 
       br(), 
-      paste0('Last updated: ', currentDate)
+      paste0('Last updated: ', currentDate),
+      br()
       ),
-      style = 'color: black; background: #62BCF0; text-align: center; border-radius: 0px; border: 0px solid black; padding: 1em; margin: 1em;'),
+      style = 'font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 5em 1em 5em;'),
     br()
   ),
   # nav_panel(

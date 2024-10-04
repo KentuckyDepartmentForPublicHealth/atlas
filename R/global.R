@@ -24,13 +24,14 @@ chfs <- list(
 )
 
 
-# deploy ------------------------------------------------------------------
+
+# time --------------------------------------------------------------------
+
 
 # currentDate <- format(Sys.time(), '%a, %b %d, %Y at %I:%M %p EDT')
 # saveRDS(currentDate, file = 'dat/currentDate.rds')
 currentDate <- readRDS(file = 'dat/currentDate.rds')
 
-# rsconnect::deployApp(account = 'kdph', appName = 'atlas', appVisibility = 'private', logLevel = 'verbose')
 
 
 # bootstrap variables -----------------------------------------------------
