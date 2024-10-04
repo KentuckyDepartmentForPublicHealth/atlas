@@ -4,9 +4,10 @@ library(cowplot)
 library(dplyr)
 library(ggpubr)
 
-d<-read.csv("Atlas_Data.csv", header=T, row.names = 1, stringsAsFactors = T)
-d<-d[d$Tumor!="#N/A",]
-
+d<-read.csv("dat/Atlas_Data.csv", header=T, row.names = 1, stringsAsFactors = T)
+freq(d$Tu)
+d<-d[d$Diagnosis.class !="#N/A",]
+d$Tumor <- d$Diagnosis.class
 d$Tumor<-factor(d$Tumor, levels = c("Papilloma", "Angiocentric", "Diffuse Glioma", "G34 Mutant", "IDH Mutant", "Midline",
                                     "HGNET-MN1", "PA", "PXA", "AT/RT-MYC", "AT/RT-SHH", "AT/RT-TYR", "ETMR", "HGNET-BCOR","MB-GP3",
                                     "MB-GP4","MB-SHH","MB-WNT", "Neuroblastoma", "NB-FOXR2", "Retinoblastoma", "MPE", "PFA", "PFB", "RELA", "SE", "YAP", "Germ Cell Tumor",

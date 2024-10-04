@@ -3,9 +3,13 @@ i<-read.csv("Atlas_Data.csv",header=T)
 
 setwd("E:/data/AffyData")
 
-library(affyPara)
-library(hgu133plus2hsentrezgcdf)
-library(hgu133plus2hsentrezg.db)
+# BiocManager::install('affyPara')
+# BiocManager::install('affyPara')
+# BiocManager::install('affyPara')
+# 
+# library(affyPara)
+# library(hgu133plus2hsentrezgcdf)
+# library(hgu133plus2hsentrezg.db)
 
 stopCluster(cl)
 cl <-makeCluster(13, type="SOCK")
