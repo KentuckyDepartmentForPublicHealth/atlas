@@ -74,7 +74,14 @@ ui <- page_navbar(id = 'navBar',
 47 neoplasms. Our dataset’s broad coverage of diagnoses, including rarely studied entities, spans
 48 all ages and includes individuals from diverse geographical regions, enhancing its utility for
 49 comprehensive and robust comparative gene expression analyses.",
-    span(img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "20%"), style = 'text-align: center;')
+    
+    span(tagList(
+      img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "30%"), 
+      br(), 
+      paste0('Last updated: ', currentDate)
+      ),
+      style = 'color: black; background: #62BCF0; text-align: center; border-radius: 0px; border: 0px solid black; padding: 1em; margin: 1em;'),
+    br()
   ),
   # nav_panel(
   #   title = "Stats", icon = icon('chart-bar'),
@@ -85,7 +92,10 @@ ui <- page_navbar(id = 'navBar',
   #   )
   # ),
   
-  
+
+# info --------------------------------------------------------------------
+
+
   nav_panel(
     title = "Info", icon = icon('circle-info'),
     align = "right"
