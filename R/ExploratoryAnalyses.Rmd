@@ -2,10 +2,12 @@
 library(dplyr)
 library(ggplot2)
 library(survival)
+
 ```
 
 ```{r}
 #atlas<-readRDS("C:/Users/henry/Downloads/ExpData.rds")
+atlas.meta <- read.csv("C:/Users/henry/Downloads/atlas.csv")
 #mean.frame <- data.frame(colMeans(atlas))
 jde.mean<- data.frame(mean.frame[1:170,])
 jde.hist <- read.csv("C:/Users/henry/Downloads/hist.csv")
@@ -15,23 +17,24 @@ boxplot(Mean ~ Histology, data = jde.data,
         main = "Boxplot by Histology", 
         xlab = "Histology", 
         ylab = "mRNA Expression (log2)")
+survival<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/AtlasSurvival.csv")
 ```
 
 
 
 ```{r}
-jde.surv<- read.csv("C:/Users/henry/Downloads/jde survival.csv")
-jde.survival<- jde.surv[, c("Vital.status","Overall.survival..months.","Original.histology"), drop=F]
-fit<- survfit(Surv(Overall.survival..months.,Vital.status)~1, data=jde.survival);fit
+jde.surv<- survival[grep("^JDE", survival[,1]), ]   #pull from complete survival
+jde.surv$Overall.survival..months. <- as.numeric(jde.surv$Overall.survival..months.)
+fit<- survfit(Surv(Overall.survival..months.,Vital.status..1.dead..0.alive.)~1, data=jde.surv)
 plot(fit, xlab="Time", ylab="Survival", main="JDE Data", col=c(1), lty=c(1),conf.int = F)
 ```
 
 
 ```{r}
 jde.survival$Age.Groups <- jde.surv$Age..grouped.
-fit2 <- survfit(Surv(Overall.survival..months.,Vital.status)~strata(Age.Groups), data=jde.survival);fit2
+fit2 <- survfit(Surv(Overall.survival..months.,jde.surv$Vital.status..1.dead..0.alive.)~strata(jde.surv$Age..grouped.), data=jde.surv)
 plot(fit2, xlab="Time", ylab="Survival", main="JDE Data", col=c(1:4), lty=c(1),conf.int = F)
-legend("bottomleft",title = "Age Groups", 0.7, legend=c("10-20","20-40","40-60","60-80"), lty=1, col=1:4)
+legend("bottomleft",title = "Age Groups", 0.7, legend=c("10-20","20-40","40-60","60-80"), lty=1, col=1:4) #missing data for 10-20 Group
 
 ```
 
@@ -39,7 +42,7 @@ legend("bottomleft",title = "Age Groups", 0.7, legend=c("10-20","20-40","40-60",
 agz_columns <- (grep("^AGZ", names(atlas)))
 agz <- atlas[, agz_columns]
 mean.frame2 <- data.frame(colMeans(agz))
-#agz.hist<- read.csv("C:/Users/henry/Downloads/agz_hist.csv")
+agz.hist<- read.csv("C:/Users/henry/Downloads/agz_hist.csv")
 agz.data<- bind_cols(mean.frame2,agz.hist)
 boxplot(colMeans.agz. ~ Histology, data = agz.data,
         main = "Boxplot by Histology", 
@@ -48,12 +51,34 @@ boxplot(colMeans.agz. ~ Histology, data = agz.data,
 ```
 
 ```{r}
-FB<-read.csv("C:/Users/henry/Downloads/FB survival.csv")
-fit3<- survfit(Surv(Overall.survival..months.,FB$Vital.status..1.dead..0.alive.)~1, data=FB);fit3
+#awk -F, 'NR==1 || $1 ~ /^FB/' /mnt/c/Users/henry/downloads/atlas.csv >FB.csv    #extracts rows that begin with GS and can be modified to extract other groups
+FB_subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlasSurvival.csv/FB.csv")   #Load data
+FB.survival<-((grep("^FB", names(survival))))   #Subset rows of FB group
+FB_subset$Overall.survival..months.<- as.numeric(FB_subset$Overall.survival..months.)    #Set time as numeric variable
+fit3<- survfit(Surv(FB_subset$Overall.survival..months.,FB_subset$Vital.status..1.dead..0.alive.)~1, data=FB_subset)
 plot(fit3, xlab="Time", ylab="Survival", main="FB Data", col=c(1), lty=c(1),conf.int = F)
-fit4<- survfit(Surv(Overall.survival..months.,FB$Vital.status..1.dead..0.alive.)~strata(FB$Age..grouped.), data=FB)
-plot(fit4, xlab="Time", ylab="Survival", main="FB Data", col=1:3, lty=c(1),conf.int = F)
+FB_col<-(grep("^FB", names(atlas)))                     #subset from second data set          
+FB<- atlas[, FB_col]
+FB_mean<- data.frame(colMeans(FB))
 ```
+
+
+```{r}
+#awk -F, 'NR==1 || $1 ~ /^GS/' /mnt/c/Users/henry/downloads/atlasSurvival.csv > GSM.csv  
+GSM_columns <- (grep("^GSM", names(atlas)))
+GSM.atlas<- atlas[, GSM_columns]                #GSM group
+GSM.subset <- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/GSM.csv")    
+mean.GSM <- data.frame(colMeans(GSM.atlas))
+GSM<- bind_cols(mean.GSM,GSM.subset$Original.histology)
+colnames(GSM)[colnames(GSM) == "...2"] <- "Original Histology"
+```
+
+
+```{r}
+
+```
+
+
 
 
 
