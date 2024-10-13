@@ -52,7 +52,7 @@ boxplot(colMeans.agz. ~ Histology, data = agz.data,
 
 ```{r}
 #awk -F, 'NR==1 || $1 ~ /^FB/' /mnt/c/Users/henry/downloads/atlas.csv >FB.csv    #extracts rows that begin with GS and can be modified to extract other groups
-FB_subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlasSurvival.csv/FB.csv")   #Load data
+FB_subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/FB.csv")   #Load data
 FB.survival<-((grep("^FB", names(survival))))   #Subset rows of FB group
 FB_subset$Overall.survival..months.<- as.numeric(FB_subset$Overall.survival..months.)    #Set time as numeric variable
 fit3<- survfit(Surv(FB_subset$Overall.survival..months.,FB_subset$Vital.status..1.dead..0.alive.)~1, data=FB_subset)
@@ -64,10 +64,11 @@ FB_mean<- data.frame(colMeans(FB))
 
 
 ```{r}
-#awk -F, 'NR==1 || $1 ~ /^GS/' /mnt/c/Users/henry/downloads/atlasSurvival.csv > GSM.csv  
+#awk -F, 'NR==1 || $1 ~ /^GS/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/AtlasSurvival.csv >GSM.csv 
+#awk -F, 'NR==1 || $1 ~ /^GS/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >GSM2.csv
 GSM_columns <- (grep("^GSM", names(atlas)))
 GSM.atlas<- atlas[, GSM_columns]                #GSM group
-GSM.subset <- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/GSM.csv")    
+GSM.subset <- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/GSM2.csv")    
 mean.GSM <- data.frame(colMeans(GSM.atlas))
 GSM<- bind_cols(mean.GSM,GSM.subset$Original.histology)
 colnames(GSM)[colnames(GSM) == "...2"] <- "Original Histology"
@@ -75,11 +76,23 @@ colnames(GSM)[colnames(GSM) == "...2"] <- "Original Histology"
 
 
 ```{r}
-
+#awk -F, 'NR==1 || $1 ~ /^AL/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >AL.csv
+Al_columns <-(grep("^AL", names(atlas)))
+AL.atlas <- atlas[, Al_columns]
+mean.AL <-data.frame(colMeans(AL.atlas))
+AL.subset<-read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/AL.csv")
+AL<- bind_cols(mean.AL,AL.subset$Original.histology)
 ```
 
 
-
+```{r}
+#awk -F, 'NR==1 || $1 ~ /^JYD/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >JYD.csv
+jyd_columns<-(grep("^JYD", names(atlas)))
+jyd.atlas<- atlas[, jyd_columns]
+mean.jyd<- data.frame(colMeans(jyd.atlas))
+jyd.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/JYD.csv")
+JYD<- bind_cols(mean.jyd,jyd.subset$Original.histology)
+```
 
 
 
