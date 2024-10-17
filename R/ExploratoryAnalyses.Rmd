@@ -94,7 +94,16 @@ jyd.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/JYD.csv")
 JYD<- bind_cols(mean.jyd,jyd.subset$Original.histology)
 ```
 
+```{r}
+Survival<-read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/AtlasSurvival.csv")
 
+Survival <- Survival %>%
+  filter(!grepl("-", Overall.survival..months.)) %>%
+  mutate(
+
+    Overall.survival..months. = gsub("[<>]", "", Overall.survival..months.) 
+  )
+```
 
 
 
