@@ -7,7 +7,7 @@ library(survival)
 
 ```{r}
 #atlas<-readRDS("C:/Users/henry/Downloads/ExpData.rds")
-atlas.meta <- read.csv("C:/Users/henry/Downloads/atlas.csv")
+#atlas.meta <- read.csv("C:/Users/henry/Downloads/atlas.csv")
 #mean.frame <- data.frame(colMeans(atlas))
 jde.mean<- data.frame(mean.frame[1:170,])
 jde.hist <- read.csv("C:/Users/henry/Downloads/hist.csv")
@@ -53,13 +53,9 @@ boxplot(colMeans.agz. ~ Histology, data = agz.data,
 ```{r}
 #awk -F, 'NR==1 || $1 ~ /^FB/' /mnt/c/Users/henry/downloads/atlas.csv >FB.csv    #extracts rows that begin with GS and can be modified to extract other groups
 FB_subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/FB.csv")   #Load data
-FB.survival<-((grep("^FB", names(survival))))   #Subset rows of FB group
-FB_subset$Overall.survival..months.<- as.numeric(FB_subset$Overall.survival..months.)    #Set time as numeric variable
-fit3<- survfit(Surv(FB_subset$Overall.survival..months.,FB_subset$Vital.status..1.dead..0.alive.)~1, data=FB_subset)
-plot(fit3, xlab="Time", ylab="Survival", main="FB Data", col=c(1), lty=c(1),conf.int = F)
 FB_col<-(grep("^FB", names(atlas)))                     #subset from second data set          
 FB<- atlas[, FB_col]
-FB_mean<- data.frame(colMeans(FB))
+FB<- data.frame(colMeans(FB));FB$Original.histology <- rep("GBM",56)
 ```
 
 
@@ -94,6 +90,153 @@ jyd.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/JYD.csv")
 JYD<- bind_cols(mean.jyd,jyd.subset$Original.histology)
 ```
 
+
+```{r}
+#awk -F, 'NR==1 || $1 ~ /^Ho/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >Ho.csv
+Ho_columns<- (grep("^Ho", names(atlas)))
+Ho.atlas <-atlas[, Ho_columns]
+mean.Ho <- data.frame(colMeans(Ho.atlas))
+Ho.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/Ho.csv")
+rownames(Ho.subset)<- Ho.subset$Filename
+mean.Ho$rowname<- rownames(mean.Ho)
+Ho.subset$rowname<-rownames(Ho.subset)
+merge.Ho<- merge(mean.Ho,Ho.subset, by="rowname")
+Ho<- merge.Ho[, c("colMeans.Ho.atlas.", "Original.histology")]   #R recognizes "Na" histology as null
+Ho$Original.histology[is.na(Ho$Original.histology)]<- "NA"
+
+```
+
+```{r}
+#awk -F, 'NR==1 || $1 ~ /^hCA/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >hCA.csv
+hCA_col<- (grep("^hCA", names(atlas)))
+hCA.atlas<- atlas[, hCA_col]
+mean.hCA<- data.frame(colMeans(hCA.atlas))
+hCA.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/hCA.csv")
+hCA<- bind_cols(mean.hCA, hCA.subset$Original.histology)
+
+#awk -F, 'NR==1 || $1 ~ /^hCR/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >hCR.csv
+hCR_col<- (grep("^hCR", names(atlas)))
+hCR.atlas<- atlas[, hCR_col]
+mean.hCR<- data.frame(colMeans(hCR.atlas))
+hCR.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/hCR.csv")
+hCR<- bind_cols(mean.hCR,hCR.subset$Original.histology)
+
+hHA_col<- (grep("^hHA", names(atlas)))
+hHA.atlas <- atlas[, hHA_col]
+hHA <- data.frame(colMeans(hHA.atlas))
+hHA$Original.Histology<- rep("Normal",4)
+```
+
+```{r}
+#awk -F, 'NR==1 || $1 ~ /^MC/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >MC.csv
+mc_col<- (grep("^MC", names(atlas)))
+mc.atlas<- atlas[, mc_col]
+mean.mc<- data.frame(colMeans(mc.atlas))
+mc.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/MC.csv")
+MC<- bind_cols(mean.mc, mc.subset$Original.histology)
+
+#awk -F, 'NR==1 || $1 ~ /^N_/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >nbt.csv
+nbt_col<- (grep("^N_", names(atlas)))
+nbt.atlas<- atlas[, nbt_col]
+mean.nbt<- data.frame(colMeans(nbt.atlas))
+nbt.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/nbt.csv")
+nbt<- bind_cols(mean.nbt, nbt.subset$Original.histology)
+
+#awk -F, 'NR==1 || $1 ~ /^SG/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >sg.csv
+
+SG_col<- (grep("^SG", names(atlas)))
+SG.atlas<- atlas[, SG_col]
+mean.SG<- data.frame(colMeans(SG.atlas))
+SG.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/sg.csv")
+SG<- bind_cols(mean.SG, SG.subset$Original.histology)
+
+#awk -F, 'NR==1 || $1 ~ /^SJ/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >SJ.csv
+SJ_col<- (grep("^SJ", names(atlas)))
+SJ.atlas<- atlas[, SJ_col]
+mean.SJ<- data.frame(colMeans(SJ.atlas))
+SJ.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/SJ.csv")
+
+rownames(SJ.subset)<- SJ.subset$Filename
+mean.SJ$rowname<- rownames(mean.SJ)
+SJ.subset$rowname<-rownames(SJ.subset)
+merge.SJ<- merge(mean.SJ,SJ.subset, by="rowname")
+SJ<- merge.SJ[, c("colMeans.SJ.atlas.", "Original.histology")]
+```
+
+```{r}
+#awk -F, 'NR==1 || $1 ~ /^X_d/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >x_d.csv
+X_d_col<- (grep("^X_d", names(atlas)))
+X_d.atlas<- atlas[, X_d_col]
+mean.X_d<- data.frame(colMeans(X_d.atlas))
+X_d.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/x_d.csv")
+X_d <- bind_cols(mean.X_d, X_d.subset$Original.histology)
+
+
+#awk -F, 'NR==1 || $1 ~ /^X_I/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >x_i.csv
+X_I_col<- (grep("^X_I", names(atlas)))
+X_I.atlas<- atlas[, X_I_col]
+mean.X_I<- data.frame(colMeans(X_I.atlas))
+X_I.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/x_i.csv")
+X_I <- bind_cols(mean.X_I, X_I.subset$Original.histology)
+
+#awk -F, 'NR==1 || $1 ~ /^X_MB/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >x_MBR.csv
+X_MB_col<- (grep("^X_MB", names(atlas)))
+X_MB.atlas<- atlas[, X_MB_col]
+mean.X_MB<- data.frame(colMeans(X_MB.atlas))
+X_MB.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/x_MBR.csv")
+X_MB <- bind_cols(mean.X_MB, X_MB.subset$Original.histology)
+
+#awk -F, 'NR==1 || $1 ~ /^X_mb/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >x_mb.csv
+X_mb_col<- (grep("^X_mb", names(atlas)))
+X_mb.atlas<- atlas[, X_mb_col]
+mean.X_mb<- data.frame(colMeans(X_mb.atlas))
+X_mb.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/x_mb.csv")
+X_mb <- bind_cols(mean.X_mb, X_mb.subset$Original.histology)
+
+#awk -F, 'NR==1 || $1 ~ /^X_MD/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >x_md.csv
+X_md_col<- (grep("^X_MD", names(atlas)))
+X_md.atlas<- atlas[, X_md_col]
+mean.X_md<- data.frame(colMeans(X_md.atlas))
+X_md.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/x_md.csv")
+X_md <- bind_cols(mean.X_md, X_md.subset$Original.histology)
+
+#awk -F, 'NR==1 || $1 ~ /^X_MD/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >x_md.csv
+X_md_col<- (grep("^X_MD", names(atlas)))
+X_md.atlas<- atlas[, X_md_col]
+mean.X_md<- data.frame(colMeans(X_md.atlas))
+X_md.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/x_md.csv")
+X_md <- bind_cols(mean.X_md, X_md.subset$Original.histology)
+
+#awk -F, 'NR==1 || $1 ~ /^FDY/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >fdy.csv
+fdy_col<- (grep("^FDY", names(atlas)))
+fdy_atlas<- atlas[, fdy_col]
+FDY<- data.frame(colMeans(fdy_atlas))
+FDY$Original.histology <- rep("GBM",23)
+
+
+xs_col<- (grep("^X_S", names(atlas)))
+xs_atlas<- atlas[, xs_col]
+XS<- data.frame(colMeans(xs_atlas))
+XS$Original.histology <- rep("MB",28)
+
+
+#awk -F, 'NR==1 || $1 ~ /^(X1|X0|X2|X5)/' /mnt/c/Users/henry/OneDrive/Documents/GitHub/atlas/atlas.csv >x.csv
+X_col<- (grep("^(X1|X0|X2|X5)", names(atlas)))
+X.atlas<- atlas[, X_col]
+mean.X<- data.frame(colMeans(X.atlas))
+X.subset<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/x.csv")
+rownames(X.subset)<- X.subset$Filename
+mean.X$rowname<- rownames(mean.X)
+X.subset$rowname<-rownames(X.subset)
+merge.X<- merge(mean.X,X.subset, by="rowname")
+X<- merge.X[, c("colMeans.X.atlas.", "Original.histology")]
+
+
+
+```
+
+
+
 ```{r}
 Survival<-read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/AtlasSurvival.csv")
 
@@ -105,6 +248,12 @@ Survival <- Survival %>%
   )
 ```
 
+
+```{r}
+path<- "C:/Users/henry/OneDrive/Documents/GitHub/atlas/subsets.RData"
+
+save(jde, agz.data,FB,GSM,AL,JYD,Ho,hCA,hCR,hHA,MC,nbt,SG,SJ,X_d,X_I,X_mb,X_md,FDY,XS,X,X_MB, file=path)
+```
 
 
 
