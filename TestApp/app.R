@@ -62,22 +62,11 @@ ui <- fluidPage(
                                            h4("Scatterplot"),
                                            ))),
                          tabPanel("Data",
-                                  navset_card_tab(
-                                    height = 450,
-                                    full_screen = TRUE,
-                                    title = "HTML Widgets",
-                                    nav_panel(
-                                      "Plot #2",
-                                      plotOutput("plot3")
-                                      
-                                    ),
-                                    nav_panel(
-                                      shiny::icon("circle-info"),
-                                      markdown("Learn more about [htmlwidgets](http://www.htmlwidgets.org/)")
-                                    )
-                                  )          
+                                           
                                   
-                                  
+                                  mainPanel(
+                                    tableOutput("contents")
+                                  )
                                   
                          )
                          
@@ -97,6 +86,15 @@ server <- function(input, output) {
     } else if (input$boxplot_choice == "JDE") {
       boxplot(jde.data$Mean ~ jde.data$Histology,data = jde.data )
     }
+  })
+  
+  output$contents <- renderTable({
+    if (input$boxplot_choice == "GSM") {
+      df<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/gsmsurv.csv")
+    } else if (input$boxplot_choice == "JDE") {
+      df<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/jdesurv.csv")
+    }
+    return(df)
   })
 }
 
