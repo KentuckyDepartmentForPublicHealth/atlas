@@ -14,6 +14,8 @@ library(shinythemes)
 library(plotly)
 library(htmltools)
 library(leaflet)
+library(survival)
+library(DT)
 
 
 ui <- fluidPage(
@@ -36,44 +38,48 @@ ui <- fluidPage(
   ),
   
   theme = shinytheme("cyborg"),  
-  tabsetPanel(
-    tabPanel("Tab 1", 
-             column(3,
-                    wellPanel(  
+             
+                    sidebarPanel(  
                       h4("Gene"),
                       radioButtons("boxplot_choice","Select Gene:",
-                                   choices = list("GSM" = "GSM", "JDE" = "JDE"))
+                                   choices = list("GSM" = "GSM", "JDE" = "JDE","AGZ"="AGZ","FB"="FB","AL"="AL","JYD"="JYD","hCA"="hCA","hCR"="hCR","Ho"="Ho","hHA"="hHA",
+                                                  "MC"="MC","nbt"="nbt","SG"="SG","SJ"="SJ","X_d"="X_d","X_I"="X_I","X_mb"="X_mb","X_md"="X_md",
+                                                  "FDY"="FDY","XS"="XS","X"="X","X_MB"="X_MB"))
                     )
-             ),
-             tabsetPanel(type = "tabs",
+            ,
+           mainPanel(  tabsetPanel(type = "tabs",
                          
                          
-                         tabPanel("mRNA Expression", h4("Contents"),
-                                  
-                                  column(10,
-                                         mainPanel(
+                         tabPanel("mRNA Expression",
+                                   
                                            h4("Boxplot"),
-                                           plotOutput("boxplot")))),
+                                           plotOutput("boxplot")),
                          
-                         tabPanel("Scatter Plot", title = tagList(icon("chart-line"), "Survival Curve"),verbatimTextOutput("summary",),
+                         tabPanel("Survival Curve", title = tagList(icon("chart-line"), "Survival Curve"),verbatimTextOutput("summary",),
                                   
-                                  column(6,
-                                         mainPanel(
-                                           h4("Scatterplot"),
-                                           ))),
+                                
+                                         (
+                                           plotOutput("surv")
+                                           )),
                          tabPanel("Data",
                                            
-                                  
-                                  mainPanel(
-                                    tableOutput("contents")
+                                  tabsetPanel(type = "tabs", 
+                                          tabPanel ("Survival Data",mainPanel(
+                                    DT::dataTableOutput("mytable1")
                                   )
+                                           ),
+                                  tabPanel("mRNA Data",mainPanel(
+                                    DT::dataTableOutput("mytable2")
+                                  )
+                                           ))
+                                  
                                   
                          )
                          
-             )
-    )
+             ))
     
-  )
+    
+  
 )
 
 # Define server logic required to draw a histogram
@@ -86,15 +92,58 @@ server <- function(input, output) {
     } else if (input$boxplot_choice == "JDE") {
       boxplot(jde.data$Mean ~ jde.data$Histology,data = jde.data )
     }
+      else if (input$boxplot_choice=="XS") {
+      boxplot(XS$colMeans.xs_atlas. ~ XS$Original.histology, data=XS)
+      }
+    else if (input$boxplot_choice=="AGZ") {
+      boxplot(agz.data$colMeans.agz. ~ XS$Original.histology, data=XS)
+    }
+    else if (input$boxplot_choice=="FB") {
+      boxplot(FB$colMeans.FB. ~ FB$Original.histology, data=FB)
+    }
   })
   
-  output$contents <- renderTable({
+ 
+  output$mytable1 <- DT::renderDataTable({
     if (input$boxplot_choice == "GSM") {
       df<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/gsmsurv.csv")
-    } else if (input$boxplot_choice == "JDE") {
-      df<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/jdesurv.csv")
+    DT::datatable(df)
     }
-    return(df)
+  })
+  
+  output$mytable2 <- DT::renderDataTable({
+    if (input$boxplot_choice == "GSM") {
+      DT::datatable(GSM)
+    }
+  })
+  
+  output$surv <- renderPlot({
+     if (input$boxplot_choice == "JDE") {
+      jdesurv<- survival[grep("^JDE", survival[,1]), ]
+      jdesurv$Overall.survival..months. <- as.numeric(jdesurv$Overall.survival..months.)
+      fit<- survfit(Surv(Overall.survival..months.,Vital.status..1.dead..0.alive.)~1, data=jdesurv)
+      plot(fit, xlab="Time", ylab="Survival", main="JDE Data", col=c(1), lty=c(1),conf.int = F)
+    }
+    else if (input$boxplot_choice == "FDY") {
+      fdysurv<- survival[grep("^FDY", survival[,1]), ]
+      fdysurv$Overall.survival..months. <- as.numeric(fdysurv$Overall.survival..months.)
+      fit<- survfit(Surv(Overall.survival..months.,Vital.status..1.dead..0.alive.)~1, data=fdysurv)
+      plot(fit, xlab="Time", ylab="Survival", main="FDY Data", col=c(1), lty=c(1),conf.int = F)
+    }
+    else if (input$boxplot_choice == "GSM") {
+      gsmsurv<- survival[grep("^GSM", survival[,1]), ]
+      gsmsurv$Overall.survival..months. <- as.numeric(gsmsurv$Overall.survival..months.)
+      fit<- survfit(Surv(Overall.survival..months.,Vital.status..1.dead..0.alive.)~1, data=gsmsurv)
+      plot(fit, xlab="Time", ylab="Survival", main="GSM Data", col=c(1), lty=c(1),conf.int = F)
+    }
+    else if (input$boxplot_choice == "FB") {
+      fbsurv<- survival[grep("^FB", survival[,1]), ]
+      fbsurv$Overall.survival..months. <- as.numeric(fbsurv$Overall.survival..months.)
+      fit<- survfit(Surv(Overall.survival..months.,Vital.status..1.dead..0.alive.)~1, data=fbsurv)
+      plot(fit, xlab="Time", ylab="Survival", main="FB Data", col=c(1), lty=c(1),conf.int = F)
+    }
+    
+    
   })
 }
 
