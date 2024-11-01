@@ -53,7 +53,7 @@ ui <- fluidPage(
                          tabPanel("mRNA Expression",
                                    
                                            h4("Boxplot"),
-                                           plotOutput("boxplot")),
+                                           plotlyOutput("boxplot")),
                          
                          tabPanel("Survival Curve", title = tagList(icon("chart-line"), "Survival Curve"),verbatimTextOutput("summary",),
                                   
@@ -86,76 +86,353 @@ ui <- fluidPage(
 server <- function(input, output) {
   load("C:/Users/henry/OneDrive/Documents/GitHub/atlas/subsets.RData")
   
-  output$boxplot <- renderPlot({
+  output$boxplot <- renderPlotly({
     if (input$boxplot_choice == "GSM") {
-      boxplot(GSM$colMeans.GSM.atlas. ~ GSM$`Original Histology`,data = GSM, xlab = "Histology",ylab="mRNA Expression log2" )
-      points(x = factor(GSM$`Original Histology`), y = GSM$colMeans.GSM.atlas.)
-    } else if (input$boxplot_choice == "JDE") {
-      boxplot(jde.data$Mean ~ jde.data$Histology,data = jde.data, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-      else if (input$boxplot_choice=="XS") {
-      boxplot(XS$colMeans.xs_atlas. ~ XS$Original.histology, data=XS, xlab = "Histology",ylab="mRNA Expression log2" )
-      }
-    else if (input$boxplot_choice=="AGZ") {
-      boxplot(agz.data$colMeans.agz. ~ agz.data$Histology, data=XS, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="FB") {
-      boxplot(FB$colMeans.FB. ~ FB$Original.histology, data=FB, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="AL") {
-      boxplot(AL$colMeans.AL.atlas. ~ AL$...2, data=AL, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="JYD") {
-      boxplot(JYD$colMeans.jyd.atlas. ~ JYD$...2, data=JYD, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="hCA") {
-      boxplot(hCA$colMeans.hCA.atlas. ~ hCA$...2, data=hCA, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="hCR") {
-      boxplot(hCR$colMeans.hCR.atlas. ~ hCR$...2, data=hCR, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="Ho") {
-      boxplot(Ho$colMeans.Ho.atlas. ~ Ho$Original.histology, data=Ho, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="hHA") {
-      boxplot(hHA$colMeans.hHA.atlas. ~ hHA$Original.Histology, data=hHA, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="MC") {
-      boxplot(MC$colMeans.mc.atlas. ~ MC$...2, data=MC, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="nbt") {
-      boxplot(nbt$colMeans.nbt.atlas. ~ nbt$...2, data=nbt, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="SG") {
-      boxplot(SG$colMeans.SG.atlas. ~ SG$...2, data=SG, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="SJ") {
-      boxplot(SJ$colMeans.SJ.atlas. ~ SJ$Original.histology, data=SJ, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="X_d") {
-      boxplot(X_d$colMeans.X_d.atlas. ~ X_d$...2, data=X_d, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="X_I") {
-      boxplot(X_I$colMeans.X_I.atlas. ~ X_I$...2, data=X_I, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="X_mb") {
-      boxplot(X_mb$colMeans.X_mb.atlas. ~ X_mb$...2, data=X_mb, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="X_md") {
-      boxplot(X_md$colMeans.X_md.atlas. ~ X_md$...2, data=X_md, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="FDY") {
-      boxplot(FDY$colMeans.fdy_atlas. ~ FDY$Original.histology, data=FDY, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="XS") {
-      boxplot(XS$colMeans.xs_atlas. ~ XS$Original.histology, data=XS, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="X") {
-      boxplot(X$colMeans.X.atlas. ~ X$Original.histology, data=X, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
-    else if (input$boxplot_choice=="X_MB") {
-      boxplot(X_MB$colMeans.X_MB.atlas. ~ X_MB$...2, data=X_MB, xlab = "Histology",ylab="mRNA Expression log2" )
-    }
+    p <- plot_ly(data = GSM, 
+                 x = ~factor(GSM$`Original Histology`), 
+                 y = ~GSM$colMeans.GSM.atlas., 
+                 type = 'box', 
+                 mode = 'markers', 
+                 boxpoints = 'all',
+                 text = ~paste("mean:", GSM$colMeans.GSM.atlas., "Histology:", GSM$`Original Histology`),  
+                 hoverinfo = 'text') 
+    
+    p <- p %>% layout(title = "GSM Dataset",
+                      xaxis = list(title = "Histology"),
+                      yaxis = list(title = "mRNA expression"))
+    
+    p}
+    else if (input$boxplot_choice == "JDE") {
+      p <- plot_ly(data = jde, 
+                   x = ~factor(jde$Histology), 
+                   y = ~jde$mean.frame.1.170..., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", jde$mean.frame.1.170..., "Histology:", jde$Histology),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "JDE Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "AGZ") {
+      p <- plot_ly(data = agz.data, 
+                   x = ~factor(agz.data$Histology), 
+                   y = ~agz.data$colMeans.agz., 
+                   type = 'box', 
+                   boxpoints = 'all',
+                   mode = 'markers', 
+                   text = ~paste("mean:", agz.data$colMeans.agz., "Histology:", agz.data$Histology),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "AGZ Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "FB") {
+      p <- plot_ly(data = FB, 
+                   x = ~factor(FB$Original.histology), 
+                   y = ~FB$colMeans.FB., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", FB$colMeans.FB., "Histology:", FB$Original.histology),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "FB Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "AL") {
+      p <- plot_ly(data = AL, 
+                   x = ~factor(AL$...2), 
+                   y = ~AL$colMeans.AL.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", AL$colMeans.AL.atlas., "Histology:", AL$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "AL Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "JYD") {
+      p <- plot_ly(data = JYD, 
+                   x = ~factor(JYD$...2), 
+                   y = ~JYD$colMeans.jyd.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", JYD$colMeans.jyd.atlas., "Histology:", JYD$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "JYD Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "hCA") {
+      p <- plot_ly(data = hCA, 
+                   x = ~factor(hCA$...2), 
+                   y = ~hCA$colMeans.hCA.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", hCA$colMeans.hCA.atlas., "Histology:", hCA$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "hCA Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "hCR") {
+      p <- plot_ly(data = hCR, 
+                   x = ~factor(hCR$...2), 
+                   y = ~hCR$colMeans.hCR.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", hCR$colMeans.hCR.atlas., "Histology:", hCR$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "hCR Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "Ho") {
+      p <- plot_ly(data = Ho, 
+                   x = ~factor(Ho$Original.histology), 
+                   y = ~Ho$colMeans.Ho.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", Ho$colMeans.Ho.atlas., "Histology:", Ho$Original.histology),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "Ho Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "hHA") {
+      p <- plot_ly(data = hHA, 
+                   x = ~factor(hHA$Original.Histology), 
+                   y = ~hHA$colMeans.hHA.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", hHA$colMeans.hHA.atlas., "Histology:", hHA$Original.Histology),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "hHA Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "MC") {
+      p <- plot_ly(data = MC, 
+                   x = ~factor(MC$...2), 
+                   y = ~MC$colMeans.mc.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", MC$colMeans.mc.atlas., "Histology:", MC$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "MC Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "nbt") {
+      p <- plot_ly(data = nbt, 
+                   x = ~factor(nbt$...2), 
+                   y = ~nbt$colMeans.nbt.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", nbt$colMeans.nbt.atlas., "Histology:", nbt$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "nbt Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "SG") {
+      p <- plot_ly(data = SG, 
+                   x = ~factor(SG$...2), 
+                   y = ~SG$colMeans.SG.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", SG$colMeans.SG.atlas., "Histology:", SG$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "SG Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "SJ") {
+      p <- plot_ly(data = SJ, 
+                   x = ~factor(SJ$Original.histology), 
+                   y = ~SJ$colMeans.SJ.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", SJ$colMeans.SJ.atlas., "Histology:", SJ$Original.histology),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "SJ Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "X_d") {
+      p <- plot_ly(data = X_d, 
+                   x = ~factor(X_d$...2), 
+                   y = ~X_d$colMeans.X_d.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", X_d$colMeans.X_d.atlas., "Histology:", X_d$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "X_d Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "X_I") {
+      p <- plot_ly(data = X_I, 
+                   x = ~factor(X_I$...2), 
+                   y = ~X_I$colMeans.X_I.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", X_I$colMeans.X_I.atlas., "Histology:", X_I$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "X_I Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "X_d") {
+      p <- plot_ly(data = X_d, 
+                   x = ~factor(X_d$...2), 
+                   y = ~X_d$colMeans.X_d.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", X_d$colMeans.X_d.atlas., "Histology:", X_d$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "X_d Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "X_mb") {
+      p <- plot_ly(data = X_d, 
+                   x = ~factor(X_mb$...2), 
+                   y = ~X_mb$colMeans.X_mb.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", X_mb$colMeans.X_mb.atlas., "Histology:", X_mb$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "X_mb Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "X_md") {
+      p <- plot_ly(data = X_md, 
+                   x = ~factor(X_md$...2), 
+                   y = ~X_md$colMeans.X_md.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", X_md$colMeans.X_md.atlas., "Histology:", X_md$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "X_md Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "FDY") {
+      p <- plot_ly(data = FDY, 
+                   x = ~factor(FDY$Original.histology), 
+                   y = ~FDY$colMeans.fdy_atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", FDY$colMeans.fdy_atlas., "Histology:", FDY$Original.histology),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "FDY Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "XS") {
+      p <- plot_ly(data = XS, 
+                   x = ~factor(XS$Original.histology), 
+                   y = ~XS$colMeans.xs_atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", XS$colMeans.xs_atlas., "Histology:", XS$Original.histology),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "XS Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "X") {
+      p <- plot_ly(data = X, 
+                   x = ~factor(X$Original.histology), 
+                   y = ~X$colMeans.X.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", X$colMeans.X.atlas., "Histology:", X$Original.histology),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "X Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    else if (input$boxplot_choice == "X_MB") {
+      p <- plot_ly(data = X_MB, 
+                   x = ~factor(X_MB$...2), 
+                   y = ~X_MB$colMeans.X_MB.atlas., 
+                   type = 'box', 
+                   mode = 'markers', 
+                   boxpoints = 'all',
+                   text = ~paste("mean:", X_MB$colMeans.X_MB.atlas., "Histology:", X_MB$...2),  
+                   hoverinfo = 'text') 
+      
+      p <- p %>% layout(title = "X_MB Dataset",
+                        xaxis = list(title = "Histology"),
+                        yaxis = list(title = "mRNA expression"))
+      
+      p}
+    
   })
   
  
