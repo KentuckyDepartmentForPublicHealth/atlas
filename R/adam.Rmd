@@ -15,8 +15,8 @@ library(survival)
 ```{r data}
 
 # ubuntu
-geneExpressionData <- readRDS('/mnt/KDPH/PQI/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds')
-atlasData <- read_csv('/mnt/KDPH/PQI/PQI Data Analytics/BrainTumorAtlas-main/Atlas_Data.csv')
+geneExpressionData <- readRDS('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds')
+atlasData <- read_csv('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Atlas_Data.csv')
 
 # windows
 
