@@ -15,13 +15,14 @@ library(survival)
 
 # ubuntu
 geneExpressionData <- readRDS('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds')
-atlasData <- read_csv('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Atlas_Data.csv')
+# atlasData <- read_csv('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Atlas_Data.csv')
 
 # windows
 
 geneExpressionData <- readRDS("P:/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds")
 # atlasData <- read_csv('dat/Atlas_Data.csv')
 # save(atlasData, file = 'dat/atlasData.RData')
+
 load(file = 'dat/atlasData.RData')
 
 
