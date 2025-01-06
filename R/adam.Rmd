@@ -1,5 +1,4 @@
 
-
 ```{r options}
 
 # ubuntu
@@ -39,6 +38,14 @@ examineOther <- atlasData %>%
   filter(Filename %in% 'AGZ_001_U133_2.CEL')
 
 rownames(examine) %>% length() %>% unique()
+
+n_distinct(atlasData$Filename) # matches 7375
+
+atlasData %>% 
+  group_by(
+    Filename
+  ) %>% 
+  count()
 ```
 
 ```{r}
