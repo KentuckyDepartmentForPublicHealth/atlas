@@ -1,0 +1,226 @@
+
+
+# fig1
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# First, let's summarize the data to get counts for each diagnosis
+diagnosis_counts <- atlasData %>%
+  count(`Final diagnosis`, sort = TRUE) %>%
+  filter(n > 50)  # Only show labels for diagnoses with more than 50 occurrences
+
+# Now, compute the position for labels to avoid overlap
+diagnosis_positions <- atlasData %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  ) %>%
+  inner_join(diagnosis_counts, by = "Final diagnosis")
+
+# Create the plot
+ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = `Final diagnosis`), alpha = 0.7, size = 2) +
+  geom_text(data = diagnosis_positions, 
+            aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+            size = 3, check_overlap = TRUE, vjust = 1, hjust = 1) +  # Adjust size and position
+  theme_minimal() +
+  labs(title = "t-SNE Visualization of Tumor Types with Diagnosis Labels",
+       x = "t-SNE 1",
+       y = "t-SNE 2",
+       color = "Diagnosis") +
+  theme(legend.position = "none")  # Remove legend since we're using labels
+
+# Save the plot if you want
+# ggsave("tsne_plot_with_labels.png", width = 15, height = 10, dpi = 300)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(ggrepel)  # For better label placement
+
+# Compute the position for labels
+diagnosis_positions <- atlasData %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  )
+
+# Create the plot with all labels
+ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = `Final diagnosis`), alpha = 0.7, size = 2) +
+  geom_text_repel(data = diagnosis_positions, 
+                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+                  size = 3, 
+                  max.overlaps = Inf,  # Show all labels
+                  box.padding = 0.5, 
+                  point.padding = 0.5, 
+                  segment.color = 'grey50') +
+  theme_minimal() +
+  labs(title = "t-SNE Visualization of Tumor Types with All Diagnosis Labels",
+       x = "t-SNE 1",
+       y = "t-SNE 2") +
+  theme(legend.position = "none")  # Remove legend since we're using labels
+
+# Save the plot if you want
+# ggsave("tsne_plot_all_labels.png", width = 15, height = 10, dpi = 300)
+```
+
+```{r}
+# blue/red no/yes tumor?
+
+# Calculate median positions for labels
+diagnosis_positions <- atlasData2 %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  )
+
+# Create the plot with all labels and color by grok_final
+ggplot(atlasData2, aes(x = tsne1, y = tsne2)) +
+  geom_jitter(aes(color = factor(is_tumor)), alpha = 0.7, size = 2) +
+  geom_text_repel(data = diagnosis_positions, 
+                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+                  size = 3, 
+                  max.overlaps = Inf,  # Show all labels
+                  box.padding = 0.5, 
+                  point.padding = 0.5, 
+                  segment.color = 'grey50') +
+  scale_color_manual(values = c("0" = "blue", "1" = "red")) +
+  theme_minimal() +
+  labs(title = "t-SNE Visualization of Tumor Types with All Diagnosis Labels",
+       x = "t-SNE 1",
+       y = "t-SNE 2",
+       color = "Grok Final") +
+  theme(legend.position = "none")
+
+```
+
+# euclidean
+```{r}
+# Load required libraries
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+
+# Assuming atlasData contains columns: tsne1, tsne2, `Euclidean classifier`, grok_final
+
+# Median imputation for NA values in `Euclidean classifier`
+atlasData$`Euclidean classifier imputed` <- ifelse(is.na(atlasData$`Euclidean classifier`), 
+                                                   median(atlasData$`Euclidean classifier`, na.rm = TRUE), 
+                                                   atlasData$`Euclidean classifier`)
+
+# Calculate median positions for each diagnosis for labeling
+diagnosis_positions <- atlasData %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  )
+
+# Create the 2D plot with Euclidean classifier
+ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = factor(grok_final)), alpha = 0.7, size = 2) +
+  geom_text_repel(data = diagnosis_positions, 
+                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+                  size = 3, 
+                  max.overlaps = Inf,  # Show all labels
+                  box.padding = 0.5, 
+                  point.padding = 0.5, 
+                  segment.color = 'grey50') +
+  scale_color_manual(values = c("0" = "blue", "1" = "red")) +
+  theme_minimal() +
+  labs(title = "2D t-SNE Visualization with Euclidean Classifier",
+       x = "t-SNE 1",
+       y = "t-SNE 2",
+       color = "Grok Final") +
+  theme(legend.position = "none")
+```
+
+# tsne2
+
+```{r}
+# Load required libraries
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+
+# Assuming atlasData contains columns: tsne1, tsne2, `t-SNE classifier`, grok_final
+
+# Convert NA values to a specific category or handle them appropriately
+atlasData$`t-SNE classifier imputed` <- ifelse(is.na(atlasData$`t-SNE classifier`), 
+                                               "Unknown", 
+                                               as.character(atlasData$`t-SNE classifier`))
+
+# Calculate median positions for each diagnosis for labeling
+diagnosis_positions <- atlasData %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  )
+
+# Create the 2D plot with t-SNE classifier
+ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = `t-SNE classifier imputed`), alpha = 0.7, size = 2) +
+  geom_text_repel(data = diagnosis_positions, 
+                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+                  size = 3, 
+                  max.overlaps = Inf,  # Show all labels
+                  box.padding = 0.5, 
+                  point.padding = 0.5, 
+                  segment.color = 'grey50') +
+  theme_minimal() +
+  labs(title = "2D t-SNE Visualization with t-SNE Classifier",
+       x = "t-SNE 1",
+       y = "t-SNE 2",
+       color = "t-SNE Classifier") +
+  scale_color_discrete()  # Changed to discrete scale
+```
+
+#random forest
+
+```{r}
+# Load required libraries
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+
+# Assuming atlasData contains columns: tsne1, tsne2, `Random Forest classifier`, grok_final
+
+# Convert NA values to a specific category or handle them appropriately
+atlasData$`Random Forest classifier imputed` <- ifelse(is.na(atlasData$`Random Forest classifier`), 
+                                                      "Unknown", 
+                                                      as.character(atlasData$`Random Forest classifier`))
+
+# Calculate median positions for each diagnosis for labeling
+diagnosis_positions <- atlasData %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  )
+
+# Create the 2D plot with Random Forest classifier
+ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = `Random Forest classifier imputed`), alpha = 0.7, size = 2) +
+  geom_text_repel(data = diagnosis_positions, 
+                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+                  size = 3, 
+                  max.overlaps = Inf,  # Show all labels
+                  box.padding = 0.5, 
+                  point.padding = 0.5, 
+                  segment.color = 'grey50') +
+  theme_minimal() +
+  labs(title = "2D t-SNE Visualization with Random Forest Classifier",
+       x = "t-SNE 1",
+       y = "t-SNE 2",
+       color = "Random Forest Classifier") +
+  scale_color_discrete()  # Changed to discrete scale
+```
+
