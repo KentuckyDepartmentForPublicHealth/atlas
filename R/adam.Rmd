@@ -119,3 +119,55 @@ atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
 
 ```
 
+```{r}
+
+```
+
+
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+```{r na-check}
+library(tidyverse)
+
+# Determine which columns are of double type
+double_columns <- geneExpressionData %>%
+  summarise(across(everything(), is.double)) %>%
+  pivot_longer(everything(), names_to = "column", values_to = "is_double") %>%
+  filter(is_double) %>%
+  pull(column)
+
+# Check for NA values in these double columns
+na_check <- geneExpressionData %>%
+  select(all_of(double_columns)) %>%
+  summarise(across(everything(), ~any(is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "column", values_to = "has_na") %>%
+  filter(has_na)
+
+# Display the result
+if (nrow(na_check) > 0) {
+  print("Columns with NA values in double type:")
+  print(na_check$column)
+} else {
+  print("No NA values found in any double type columns.")
+}
+
+
+
+```
+
