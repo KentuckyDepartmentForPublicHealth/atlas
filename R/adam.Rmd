@@ -24,13 +24,14 @@ geneExpressionData <- readRDS("P:/PQI/Division Office/PQI Data Analytics/BrainTu
 # save(atlasData, file = 'dat/atlasData.RData')
 
 load(file = 'dat/atlasData.RData')
-
-
+load("~/Sandbox/Shiny/atlas/dat/geneExpressionData.RData")
+atlasData2 <- atlasData %>% 
+  filter(`Diagnosis class` != '#N/A')
 
 ```
 
 
-```{r cross-reference}
+```{r cross-reference and explore}
 
 examine <- geneExpressionData %>% 
   select(AGZ_001_U133_2.CEL)
@@ -47,6 +48,23 @@ atlasData %>%
     Filename
   ) %>% 
   count()
+
+# List of non-tumor categories from the image
+non_tumor_categories <- c("Cerebellum", "Cerebellum, Fetal", "Choroid Plexus", 
+                          "CNS", "Nerve Ganglia", "Peri. Nerve", "Pituitary", 
+                          "Retina", "Retina, Fetal")
+
+
+# Create the binary indicator variable
+atlasData2$is_tumor <- ifelse(
+  # atlasData2$`Final diagnosis` %in% non_tumor_categories, 
+  atlasData2$`Diagnosis class` %in% 'Non-tumor',
+  0, 
+  1
+)
+
+# Check the frequency to ensure the counts match
+freq(atlasData2$is_tumor)
 ```
 
 ```{r}
@@ -90,79 +108,14 @@ legend("bottomleft",title = "Age Groups", 0.7, legend=c("10-20","20-40","40-60",
 ```{r freqs}
 
 
-map(atlasData[, "Diagnosis class", drop = F], ~ freq(.x) %>% head())
+map(atlasData[, "Diagnosis class", drop = F], ~ freq(.x))
+map(atlasData[, "Diagnosis", drop = F], ~ freq(.x))
+map(atlasData[, "Final diagnosis", drop = F], ~ freq(.x))
+map(select(atlasData, contains('classifier')), drop = F, ~ freq(.x))
+map(atlasData[, , drop = F], ~ freq(.x) %>% head())
 
-```
+atlasData %>% filter(as.logical(is_tumor)) %>% pull('Final diagnosis') %>% freq
+atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
 
-
-
-# grok
-
-```{r}
-library(ggplot2)
-library(dplyr)
-
-# First, let's summarize the data to get counts for each diagnosis
-diagnosis_counts <- atlasData %>%
-  count(`Final diagnosis`, sort = TRUE) %>%
-  filter(n > 50)  # Only show labels for diagnoses with more than 50 occurrences
-
-# Now, compute the position for labels to avoid overlap
-diagnosis_positions <- atlasData %>%
-  group_by(`Final diagnosis`) %>%
-  summarise(
-    tsne1 = median(tsne1),
-    tsne2 = median(tsne2)
-  ) %>%
-  inner_join(diagnosis_counts, by = "Final diagnosis")
-
-# Create the plot
-ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
-  geom_point(aes(color = `Final diagnosis`), alpha = 0.7, size = 2) +
-  geom_text(data = diagnosis_positions, 
-            aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
-            size = 3, check_overlap = TRUE, vjust = 1, hjust = 1) +  # Adjust size and position
-  theme_minimal() +
-  labs(title = "t-SNE Visualization of Tumor Types with Diagnosis Labels",
-       x = "t-SNE 1",
-       y = "t-SNE 2",
-       color = "Diagnosis") +
-  theme(legend.position = "none")  # Remove legend since we're using labels
-
-# Save the plot if you want
-# ggsave("tsne_plot_with_labels.png", width = 15, height = 10, dpi = 300)
-```
-
-```{r}
-library(ggplot2)
-library(dplyr)
-library(ggrepel)  # For better label placement
-
-# Compute the position for labels
-diagnosis_positions <- atlasData %>%
-  group_by(`Final diagnosis`) %>%
-  summarise(
-    tsne1 = median(tsne1),
-    tsne2 = median(tsne2)
-  )
-
-# Create the plot with all labels
-ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
-  geom_point(aes(color = `Final diagnosis`), alpha = 0.7, size = 2) +
-  geom_text_repel(data = diagnosis_positions, 
-                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
-                  size = 3, 
-                  max.overlaps = Inf,  # Show all labels
-                  box.padding = 0.5, 
-                  point.padding = 0.5, 
-                  segment.color = 'grey50') +
-  theme_minimal() +
-  labs(title = "t-SNE Visualization of Tumor Types with All Diagnosis Labels",
-       x = "t-SNE 1",
-       y = "t-SNE 2") +
-  theme(legend.position = "none")  # Remove legend since we're using labels
-
-# Save the plot if you want
-# ggsave("tsne_plot_all_labels.png", width = 15, height = 10, dpi = 300)
 ```
 
