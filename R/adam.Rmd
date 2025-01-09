@@ -74,36 +74,6 @@ glimpse(atlasData)
 
 
 
-```{r adapt-from-hn}
-#atlas<-readRDS("C:/Users/henry/Downloads/ExpData.rds")
-mean.frame <- data.frame(colMeans(geneExpressionData))
-jde.mean<- data.frame(mean.frame[1:170,])
-# jde.hist <- read.csv("C:/Users/henry/Downloads/hist.csv")
-hist <- read_csv("hist.csv")
-jde.data<- bind_cols(jde.mean,hist)
-colnames(jde.data)[colnames(jde.data) == "mean.frame.1.170..."] <- "Mean"
-boxplot(Mean ~ Histology, data = jde.data,
-        main = "Boxplot by Histology", 
-        xlab = "Histology", 
-        ylab = "mRNA Expression (log2)")
-```
-
-
-
-```{r adapt-from-hn}
-# jde.surv<- read.csv("C:/Users/henry/Downloads/jde survival.csv")
-jde.survival <- read_csv("jde survival.csv")
-jde.survival$Age.Groups <- jde_survival$`Age (grouped)`
-
-jde.survival<- jde_survival[, c("Vital status","Overall survival (months)","Original histology"), drop=F]
-# jde.survival$`Overall survival (months)` <- as.numeric(jde.survival$`Overall survival (months)`)
-fit<- survfit(Surv(`Overall survival (months)`,`Vital status`)~strata(Age.Groups), data=jde.survival)
-plot(fit, xlab="Time", ylab="Survival", main="JDE Data", col=c(1:4), lty=c(1),conf.int = F)
-legend("bottomleft",title = "Age Groups", 0.7, legend=c("10-20","20-40","40-60","60-80"), lty=1, col=1:4)
-
-
-```
-
 
 ```{r freqs}
 
@@ -119,16 +89,6 @@ atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
 
 ```
 
-```{r}
-
-```
-
-
-
-
-```{r}
-
-```
 
 
 ```{r}
@@ -138,7 +98,19 @@ atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
 
 
 
+```{r}
 
+```
+
+
+```{r}
+
+```
+
+
+
+
+# extra
 
 
 
@@ -167,6 +139,39 @@ if (nrow(na_check) > 0) {
   print("No NA values found in any double type columns.")
 }
 
+
+
+```
+
+# henry-adapted
+
+
+```{r adapt-from-hn}
+# #atlas<-readRDS("C:/Users/henry/Downloads/ExpData.rds")
+# mean.frame <- data.frame(colMeans(geneExpressionData))
+# jde.mean<- data.frame(mean.frame[1:170,])
+# # jde.hist <- read.csv("C:/Users/henry/Downloads/hist.csv")
+# hist <- read_csv("hist.csv")
+# jde.data<- bind_cols(jde.mean,hist)
+# colnames(jde.data)[colnames(jde.data) == "mean.frame.1.170..."] <- "Mean"
+# boxplot(Mean ~ Histology, data = jde.data,
+#         main = "Boxplot by Histology", 
+#         xlab = "Histology", 
+#         ylab = "mRNA Expression (log2)")
+```
+
+
+
+```{r adapt-from-hn}
+# # jde.surv<- read.csv("C:/Users/henry/Downloads/jde survival.csv")
+# jde_survival <- read_csv("jdesurv.csv")
+# jde.survival$Age.Groups <- jde_survival$`Age (grouped)`
+# 
+# jde.survival<- jde_survival[, c("Vital status","Overall survival (months)","Original histology"), drop=F]
+# # jde.survival$`Overall survival (months)` <- as.numeric(jde.survival$`Overall survival (months)`)
+# fit<- survfit(Surv(`Overall survival (months)`,`Vital status`)~strata(Age.Groups), data=jde.survival)
+# plot(fit, xlab="Time", ylab="Survival", main="JDE Data", col=c(1:4), lty=c(1),conf.int = F)
+# legend("bottomleft",title = "Age Groups", 0.7, legend=c("10-20","20-40","40-60","60-80"), lty=1, col=1:4)
 
 
 ```
