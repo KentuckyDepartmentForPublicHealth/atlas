@@ -14,19 +14,20 @@ library(survival)
 ```{r data}
 
 # ubuntu
-geneExpressionData <- readRDS('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds')
+# geneExpressionData <- readRDS('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds')
 # atlasData <- read_csv('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Atlas_Data.csv')
 
 # windows
 
-geneExpressionData <- readRDS("P:/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds")
-# atlasData <- read_csv('dat/Atlas_Data.csv')
+# geneExpressionData <- readRDS("P:/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds")
+# # atlasData <- read_csv('dat/Atlas_Data.csv')
 # save(atlasData, file = 'dat/atlasData.RData')
 
-load(file = 'dat/atlasData.RData')
-load("~/Sandbox/Shiny/atlas/dat/geneExpressionData.RData")
-atlasData2 <- atlasData %>% 
-  filter(`Diagnosis class` != '#N/A')
+load("dat/atlasData.RData")
+load("dat/geneExpressionData.RData")
+
+# atlasData2 <- atlasData %>% 
+#   filter(`Diagnosis class` != '#N/A')
 
 ```
 
@@ -67,9 +68,13 @@ atlasData2$is_tumor <- ifelse(
 freq(atlasData2$is_tumor)
 ```
 
+
+
 ```{r}
+
 glimpse(geneExpressionData)
 glimpse(atlasData)
+
 ```
 
 
@@ -81,8 +86,12 @@ glimpse(atlasData)
 map(atlasData[, "Diagnosis class", drop = F], ~ freq(.x))
 map(atlasData[, "Diagnosis", drop = F], ~ freq(.x))
 map(atlasData[, "Final diagnosis", drop = F], ~ freq(.x))
+map(atlasData[, "Age (grouped)", drop = F], ~ freq(.x))
+
 map(select(atlasData, contains('classifier')), drop = F, ~ freq(.x))
+
 map(atlasData[, , drop = F], ~ freq(.x) %>% head())
+sink('dat/all-freqs'); map(atlasData, ~ freq(.x)); sink()
 
 atlasData %>% filter(as.logical(is_tumor)) %>% pull('Final diagnosis') %>% freq
 atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
@@ -90,23 +99,102 @@ atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
 ```
 
 
+Sample analysis group
 
-```{r}
+filter out: Test - Not classified (n=79) <-same-> [`Final diagnosis` == '-'] == 79
+
+potential groups/features/app selectors:
+- 52 diagnostic entities
+- 13 diagnostic classes
+- grade
+- Sex
+- Recurrent
+
+# Data cleaning
+
+## Select
+
+```{r select}
+
+atlasDataClean <- atlasData %>% 
+  select(
+    'Age (grouped)',
+    'Age (year)',
+    Compartment,
+    'Diagnosis class',
+    Filename,
+    'Final diagnosis',
+    Grade,
+    Location,
+    'Overall survival (months)',
+    Sex,
+    tsne1,
+    tsne2,
+    'Vital status (1=dead; 0=alive)'
+  )
+
+
 
 ```
 
 
+## Rename
+
+```{r}
+
+# oldNames <- names(atlasDataClean)
+
+# refNames <- tibble(oldNames = oldNames)
+
+cleanNames <- c(
+  'ageGroup',
+  'age',
+  'compartment',
+  'diagnosisClass',
+  'filename',
+  'diagnosisFinal',
+  'grade',
+  'location',
+  'survivalMonths',
+  'sex',
+  'tsne1',
+  'tsne2',
+  'mortality'
+)
+  
+names(atlasDataClean) <- cleanNames
+
+```
+
+## Transform
+
 
 
 ```{r}
 
+# capitalize
+
+atlasDataClean <- atlasDataClean %>% 
+  allCaps()
+
+
+# x
+
+
+# y
+
+
+
 ```
 
+## Recode
 
 ```{r}
 
-```
 
+
+
+```
 
 
 
