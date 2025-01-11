@@ -66,6 +66,18 @@ atlasData2$is_tumor <- ifelse(
 
 # Check the frequency to ensure the counts match
 freq(atlasData2$is_tumor)
+
+sample(atlasData$'Sample ID', 250) %>% freq
+
+atlasDataClean %>% 
+  mutate(
+    x = str_sub(filename, 1, 3),
+    .keep = 'used'
+  ) %>% 
+  group_by(x) %>% 
+  count(sort = T)
+
+
 ```
 
 
@@ -99,9 +111,7 @@ atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
 ```
 
 
-Sample analysis group
-
-filter out: Test - Not classified (n=79) <-same-> [`Final diagnosis` == '-'] == 79
+filter out: `Sample analysis group` == Test - Not classified (n=79) <-same-> [`Final diagnosis` == '-'] == 79 <-same-> 
 
 potential groups/features/app selectors:
 - 52 diagnostic entities
@@ -112,54 +122,56 @@ potential groups/features/app selectors:
 
 # Data cleaning
 
-## Select
-
-```{r select}
-
-atlasDataClean <- atlasData %>% 
-  select(
-    'Age (grouped)',
-    'Age (year)',
-    Compartment,
-    'Diagnosis class',
-    Filename,
-    'Final diagnosis',
-    Grade,
-    Location,
-    'Overall survival (months)',
-    Sex,
-    tsne1,
-    tsne2,
-    'Vital status (1=dead; 0=alive)'
-  )
-
-
-
-```
-
-
 ## Rename
 
 ```{r}
 
 cleanNames <- c(
-  'ageGroup',
-  'age',
-  'compartment',
-  'diagnosisClass',
   'filename',
-  'diagnosisFinal',
-  'grade',
+  'dataID',
+  'sampleID',
+  'institution',
+  'country',
+  'histology',
+  'subgroup',
+  'locationOriginal',
+  'compartment',
   'location',
-  'survivalMonths',
-  'sex',
+  'stageNeuroblastoma',
+  'stageMedulloblastoma',
+  'tissuePrep',
+  'sampleAnalysisGroup',
+  'diagnosis',
+  'grade',
+  'fullName',
+  'diagnosisClass',
+  'classifierLightGBM',
+  'classifierRandomForest',
+  'classifierEuclidean',
+  'classifierTSNE',
+  'diagnosisFinal',
   'tsne1',
   'tsne2',
-  'mortality'
+  'age',
+  'ageGroup',
+  'sex',
+  'recurrent',
+  'mortality',
+  'survivalMonths',
+  '1p/19q-codel',
+  'mutationIDH1/2',
+  'mutationH3',
+  'mutationTERTpromoter',
+  'amplificationEGFR',
+  'methylProMGMT',
+  'mutationBRAF',
+  'amplificationMCYN'
 )
   
 names(atlasDataClean) <- cleanNames
 
+
+View(data.frame(a = names(atlasData), b = cleanNames))
 ```
 
 ## Transform
