@@ -142,10 +142,6 @@ atlasDataClean <- atlasData %>%
 
 ```{r}
 
-# oldNames <- names(atlasDataClean)
-
-# refNames <- tibble(oldNames = oldNames)
-
 cleanNames <- c(
   'ageGroup',
   'age',
@@ -175,7 +171,12 @@ names(atlasDataClean) <- cleanNames
 # capitalize
 
 atlasDataClean <- atlasDataClean %>% 
-  allCaps()
+  mutate(
+    across(
+      .cols = everything(),
+      str_to_upper
+    )
+)
 
 
 # x
