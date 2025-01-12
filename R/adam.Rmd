@@ -1,13 +1,9 @@
 
 ```{r options}
 
-# ubuntu
-source('/home/adam/Sandbox/adam-utils/sysOpsLibsFuncs.R')
+source('R/sysOpsLibsFuncs.R')
 
-# win
-source('../../adam-utils/sysOpsLibsFuncs.R')
 
-library(survival)
 ```
 
 
@@ -26,10 +22,153 @@ library(survival)
 load("dat/atlasData.RData")
 load("dat/geneExpressionData.RData")
 
+# Diverge from original data set
+atlasDataClean <- atlasData
+
 # atlasData2 <- atlasData %>% 
 #   filter(`Diagnosis class` != '#N/A')
 
 ```
+
+
+
+filter out: `Sample analysis group` == Test - Not classified (n=79) <-same-> [`Final diagnosis`d == '-'] == 79 <-same-> 
+
+potential groups/features/app selectors:
+- 52 diagnostic entities
+- 13 diagnostic classes
+- grade
+- Sex
+- Recurrent
+
+# Data cleaning
+
+## Rename
+
+```{r}
+
+oldNames <- names(atlasData)
+
+cleanNames <- c(
+  'filename',
+  'dataID',
+  'sampleID',
+  'institution',
+  'country',
+  'histologyOriginal',
+  'subgroup',
+  'locationOriginal',
+  'compartment',
+  'location',
+  'stageNeuroblastoma',
+  'stageMedulloblastoma',
+  'tissuePrep',
+  'sampleAnalysisGroup',
+  'diagnosis',
+  'grade',
+  'fullName',
+  'diagnosisClass',
+  'classifierLightGBM',
+  'classifierRandomForest',
+  'classifierEuclidean',
+  'classifierTSNE',
+  'diagnosisFinal',
+  'tsne1',
+  'tsne2',
+  'age',
+  'ageGroup',
+  'sex',
+  'recurrent',
+  'mortality',
+  'survivalMonths',
+  '1p/19q-codel',
+  'mutationIDH1/2',
+  'mutationH3',
+  'mutationTERTpromoter',
+  'amplificationEGFR',
+  'methylationMGMTpromoter',
+  'mutationBRAF',
+  'amplificationMCYN'
+)
+  
+names(atlasDataClean) <- cleanNames
+
+
+# View(data.frame(row = 1:length(cleanNames), oldNames, cleanNames))
+
+
+```
+
+
+
+## Transform
+
+
+
+```{r}
+
+atlasDataClean <- atlasDataClean %>%
+  mutate(
+    across( 
+     .cols = where(is.character),
+     str_to_upper # make char ALL CAPS
+    )
+)
+
+
+
+
+```
+
+
+
+## Recode
+
+```{r}
+
+# Define the vector for both ageGroup levels and labels
+age_groups <- c("FETAL", "0-5YRS", "5-10YRS", "10-20YRS", "20-40YRS", "40-60YRS", "60-80YRS", "80+YRS")
+
+
+atlasDataClean <- atlasDataClean %>%
+  mutate(
+    grade = ifelse(grade %in% paste0('GRADE ', 1:4), grade, NA), # flip n=11 to NA because inexclusive
+    ageGroup = factor(ageGroup, levels = age_groups, labels = age_groups), # make factor
+    recurrent = ifelse(recurrent %in% c('PRIMARY', 'RECURRENT'), recurrent, NA) %>% factor() # flip n=19 to NA because inexclusive; make factor
+  )
+
+
+
+
+```
+
+
+## Filter
+
+```{r}
+
+atlasDataClean <- atlasDataClean %>% 
+  filter(!sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign confident final diagnosis
+
+
+# verifies record deletion
+# select(atlasDataClean, sampleAnalysisGroup, diagnosisFinal) %>% filter(sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') %>% view
+
+```
+
+
+## Select
+
+```{r}
+
+
+
+
+```
+
+
+
+# examine
 
 
 ```{r cross-reference and explore}
@@ -110,104 +249,6 @@ atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
 
 ```
 
-
-filter out: `Sample analysis group` == Test - Not classified (n=79) <-same-> [`Final diagnosis` == '-'] == 79 <-same-> 
-
-potential groups/features/app selectors:
-- 52 diagnostic entities
-- 13 diagnostic classes
-- grade
-- Sex
-- Recurrent
-
-# Data cleaning
-
-## Rename
-
-```{r}
-
-cleanNames <- c(
-  'filename',
-  'dataID',
-  'sampleID',
-  'institution',
-  'country',
-  'histology',
-  'subgroup',
-  'locationOriginal',
-  'compartment',
-  'location',
-  'stageNeuroblastoma',
-  'stageMedulloblastoma',
-  'tissuePrep',
-  'sampleAnalysisGroup',
-  'diagnosis',
-  'grade',
-  'fullName',
-  'diagnosisClass',
-  'classifierLightGBM',
-  'classifierRandomForest',
-  'classifierEuclidean',
-  'classifierTSNE',
-  'diagnosisFinal',
-  'tsne1',
-  'tsne2',
-  'age',
-  'ageGroup',
-  'sex',
-  'recurrent',
-  'mortality',
-  'survivalMonths',
-  '1p/19q-codel',
-  'mutationIDH1/2',
-  'mutationH3',
-  'mutationTERTpromoter',
-  'amplificationEGFR',
-  'methylProMGMT',
-  'mutationBRAF',
-  'amplificationMCYN'
-)
-  
-names(atlasDataClean) <- cleanNames
-
-
-View(data.frame(a = names(atlasData), b = cleanNames))
-```
-
-## Transform
-
-
-
-```{r}
-
-# capitalize
-
-atlasDataClean <- atlasDataClean %>% 
-  mutate(
-    across(
-      .cols = everything(),
-      str_to_upper
-    )
-)
-
-
-# x
-
-
-# y
-
-
-
-```
-
-## Recode
-
-```{r}
-
-
-
-
-```
 
 
 
