@@ -1,0 +1,12 @@
+name: atlas-dev
+title: atlas-dev
+username: kdph
+account: kdph
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13704111
+bundleId: 9639768
+url: https://kdph.shinyapps.io/atlas-dev/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

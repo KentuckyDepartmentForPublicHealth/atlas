@@ -31,17 +31,7 @@ atlasDataClean <- atlasData
 ```
 
 
-
-filter out: `Sample analysis group` == Test - Not classified (n=79) <-same-> [`Final diagnosis`d == '-'] == 79 <-same-> 
-
-potential groups/features/app selectors:
-- 52 diagnostic entities
-- 13 diagnostic classes
-- grade
-- Sex
-- Recurrent
-
-# Data cleaning
+# ETL
 
 ## Rename
 
@@ -99,19 +89,17 @@ names(atlasDataClean) <- cleanNames
 
 ```
 
-
-
 ## Transform
 
-
-
 ```{r}
+
+
 
 atlasDataClean <- atlasDataClean %>%
   mutate(
     across( 
      .cols = where(is.character),
-     str_to_upper # make char ALL CAPS
+     str_to_upper # ALL CAPS for character data
     )
 )
 
@@ -120,22 +108,23 @@ atlasDataClean <- atlasDataClean %>%
 
 ```
 
-
-
 ## Recode
 
 ```{r}
 
 # Define the vector for both ageGroup levels and labels
-age_groups <- c("FETAL", "0-5YRS", "5-10YRS", "10-20YRS", "20-40YRS", "40-60YRS", "60-80YRS", "80+YRS")
+# age_groups <- c("FETAL", "0-5YRS", "5-10YRS", "10-20YRS", "20-40YRS", "40-60YRS", "60-80YRS", "80+YRS")
 
 
 atlasDataClean <- atlasDataClean %>%
   mutate(
+    recurrent = ifelse(recurrent %in% c('PRIMARY', 'RECURRENT'), recurrent, NA), # flip n=19 to NA because inexclusive; make factor
     grade = ifelse(grade %in% paste0('GRADE ', 1:4), grade, NA), # flip n=11 to NA because inexclusive
-    ageGroup = factor(ageGroup, levels = age_groups, labels = age_groups), # make factor
-    recurrent = ifelse(recurrent %in% c('PRIMARY', 'RECURRENT'), recurrent, NA) %>% factor() # flip n=19 to NA because inexclusive; make factor
-  )
+    across(
+      c(grade, ageGroup, recurrent, sex),
+      as.factor
+    )
+)
 
 
 
