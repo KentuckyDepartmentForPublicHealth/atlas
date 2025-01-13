@@ -68,7 +68,7 @@ cleanNames <- c(
   'age',
   'ageGroup',
   'sex',
-  'recurrent',
+  'tumorType',
   'mortality',
   'survivalMonths',
   '1p/19q-codel',
@@ -84,7 +84,7 @@ cleanNames <- c(
 names(atlasDataClean) <- cleanNames
 
 
-# View(data.frame(row = 1:length(cleanNames), oldNames, cleanNames))
+colNames <- tibble(row = 1:length(oldNames), oldNames, cleanNames)
 
 
 ```
@@ -99,7 +99,7 @@ atlasDataClean <- atlasDataClean %>%
   mutate(
     across( 
      .cols = where(is.character),
-     str_to_upper # ALL CAPS for character data
+     str_to_upper # ALL CAPS for only char data
     )
 )
 
@@ -118,10 +118,10 @@ atlasDataClean <- atlasDataClean %>%
 
 atlasDataClean <- atlasDataClean %>%
   mutate(
-    recurrent = ifelse(recurrent %in% c('PRIMARY', 'RECURRENT'), recurrent, NA), # flip n=19 to NA because inexclusive; make factor
+    tumorType = ifelse(tumorType %in% c('PRIMARY', 'RECURRENT'), tumorType, NA), # flip n=19 to NA because inexclusive
     grade = ifelse(grade %in% paste0('GRADE ', 1:4), grade, NA), # flip n=11 to NA because inexclusive
     across(
-      c(grade, ageGroup, recurrent, sex),
+      c(grade, ageGroup, tumorType, sex),
       as.factor
     )
 )
@@ -137,7 +137,7 @@ atlasDataClean <- atlasDataClean %>%
 ```{r}
 
 atlasDataClean <- atlasDataClean %>% 
-  filter(!sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign confident final diagnosis
+  filter(!sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
 
 
 # verifies record deletion
@@ -304,6 +304,8 @@ if (nrow(na_check) > 0) {
 
 
 ```{r adapt-from-hn}
+
+
 # # jde.surv<- read.csv("C:/Users/henry/Downloads/jde survival.csv")
 # jde_survival <- read_csv("jdesurv.csv")
 # jde.survival$Age.Groups <- jde_survival$`Age (grouped)`
