@@ -16,7 +16,7 @@ library(htmltools)
 library(leaflet)
 library(survival)
 library(DT)
-
+load(file = '~/Sandbox/Shiny/atlas/henry/subsets.RData')
 
 ui <- fluidPage(
 
@@ -82,10 +82,10 @@ ui <- fluidPage(
   
 )
 
+
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  load("C:/Users/henry/OneDrive/Documents/GitHub/atlas/subsets.RData")
-  
+  # load("C:/Users/henry/OneDrive/Documents/GitHub/atlas/subsets.RData")
   output$boxplot <- renderPlotly({
     if (input$boxplot_choice == "GSM") {
     p <- plot_ly(data = GSM, 
@@ -438,11 +438,13 @@ server <- function(input, output) {
  
   output$mytable1 <- DT::renderDataTable({
     if (input$boxplot_choice == "GSM") {
-      df<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/gsmsurv.csv")
+      # df<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/gsmsurv.csv")
+      df <- read.csv('gsmsurv.csv')
     DT::datatable(df)
     }
     else if (input$boxplot_choice == "JDE") {
-      df<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/jdesurv.csv")
+      # df<- read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/jdesurv.csv")
+      df <- read.csv('jdesurv.csv')
       DT::datatable(df)
     }
     else if (input$boxplot_choice == "FB") {
