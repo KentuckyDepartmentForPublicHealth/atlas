@@ -6,9 +6,7 @@ library(DT)
 ui <- fluidPage(
   titlePanel("t-SNE Visualization with Data Table"),
   sidebarLayout(
-    sidebarPanel(
-      # No selectInput as per previous comment
-    ),
+    sidebarPanel = NA,
     mainPanel(
       plotlyOutput("tsnePlot"),
       DT::dataTableOutput("dataTable")
@@ -26,7 +24,7 @@ server <- function(input, output) {
                  type = 'scatter', mode = 'markers',
                  color = ~diagnosisFinal,
                  colors = custom_colors,
-                 marker = list(size = 8, opacity = 0.7),
+                 marker = list(size = 2, opacity = 0.7),
                  text = ~diagnosisFinal,  
                  hoverinfo = 'text',
                  source = "tsnePlot") %>%
