@@ -238,7 +238,8 @@ X<- merge.X[, c("colMeans.X.atlas.", "Original.histology")]
 
 
 ```{r}
-Survival<-read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/AtlasSurvival.csv")
+# Survival<-read.csv("C:/Users/henry/OneDrive/Documents/GitHub/atlas/AtlasSurvival.csv")
+ Survival<-read.csv("AtlasSurvival.csv")
 
 Survival <- Survival %>%
   filter(!grepl("-", Overall.survival..months.)) %>%
@@ -246,13 +247,16 @@ Survival <- Survival %>%
 
     Overall.survival..months. = gsub("[<>]", "", Overall.survival..months.) 
   )
+
+survival <- Survival
 ```
 
 
 ```{r}
-path<- "C:/Users/henry/OneDrive/Documents/GitHub/atlas/subsets.RData"
+# path<- "C:/Users/henry/OneDrive/Documents/GitHub/atlas/subsets.RData"
+path<- "subsets.RData"
 
-save(jde, agz.data,FB,GSM,AL,JYD,Ho,hCA,hCR,hHA,MC,nbt,SG,SJ,X_d,X_I,X_mb,X_md,FDY,XS,X,X_MB, file=path)
+save(jde, agz.data,FB,GSM,AL,JYD,Ho,hCA,hCR,hHA,MC,nbt,SG,SJ,X_d,X_I,X_mb,X_md,FDY,XS,X,X_MB, survival,file=path)
 ```
 
 
