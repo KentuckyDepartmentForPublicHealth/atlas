@@ -1,4 +1,6 @@
 
+# System
+
 ```{r options}
 
 source('R/sysOpsLibsFuncs.R')
@@ -6,6 +8,9 @@ source('R/sysOpsLibsFuncs.R')
 
 ```
 
+# ETL
+
+## Load
 
 ```{r data}
 
@@ -25,13 +30,11 @@ load("dat/geneExpressionData.RData")
 # Diverge from original data set
 atlasDataClean <- atlasData
 
-# atlasData2 <- atlasData %>% 
-#   filter(`Diagnosis class` != '#N/A')
 
 ```
 
 
-# ETL
+
 
 ## Rename
 
@@ -120,14 +123,16 @@ atlasDataClean <- atlasDataClean %>%
   mutate(
     tumorType = ifelse(tumorType %in% c('PRIMARY', 'RECURRENT'), tumorType, NA), # flip n=19 to NA because inexclusive
     grade = ifelse(grade %in% paste0('GRADE ', 1:4), grade, NA), # flip n=11 to NA because inexclusive
+    survivalMonths = as.double(survivalMonths),
     across(
-      c(grade, ageGroup, tumorType, sex),
+      c(grade, ageGroup, tumorType, sex, compartment, fullName, country),
       as.factor
     )
 )
 
 
-
+# freq(atlasDataClean$survivalMonths) %>% filter(str_detect(var, '[^0-9.]')) # n=104 # not a digit, not a period
+# freq(atlasDataClean$age) %>% filter(str_detect(var, "[^0-9.]")) # n=590 # not a digit, not a period
 
 ```
 
@@ -137,7 +142,7 @@ atlasDataClean <- atlasDataClean %>%
 ```{r}
 
 atlasDataClean <- atlasDataClean %>% 
-  filter(!sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
+  filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
 
 
 # verifies record deletion
@@ -166,156 +171,4 @@ save(atlasDataClean, file = 'dat/atlasDataClean.RData')
 ```
 
 
-
-# examine
-
-
-```{r cross-reference and explore}
-
-examine <- geneExpressionData %>% 
-  select(AGZ_001_U133_2.CEL)
-
-examineOther <- atlasData %>% 
-  filter(Filename %in% 'AGZ_001_U133_2.CEL')
-
-rownames(examine) %>% length() %>% unique()
-
-n_distinct(atlasData$Filename) # matches 7375
-
-atlasData %>% 
-  group_by(
-    Filename
-  ) %>% 
-  count()
-
-# List of non-tumor categories from the image
-non_tumor_categories <- c("Cerebellum", "Cerebellum, Fetal", "Choroid Plexus", 
-                          "CNS", "Nerve Ganglia", "Peri. Nerve", "Pituitary", 
-                          "Retina", "Retina, Fetal")
-
-
-# Create the binary indicator variable
-atlasData2$is_tumor <- ifelse(
-  # atlasData2$`Final diagnosis` %in% non_tumor_categories, 
-  atlasData2$`Diagnosis class` %in% 'Non-tumor',
-  0, 
-  1
-)
-
-# Check the frequency to ensure the counts match
-freq(atlasData2$is_tumor)
-
-sample(atlasData$'Sample ID', 250) %>% freq
-
-atlasDataClean %>% 
-  mutate(
-    x = str_sub(filename, 1, 3),
-    .keep = 'used'
-  ) %>% 
-  group_by(x) %>% 
-  count(sort = T)
-
-
-```
-
-
-
-```{r}
-
-glimpse(geneExpressionData)
-glimpse(atlasData)
-
-```
-
-
-
-
-```{r freqs}
-
-
-map(atlasData[, "Diagnosis class", drop = F], ~ freq(.x))
-map(atlasData[, "Diagnosis", drop = F], ~ freq(.x))
-map(atlasData[, "Final diagnosis", drop = F], ~ freq(.x))
-map(atlasData[, "Age (grouped)", drop = F], ~ freq(.x))
-
-map(select(atlasData, contains('classifier')), drop = F, ~ freq(.x))
-
-map(atlasData[, , drop = F], ~ freq(.x) %>% head())
-sink('dat/all-freqs'); map(atlasData, ~ freq(.x)); sink()
-
-atlasData %>% filter(as.logical(is_tumor)) %>% pull('Final diagnosis') %>% freq
-atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
-
-```
-
-
-
-
-# extra
-
-
-
-```{r na-check}
-library(tidyverse)
-
-# Determine which columns are of double type
-double_columns <- geneExpressionData %>%
-  summarise(across(everything(), is.double)) %>%
-  pivot_longer(everything(), names_to = "column", values_to = "is_double") %>%
-  filter(is_double) %>%
-  pull(column)
-
-# Check for NA values in these double columns
-na_check <- geneExpressionData %>%
-  select(all_of(double_columns)) %>%
-  summarise(across(everything(), ~any(is.na(.)))) %>%
-  pivot_longer(everything(), names_to = "column", values_to = "has_na") %>%
-  filter(has_na)
-
-# Display the result
-if (nrow(na_check) > 0) {
-  print("Columns with NA values in double type:")
-  print(na_check$column)
-} else {
-  print("No NA values found in any double type columns.")
-}
-
-
-
-```
-
-# henry-adapted
-
-
-```{r adapt-from-hn}
-# #atlas<-readRDS("C:/Users/henry/Downloads/ExpData.rds")
-# mean.frame <- data.frame(colMeans(geneExpressionData))
-# jde.mean<- data.frame(mean.frame[1:170,])
-# # jde.hist <- read.csv("C:/Users/henry/Downloads/hist.csv")
-# hist <- read_csv("hist.csv")
-# jde.data<- bind_cols(jde.mean,hist)
-# colnames(jde.data)[colnames(jde.data) == "mean.frame.1.170..."] <- "Mean"
-# boxplot(Mean ~ Histology, data = jde.data,
-#         main = "Boxplot by Histology", 
-#         xlab = "Histology", 
-#         ylab = "mRNA Expression (log2)")
-```
-
-
-
-```{r adapt-from-hn}
-
-
-# # jde.surv<- read.csv("C:/Users/henry/Downloads/jde survival.csv")
-# jde_survival <- read_csv("jdesurv.csv")
-# jde.survival$Age.Groups <- jde_survival$`Age (grouped)`
-# 
-# jde.survival<- jde_survival[, c("Vital status","Overall survival (months)","Original histology"), drop=F]
-# # jde.survival$`Overall survival (months)` <- as.numeric(jde.survival$`Overall survival (months)`)
-# fit<- survfit(Surv(`Overall survival (months)`,`Vital status`)~strata(Age.Groups), data=jde.survival)
-# plot(fit, xlab="Time", ylab="Survival", main="JDE Data", col=c(1:4), lty=c(1),conf.int = F)
-# legend("bottomleft",title = "Age Groups", 0.7, legend=c("10-20","20-40","40-60","60-80"), lty=1, col=1:4)
-
-
-```
 
