@@ -117,6 +117,17 @@ df_into_clip <- function(df, ...) { write.table(
   row.names = F,
   ...) }
 
+copy_df_to_clipboard <- function(df) {
+  # Write the data frame to a temporary file
+  temp_file <- tempfile(fileext = ".tsv")
+  write.table(df, file = temp_file, sep = "\t", row.names = FALSE, quote = FALSE)
+  on.exit(unlink(temp_file))  # Clean up the temporary file
+  
+  # Use system to execute xclip to copy the file content to clipboard
+  system(paste("xclip -selection clipboard -i", temp_file))
+  message("Data frame has been copied to the clipboard.")
+}
+
 
 
 # separate vector with delimiter to clipboard -----------------------------
