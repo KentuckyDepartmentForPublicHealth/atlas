@@ -1,5 +1,23 @@
 
 
+
+```{r}
+# jan 21 2025
+# understand gene annotations
+
+tellMe <- names(mapped_genes) %>% 
+  unique()
+
+sample(tellMe, 50)
+
+glimpse(atlasDataClean)
+glimpse(geneExpressionData[1:25, 1:5])
+glimpse(gene_annotations)
+
+
+```
+
+
 # gene groupings
 
 Summary
