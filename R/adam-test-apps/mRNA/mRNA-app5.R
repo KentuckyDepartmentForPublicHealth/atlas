@@ -13,7 +13,7 @@ selected_genes <- unique(gene_annotations$SYMBOL)
 
 # Shiny app
 ui <- fluidPage(
-  titlePanel("mRNA Expression Boxplots with Gene Annotations (Multiple Genes)"),
+  titlePanel("mRNA Expression Boxplots with Gene Annotations (Facet Toggle)"),
   sidebarLayout(
     sidebarPanel(
       selectInput(
@@ -29,6 +29,11 @@ ui <- fluidPage(
         "Group By",
         choices = c("grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country"),
         selected = "grade"
+      ),
+      checkboxInput(
+        "use_facet",
+        "Use Facet Wrap",
+        value = FALSE
       ),
       width = 3
     ),
@@ -61,19 +66,30 @@ server <- function(input, output) {
       left_join(atlasDataClean %>% select(filename, grade, ageGroup, tumorType, sex, compartment, fullName, country), by = "filename")
   })
   
-  # Render the boxplot
+  # Render the boxplot with optional faceting
   output$boxplot <- renderPlot({
     req(filtered_data())
-    ggplot(filtered_data(), aes(x = .data[[input$group_by]], y = expression, color = SYMBOL)) +
+    p <- ggplot(filtered_data(), aes(x = SYMBOL, y = expression, color = SYMBOL)) +
       geom_boxplot() +
       geom_jitter(width = 0.2, alpha = 0.5) +
       labs(
-        title = paste("Expression of Selected Genes"),
-        x = input$group_by,
+        title = "Expression of Selected Genes",
+        x = "Gene Symbol",
         y = "Expression Level"
       ) +
       theme_minimal() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+      theme(
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      )
+    
+    # Add faceting if use_facet is TRUE
+    if (input$use_facet) {
+      p <- p +
+        facet_wrap(~ .data[[input$group_by]], scales = "free") +
+        theme(strip.text = element_text(size = 12, face = "bold"))
+    }
+    
+    p
   })
   
   # Render the gene information table
