@@ -324,11 +324,23 @@ map(atlasData[, "Age (grouped)", drop = F], ~ freq(.x))
 map(select(atlasData, contains('classifier')), drop = F, ~ freq(.x))
 
 map(atlasData[, , drop = F], ~ freq(.x) %>% head())
+map(atlasDataClean[, , drop = F], ~ freq(.x) %>% head())
 sink('dat/all-freqs'); map(atlasData, ~ freq(.x)); sink()
 sink('dat/all-freqs2'); map(atlasDataClean, ~ freq(.x)); sink()
 
 atlasData %>% filter(as.logical(is_tumor)) %>% pull('Final diagnosis') %>% freq
 atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
+
+atlasDataClean %>% 
+  pull(diagnosisFinal) %>% 
+  freq()
+atlasDataClean %>% 
+  pull(diagnosis) %>% 
+  freq()
+atlasDataClean %>% 
+  pull(diagnosisClass) %>% 
+  freq()
+
 
 ```
 

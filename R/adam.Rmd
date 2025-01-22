@@ -24,7 +24,7 @@ source('R/sysOpsLibsFuncs.R')
 # # atlasData <- read_csv('dat/Atlas_Data.csv')
 # save(atlasData, file = 'dat/atlasData.RData')
 
-# load("dat/atlasData.RData")
+load("dat/atlasData.RData")
 load("dat/geneExpressionData.RData")
 
 # Diverge from original data set
