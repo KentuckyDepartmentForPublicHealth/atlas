@@ -61,19 +61,23 @@ server <- function(input, output) {
       left_join(atlasDataClean %>% select(filename, grade, ageGroup, tumorType, sex, compartment, fullName, country), by = "filename")
   })
   
-  # Render the boxplot
+  # Render the boxplot with faceting
   output$boxplot <- renderPlot({
     req(filtered_data())
-    ggplot(filtered_data(), aes(x = .data[[input$group_by]], y = expression, color = SYMBOL)) +
+    ggplot(filtered_data(), aes(x = SYMBOL, y = expression, color = SYMBOL)) +
       geom_boxplot() +
       geom_jitter(width = 0.2, alpha = 0.5) +
+      facet_wrap(~ .data[[input$group_by]], scales = "free") +  # Add dynamic faceting
       labs(
         title = paste("Expression of Selected Genes"),
-        x = input$group_by,
+        x = "Gene Symbol",
         y = "Expression Level"
       ) +
       theme_minimal() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+      theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.text = element_text(size = 12, face = "bold")
+      )
   })
   
   # Render the gene information table
