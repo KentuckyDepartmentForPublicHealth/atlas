@@ -1,175 +1,402 @@
+[1] 5248
+[1] 5248
 $filename
-# A tibble: 7,297 × 6
-     var                                                                               count count_rolling count_all fraction
-     <chr>                                                                             <int>         <int>     <int>    <dbl>
-   1 AGZ_001_U133_2.CEL                                                                    1             1      7296 0.000137
-   2 AGZ_002_U133_2.CEL                                                                    1             2      7296 0.000137
-   3 AGZ_003_U133_2.CEL                                                                    1             3      7296 0.000137
-   4 AGZ_004_U133_2.CEL                                                                    1             4      7296 0.000137
-   5 AGZ_005_U133_2.CEL                                                                    1             5      7296 0.000137
-   6 AGZ_006_U133_2.CEL                                                                    1             6      7296 0.000137
-   7 AGZ_007_U133_2.CEL                                                                    1             7      7296 0.000137
-   8 AGZ_008_U133_2.CEL                                                                    1             8      7296 0.000137
-   9 AGZ_009B_U133_2.CEL                                                                   1             9      7296 0.000137
-  10 AGZ_011_U133_2.CEL                                                                    1            10      7296 0.000137
-  11 AGZ_012_U133_2.CEL                                                                    1            11      7296 0.000137
-  12 AGZ_013_U133_2.CEL                                                                    1            12      7296 0.000137
-  13 AGZ_015_U133_2.CEL                                                                    1            13      7296 0.000137
-  14 AGZ_016_U133_2.CEL                                                                    1            14      7296 0.000137
-  15 AGZ_017_U133_2.CEL                                                                    1            15      7296 0.000137
-  16 AGZ_018_U133_2.CEL                                                                    1            16      7296 0.000137
-  17 AGZ_019_U133_2.CEL                                                                    1            17      7296 0.000137
-  18 AGZ_020_U133_2.CEL                                                                    1            18      7296 0.000137
-  19 AGZ_021_U133_2.CEL                                                                    1            19      7296 0.000137
-  20 AGZ_022B_U133_2.CEL                                                                   1            20      7296 0.000137
-  21 AGZ_023_U133_2.CEL                                                                    1            21      7296 0.000137
-  22 AGZ_024_U133_2.CEL                                                                    1            22      7296 0.000137
-  23 AGZ_025_U133_2.CEL                                                                    1            23      7296 0.000137
-  24 AGZ_027_U133_2.CEL                                                                    1            24      7296 0.000137
-  25 AGZ_029_U133_2.CEL                                                                    1            25      7296 0.000137
-  26 AGZ_030_U133_2.CEL                                                                    1            26      7296 0.000137
-  27 AGZ_031_U133_2.CEL                                                                    1            27      7296 0.000137
-  28 AGZ_032_U133_2.CEL                                                                    1            28      7296 0.000137
-  29 AGZ_033_U133_2.CEL                                                                    1            29      7296 0.000137
-  30 AGZ_034_U133_2.CEL                                                                    1            30      7296 0.000137
-  31 AGZ_035_U133_2.CEL                                                                    1            31      7296 0.000137
-  32 AGZ_036_U133_2.CEL                                                                    1            32      7296 0.000137
-  33 AGZ_037_U133_2.CEL                                                                    1            33      7296 0.000137
-  34 AGZ_038_U133_2.CEL                                                                    1            34      7296 0.000137
-  35 AGZ_040_U133_2.CEL                                                                    1            35      7296 0.000137
-  36 AGZ_041_U133_2.CEL                                                                    1            36      7296 0.000137
-  37 AGZ_042_U133_2.CEL                                                                    1            37      7296 0.000137
-  38 AGZ_043_U133_2.CEL                                                                    1            38      7296 0.000137
-  39 AGZ_044_U133_2.CEL                                                                    1            39      7296 0.000137
-  40 AGZ_045_U133_2.CEL                                                                    1            40      7296 0.000137
-  41 AGZ_046_U133_2.CEL                                                                    1            41      7296 0.000137
-  42 AGZ_047_U133_2.CEL                                                                    1            42      7296 0.000137
-  43 AGZ_048_U133_2.CEL                                                                    1            43      7296 0.000137
-  44 AGZ_049_U133_2.CEL                                                                    1            44      7296 0.000137
-  45 AGZ_050_U133_2.CEL                                                                    1            45      7296 0.000137
-  46 AGZ_051_U133_2.CEL                                                                    1            46      7296 0.000137
-  47 AGZ_052_U133_2.CEL                                                                    1            47      7296 0.000137
-  48 AGZ_053_U133_2.CEL                                                                    1            48      7296 0.000137
-  49 AGZ_055_U133_2.CEL                                                                    1            49      7296 0.000137
-  50 AGZ_056_U133_2.CEL                                                                    1            50      7296 0.000137
-  51 AGZ_057_U133_2.CEL                                                                    1            51      7296 0.000137
-  52 AGZ_058_U133_2.CEL                                                                    1            52      7296 0.000137
-  53 AGZ_059_U133_2.CEL                                                                    1            53      7296 0.000137
-  54 AGZ_060_U133_2.CEL                                                                    1            54      7296 0.000137
-  55 AGZ_061_U133_2.CEL                                                                    1            55      7296 0.000137
-  56 AGZ_063_U133_2.CEL                                                                    1            56      7296 0.000137
-  57 AGZ_064_U133_2.CEL                                                                    1            57      7296 0.000137
-  58 AGZ_065_U133_2.CEL                                                                    1            58      7296 0.000137
-  59 AGZ_066_U133_2.CEL                                                                    1            59      7296 0.000137
-  60 AGZ_068_U133_2.CEL                                                                    1            60      7296 0.000137
-  61 AGZ_069_U133_2.CEL                                                                    1            61      7296 0.000137
-  62 AGZ_070_U133_2.CEL                                                                    1            62      7296 0.000137
-  63 AGZ_071_U133_2.CEL                                                                    1            63      7296 0.000137
-  64 AGZ_072_U133_2.CEL                                                                    1            64      7296 0.000137
-  65 AGZ_073B_U133_2.CEL                                                                   1            65      7296 0.000137
-  66 AGZ_074_U133_2.CEL                                                                    1            66      7296 0.000137
-  67 AGZ_076_U133_2.CEL                                                                    1            67      7296 0.000137
-  68 AGZ_077_U133_2.CEL                                                                    1            68      7296 0.000137
-  69 AGZ_078_U133_2.CEL                                                                    1            69      7296 0.000137
-  70 AGZ_079_U133_2.CEL                                                                    1            70      7296 0.000137
-  71 AGZ_080_U133_2.CEL                                                                    1            71      7296 0.000137
-  72 AGZ_081_U133_2.CEL                                                                    1            72      7296 0.000137
-  73 AGZ_082_U133_2.CEL                                                                    1            73      7296 0.000137
-  74 AGZ_083_U133_2.CEL                                                                    1            74      7296 0.000137
-  75 AGZ_084_U133_2.CEL                                                                    1            75      7296 0.000137
-  76 AGZ_085_U133_2.CEL                                                                    1            76      7296 0.000137
-  77 AGZ_087_U133_2.CEL                                                                    1            77      7296 0.000137
-  78 AGZ_088_U133_2.CEL                                                                    1            78      7296 0.000137
-  79 AGZ_089_U133_2.CEL                                                                    1            79      7296 0.000137
-  80 AGZ_090_U133_2.CEL                                                                    1            80      7296 0.000137
-  81 AGZ_091_U133_2.CEL                                                                    1            81      7296 0.000137
-  82 AGZ_092_U133_2.CEL                                                                    1            82      7296 0.000137
-  83 AGZ_093_U133_2.CEL                                                                    1            83      7296 0.000137
-  84 AGZ_094_U133_2.CEL                                                                    1            84      7296 0.000137
-  85 AGZ_095_U133_2.CEL                                                                    1            85      7296 0.000137
-  86 AGZ_096_U133_2.CEL                                                                    1            86      7296 0.000137
-  87 AGZ_098_U133_2.CEL                                                                    1            87      7296 0.000137
-  88 AGZ_099_U133_2.CEL                                                                    1            88      7296 0.000137
-  89 AGZ_100_U133_2.CEL                                                                    1            89      7296 0.000137
-  90 AGZ_101_U133_2.CEL                                                                    1            90      7296 0.000137
-  91 AGZ_102_U133_2.CEL                                                                    1            91      7296 0.000137
-  92 AGZ_105B_U133_2.CEL                                                                   1            92      7296 0.000137
-  93 AGZ_106B_U133_2.CEL                                                                   1            93      7296 0.000137
-  94 AGZ_107_U133_2.CEL                                                                    1            94      7296 0.000137
-  95 AGZ_108_U133_2.CEL                                                                    1            95      7296 0.000137
-  96 AGZ_109_U133_2.CEL                                                                    1            96      7296 0.000137
-  97 AGZ_110_U133_2.CEL                                                                    1            97      7296 0.000137
-  98 AGZ_111_U133_2.CEL                                                                    1            98      7296 0.000137
-  99 AGZ_112_U133_2.CEL                                                                    1            99      7296 0.000137
- 100 AGZ_113_U133_2.CEL                                                                    1           100      7296 0.000137
- 101 AGZ_115_U133_2.CEL                                                                    1           101      7296 0.000137
- 102 AGZ_116_U133_2.CEL                                                                    1           102      7296 0.000137
- 103 AGZ_119_U133_2.CEL                                                                    1           103      7296 0.000137
- 104 AGZ_120_U133_2.CEL                                                                    1           104      7296 0.000137
- 105 AGZ_121_U133_2.CEL                                                                    1           105      7296 0.000137
- 106 AGZ_122_U133_2.CEL                                                                    1           106      7296 0.000137
- 107 AGZ_123_U133_2.CEL                                                                    1           107      7296 0.000137
- 108 AGZ_124_U133_2.CEL                                                                    1           108      7296 0.000137
- 109 AGZ_125_U133_2.CEL                                                                    1           109      7296 0.000137
- 110 AGZ_128_U133_2.CEL                                                                    1           110      7296 0.000137
- 111 AGZ_129_U133_2.CEL                                                                    1           111      7296 0.000137
- 112 AGZ_130_U133_2.CEL                                                                    1           112      7296 0.000137
- 113 AGZ_131_U133_2.CEL                                                                    1           113      7296 0.000137
- 114 AGZ_132_U133_2.CEL                                                                    1           114      7296 0.000137
- 115 AGZ_133_U133_2.CEL                                                                    1           115      7296 0.000137
- 116 AGZ_134_U133_2.CEL                                                                    1           116      7296 0.000137
- 117 AGZ_136_U133_2.CEL                                                                    1           117      7296 0.000137
- 118 AGZ_137_U133_2.CEL                                                                    1           118      7296 0.000137
- 119 AGZ_138_U133_2.CEL                                                                    1           119      7296 0.000137
- 120 AGZ_139_U133_2.CEL                                                                    1           120      7296 0.000137
- 121 AGZ_140_U133_2.CEL                                                                    1           121      7296 0.000137
- 122 AGZ_141_U133_2.CEL                                                                    1           122      7296 0.000137
- 123 AGZ_142_U133_2.CEL                                                                    1           123      7296 0.000137
- 124 AGZ_143_U133_2.CEL                                                                    1           124      7296 0.000137
- 125 AGZ_144_U133_2.CEL                                                                    1           125      7296 0.000137
- 126 AGZ_145_U133_2.CEL                                                                    1           126      7296 0.000137
- 127 AGZ_146_U133_2.CEL                                                                    1           127      7296 0.000137
- 128 AGZ_147_U133_2.CEL                                                                    1           128      7296 0.000137
- 129 AGZ_148_U133_2.CEL                                                                    1           129      7296 0.000137
- 130 AGZ_149_U133_2.CEL                                                                    1           130      7296 0.000137
- 131 AGZ_150_U133_2.CEL                                                                    1           131      7296 0.000137
- 132 AGZ_151_U133_2.CEL                                                                    1           132      7296 0.000137
- 133 AGZ_152_U133_2.CEL                                                                    1           133      7296 0.000137
- 134 AGZ_153_U133_2.CEL                                                                    1           134      7296 0.000137
- 135 AGZ_154BIS_U133_2.CEL                                                                 1           135      7296 0.000137
- 136 AGZ_155_U133_2.CEL                                                                    1           136      7296 0.000137
- 137 AGZ_156_U133_2.CEL                                                                    1           137      7296 0.000137
- 138 AGZ_157_U133_2.CEL                                                                    1           138      7296 0.000137
- 139 AGZ_158_U133_2.CEL                                                                    1           139      7296 0.000137
- 140 AGZ_159_U133_2.CEL                                                                    1           140      7296 0.000137
- 141 AGZ_161_U133_2.CEL                                                                    1           141      7296 0.000137
- 142 AGZ_162_U133_2.CEL                                                                    1           142      7296 0.000137
- 143 AGZ_163_U133_2.CEL                                                                    1           143      7296 0.000137
- 144 AGZ_164_U133_2.CEL                                                                    1           144      7296 0.000137
- 145 AGZ_165BIS_U133_2.CEL                                                                 1           145      7296 0.000137
- 146 AGZ_167BIS_U133_2.CEL                                                                 1           146      7296 0.000137
- 147 AGZ_168_U133_2.CEL                                                                    1           147      7296 0.000137
- 148 AGZ_169_U133_2.CEL                                                                    1           148      7296 0.000137
- 149 AGZ_170_U133_2.CEL                                                                    1           149      7296 0.000137
- 150 AGZ_171_U133_2.CEL                                                                    1           150      7296 0.000137
- 151 AGZ_172_U133_2.CEL                                                                    1           151      7296 0.000137
- 152 AGZ_173_U133_2.CEL                                                                    1           152      7296 0.000137
- 153 AGZ_174_U133_2.CEL                                                                    1           153      7296 0.000137
- 154 AGZ_175_U133_2.CEL                                                                    1           154      7296 0.000137
- 155 AGZ_176_U133_2.CEL                                                                    1           155      7296 0.000137
- 156 AGZ_177_U133_2.CEL                                                                    1           156      7296 0.000137
- 157 AGZ_178_U133_2.CEL                                                                    1           157      7296 0.000137
- 158 AGZ_179_U133_2.CEL                                                                    1           158      7296 0.000137
- 159 AGZ_180_U133_2.CEL                                                                    1           159      7296 0.000137
- 160 AGZ_181_U133_2.CEL                                                                    1           160      7296 0.000137
- 161 AGZ_182_U133_2.CEL                                                                    1           161      7296 0.000137
- 162 AGZ_183_U133_2.CEL                                                                    1           162      7296 0.000137
- 163 AGZ_184_U133_2.CEL                                                                    1           163      7296 0.000137
- 164 AGZ_185_U133_2.CEL                                                                    1           164      7296 0.000137
- 165 AGZ_186_U133_2.CEL                                                                    1           165      7296 0.000137
- 166 AGZ_187_U133_2.CEL                                                                    1           166      7296 0.000137
- 167 AGZ_188_U133_2.CEL                                                                    1           167      7296 0.000137
- 168 AGZ_189_U133_2.CEL                                                                    1           168      7296 0.000137
+# A tibble: 6 × 6
+  var                count count_rolling count_all fraction fraction_rolling
+  <chr>              <int>         <int>     <int>    <dbl>            <dbl>
+1 AGZ_001_U133_2.CEL     1             1      7296 0.000137         0.000137
+2 AGZ_002_U133_2.CEL     1             2      7296 0.000137         0.000274
+3 AGZ_003_U133_2.CEL     1             3      7296 0.000137         0.000411
+4 AGZ_004_U133_2.CEL     1             4      7296 0.000137         0.000548
+5 AGZ_005_U133_2.CEL     1             5      7296 0.000137         0.000685
+6 AGZ_006_U133_2.CEL     1             6      7296 0.000137         0.000822
+
+$dataID
+# A tibble: 6 × 6
+  var             count count_rolling count_all fraction fraction_rolling
+  <chr>           <int>         <int>     <int>    <dbl>            <dbl>
+1 GSE108474         535           535      7296   0.0733           0.0733
+2 GSE16011          284           819      7296   0.0389           0.112 
+3 GSE7307           264          1083      7296   0.0362           0.148 
+4 GSE48350          250          1333      7296   0.0343           0.183 
+5 EGAD00010001301   245          1578      7296   0.0336           0.216 
+6 GSE3526           201          1779      7296   0.0275           0.244 
+
+$sampleID
+# A tibble: 6 × 6
+  var             count count_rolling count_all fraction fraction_rolling
+  <chr>           <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>              415           415      7296 0.0569             0.0569
+2 EGAD00010000462    72           487      7296 0.00987            0.0667
+3 HS_F31              2           489      7296 0.000274           0.0670
+4 HS_F35              2           491      7296 0.000274           0.0673
+5 HS_M45A             2           493      7296 0.000274           0.0676
+6 HS_M45B             2           495      7296 0.000274           0.0678
+
+$institution
+# A tibble: 6 × 6
+  var                          count count_rolling count_all fraction fraction_rolling
+  <chr>                        <int>         <int>     <int>    <dbl>            <dbl>
+1 DKFZ                           933           933      7296   0.128             0.128
+2 ST. JUDE                       552          1485      7296   0.0757            0.204
+3 REMBRANDT                      535          2020      7296   0.0733            0.277
+4 NEUROCRINE BIOSCIENCES, INC.   465          2485      7296   0.0637            0.341
+5 UC DENVER                      450          2935      7296   0.0617            0.402
+6 ERASMUS MC, NETHERLANDS        384          3319      7296   0.0526            0.455
+
+$country
+# A tibble: 6 × 6
+  var         count count_rolling count_all fraction fraction_rolling
+  <chr>       <int>         <int>     <int>    <dbl>            <dbl>
+1 USA          3582          3582      7296   0.491             0.491
+2 GERMANY      1195          4777      7296   0.164             0.655
+3 FRANCE        801          5578      7296   0.110             0.765
+4 NETHERLANDS   743          6321      7296   0.102             0.866
+5 UK            170          6491      7296   0.0233            0.890
+6 JAPAN         149          6640      7296   0.0204            0.910
+
+$histologyOriginal
+# A tibble: 6 × 6
+  var       count count_rolling count_all fraction fraction_rolling
+  <chr>     <int>         <int>     <int>    <dbl>            <dbl>
+1 NORMAL     1266          1266      7296   0.174             0.174
+2 GBM        1265          2531      7296   0.173             0.347
+3 MB          811          3342      7296   0.111             0.458
+4 NON-TUMOR   651          3993      7296   0.0892            0.547
+5 EPN         559          4552      7296   0.0766            0.624
+6 A           357          4909      7296   0.0489            0.673
+
+$subgroup
+# A tibble: 6 × 6
+  var   count count_rolling count_all fraction fraction_rolling
+  <chr> <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>   6027          6027      7296  0.826              0.826
+2 IDH     303          6330      7296  0.0415             0.868
+3 PFA     212          6542      7296  0.0291             0.897
+4 SHH     159          6701      7296  0.0218             0.918
+5 PFB      75          6776      7296  0.0103             0.929
+6 GP4      65          6841      7296  0.00891            0.938
+
+$locationOriginal
+# A tibble: 6 × 6
+  var                            count count_rolling count_all fraction fraction_rolling
+  <chr>                          <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>                            3308          3308      7296   0.453             0.453
+2 POSTERIOR FOSSA                  623          3931      7296   0.0854            0.539
+3 INFRATENTORIAL                   410          4341      7296   0.0562            0.595
+4 DORSOLATERAL PREFRONTAL CORTEX   186          4527      7296   0.0255            0.620
+5 EYE                              165          4692      7296   0.0226            0.643
+6 CEREBELLUM                       135          4827      7296   0.0185            0.662
+
+$compartment
+# A tibble: 6 × 6
+  var                   count count_rolling count_all fraction fraction_rolling
+  <chr>                 <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>                   2883          2883      7296  0.395              0.395
+2 BRAIN, SUPRATENTORIAL  1951          4834      7296  0.267              0.663
+3 BRAIN, INFRATENTORIAL  1693          6527      7296  0.232              0.895
+4 PERIPHERAL              356          6883      7296  0.0488             0.943
+5 EYE                     348          7231      7296  0.0477             0.991
+6 SPINAL CORD              60          7291      7296  0.00822            0.999
+
+$location
+# A tibble: 6 × 6
+  var                   count count_rolling count_all fraction fraction_rolling
+  <chr>                 <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>                   4553          4553      7296   0.624             0.624
+2 CEREBRAL LOBES/CORTEX  1366          5919      7296   0.187             0.811
+3 BRAINSTEM AND NUCLEI    351          6270      7296   0.0481            0.859
+4 CEREBELLUM              200          6470      7296   0.0274            0.887
+5 CEREBRUM, FRONTAL       105          6575      7296   0.0144            0.901
+6 PITUITARY/SELLAR         95          6670      7296   0.0130            0.914
+
+$stageNeuroblastoma
+# A tibble: 6 × 6
+  var      count count_rolling count_all fraction fraction_rolling
+  <chr>    <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>      7011          7011      7296  0.961              0.961
+2 STAGE 4    112          7123      7296  0.0154             0.976
+3 STAGE 1     61          7184      7296  0.00836            0.985
+4 STAGE 2     51          7235      7296  0.00699            0.992
+5 STAGE 3     30          7265      7296  0.00411            0.996
+6 STAGE 4S    29          7294      7296  0.00397            1.00 
+
+$stageMedulloblastoma
+# A tibble: 6 × 6
+  var   count count_rolling count_all fraction fraction_rolling
+  <chr> <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>   7157          7157      7296 0.981               0.981
+2 M0      101          7258      7296 0.0138              0.995
+3 M3       21          7279      7296 0.00288             0.998
+4 M1       10          7289      7296 0.00137             0.999
+5 M2        6          7295      7296 0.000822            1.00 
+6 M4        1          7296      7296 0.000137            1    
+
+$tissuePrep
+# A tibble: 6 × 6
+  var         count count_rolling count_all fraction fraction_rolling
+  <chr>       <int>         <int>     <int>    <dbl>            <dbl>
+1 FROZEN       5440          5440      7296  0.746              0.746
+2 POSTMORTEM   1461          6901      7296  0.200              0.946
+3 ?COMMERCIAL   264          7165      7296  0.0362             0.982
+4 ?FROZEN        80          7245      7296  0.0110             0.993
+5 COMMERCIAL     21          7266      7296  0.00288            0.996
+6 FFPE           15          7281      7296  0.00206            0.998
+
+$sampleAnalysisGroup
+# A tibble: 3 × 6
+  var               count count_rolling count_all fraction fraction_rolling
+  <chr>             <int>         <int>     <int>    <dbl>            <dbl>
+1 CORE DATASET       5248          5248      7296    0.719            0.719
+2 TEST - CLASSIFIED  2048          7296      7296    0.281            1    
+3 <NA>                  0          7296      7296    0                1    
+
+$diagnosis
+# A tibble: 6 × 6
+  var            count count_rolling count_all fraction fraction_rolling
+  <chr>          <int>         <int>     <int>    <dbl>            <dbl>
+1 #N/A            2048          2048      7296   0.281             0.281
+2 CNS             1614          3662      7296   0.221             0.502
+3 DIFFUSE GLIOMA   966          4628      7296   0.132             0.634
+4 NEUROBLASTOMA    248          4876      7296   0.0340            0.668
+5 IDH MUTANT       242          5118      7296   0.0332            0.701
+6 PH/PG            237          5355      7296   0.0325            0.734
+
+$grade
+# A tibble: 5 × 6
+  var     count count_rolling count_all fraction fraction_rolling
+  <chr>   <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>     3557          3557      7296   0.488             0.488
+2 GRADE 4  2262          5819      7296   0.310             0.798
+3 GRADE 3   593          6412      7296   0.0813            0.879
+4 GRADE 2   447          6859      7296   0.0613            0.940
+5 GRADE 1   437          7296      7296   0.0599            1    
+
+$fullName
+# A tibble: 6 × 6
+  var                                           count count_rolling count_all fraction fraction_rolling
+  <chr>                                         <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>                                           5363          5363      7296  0.735              0.735
+2 CENTRAL NERVOUS SYSTEM                         1614          6977      7296  0.221              0.956
+3 PHEOCHROMOCYTOMA AND PARAGANGLIOMA              237          7214      7296  0.0325             0.989
+4 ADAMANTINOMATOUS CRANIOPHARYNGIOMA               24          7238      7296  0.00329            0.992
+5 BREAST CANCER METASTASIS                         17          7255      7296  0.00233            0.994
+6 ATYPICAL TERATOID RHABDOID TUMOR-SHH SUBGROUP    15          7270      7296  0.00206            0.996
+
+$diagnosisClass
+# A tibble: 6 × 6
+  var            count count_rolling count_all fraction fraction_rolling
+  <chr>          <int>         <int>     <int>    <dbl>            <dbl>
+1 #N/A            2048          2048      7296   0.281             0.281
+2 NON-TUMOR       1819          3867      7296   0.249             0.530
+3 DIFFUSE GLIOMA  1287          5154      7296   0.176             0.706
+4 EMBRYONAL        768          5922      7296   0.105             0.812
+5 EPENDYMAL        351          6273      7296   0.0481            0.860
+6 NERVE            284          6557      7296   0.0389            0.899
+
+$classifierLightGBM
+# A tibble: 6 × 6
+  var            count count_rolling count_all fraction fraction_rolling
+  <chr>          <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>            5248          5248      7296   0.719             0.719
+2 DIFFUSE GLIOMA   505          5753      7296   0.0692            0.789
+3 IDH MUTANT       289          6042      7296   0.0396            0.828
+4 MB-GP4           241          6283      7296   0.0330            0.861
+5 CNS              146          6429      7296   0.0200            0.881
+6 MB-GP3           125          6554      7296   0.0171            0.898
+
+$classifierRandomForest
+# A tibble: 6 × 6
+  var            count count_rolling count_all fraction fraction_rolling
+  <chr>          <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>            5248          5248      7296   0.719             0.719
+2 DIFFUSE GLIOMA   548          5796      7296   0.0751            0.794
+3 IDH MUTANT       289          6085      7296   0.0396            0.834
+4 MB-GP4           235          6320      7296   0.0322            0.866
+5 CNS              148          6468      7296   0.0203            0.887
+6 MB-GP3           136          6604      7296   0.0186            0.905
+
+$classifierEuclidean
+# A tibble: 6 × 6
+  var            count count_rolling count_all fraction fraction_rolling
+  <chr>          <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>            5248          5248      7296   0.719             0.719
+2 DIFFUSE GLIOMA   540          5788      7296   0.0740            0.793
+3 IDH MUTANT       301          6089      7296   0.0413            0.835
+4 MB-GP4           250          6339      7296   0.0343            0.869
+5 MB-SHH           126          6465      7296   0.0173            0.886
+6 CNS              122          6587      7296   0.0167            0.903
+
+$classifierTSNE
+# A tibble: 6 × 6
+  var            count count_rolling count_all fraction fraction_rolling
+  <chr>          <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>            5248          5248      7296   0.719             0.719
+2 DIFFUSE GLIOMA   441          5689      7296   0.0604            0.780
+3 IDH MUTANT       335          6024      7296   0.0459            0.826
+4 MB-GP4           242          6266      7296   0.0332            0.859
+5 MB-GP3           128          6394      7296   0.0175            0.876
+6 PFA              127          6521      7296   0.0174            0.894
+
+$diagnosisFinal
+# A tibble: 6 × 6
+  var            count count_rolling count_all fraction fraction_rolling
+  <chr>          <int>         <int>     <int>    <dbl>            <dbl>
+1 CNS             1750          1750      7296   0.240             0.240
+2 DIFFUSE GLIOMA  1476          3226      7296   0.202             0.442
+3 IDH MUTANT       559          3785      7296   0.0766            0.519
+4 PFA              331          4116      7296   0.0454            0.564
+5 MB-GP4           307          4423      7296   0.0421            0.606
+6 PA               276          4699      7296   0.0378            0.644
+
+$tsne1
+# A tibble: 6 × 6
+  var          count count_rolling count_all fraction fraction_rolling
+  <chr>        <int>         <int>     <int>    <dbl>            <dbl>
+1 -0.818513481     2             2      7296 0.000274         0.000274
+2 1.655201168      2             4      7296 0.000274         0.000548
+3 1.700190034      2             6      7296 0.000274         0.000822
+4 2.044838123      2             8      7296 0.000274         0.00110 
+5 3.838466217      2            10      7296 0.000274         0.00137 
+6 4.042563982      2            12      7296 0.000274         0.00164 
+
+$tsne2
+# A tibble: 6 × 6
+  var          count count_rolling count_all fraction fraction_rolling
+  <chr>        <int>         <int>     <int>    <dbl>            <dbl>
+1 -38.18140423     2             2      7296 0.000274         0.000274
+2 -20.34244072     2             4      7296 0.000274         0.000548
+3 -19.49175842     2             6      7296 0.000274         0.000822
+4 -18.40540713     2             8      7296 0.000274         0.00110 
+5 -17.33950013     2            10      7296 0.000274         0.00137 
+6 -16.63180439     2            12      7296 0.000274         0.00164 
+
+$age
+# A tibble: 6 × 6
+  var   count count_rolling count_all fraction fraction_rolling
+  <chr> <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>   2667          2667      7296  0.366              0.366
+2 2        92          2759      7296  0.0126             0.378
+3 3        78          2837      7296  0.0107             0.389
+4 48       69          2906      7296  0.00946            0.398
+5 50-54    68          2974      7296  0.00932            0.408
+6 1        66          3040      7296  0.00905            0.417
+
+$ageGroup
+# A tibble: 6 × 6
+  var      count count_rolling count_all fraction fraction_rolling
+  <chr>    <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>      2679          2679      7296   0.367             0.367
+2 40-60YRS  1140          3819      7296   0.156             0.523
+3 20-40YRS   908          4727      7296   0.124             0.648
+4 60-80YRS   808          5535      7296   0.111             0.759
+5 0-5YRS     749          6284      7296   0.103             0.861
+6 10-20YRS   361          6645      7296   0.0495            0.911
+
+$sex
+# A tibble: 3 × 6
+  var   count count_rolling count_all fraction fraction_rolling
+  <chr> <int>         <int>     <int>    <dbl>            <dbl>
+1 M      2814          2814      7296    0.386            0.386
+2 <NA>   2537          5351      7296    0.348            0.733
+3 F      1945          7296      7296    0.267            1    
+
+$tumorType
+# A tibble: 3 × 6
+  var       count count_rolling count_all fraction fraction_rolling
+  <chr>     <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>       5977          5977      7296   0.819             0.819
+2 PRIMARY    1172          7149      7296   0.161             0.980
+3 RECURRENT   147          7296      7296   0.0201            1    
+
+$mortality
+# A tibble: 3 × 6
+  var   count count_rolling count_all fraction fraction_rolling
+  <chr> <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>   5151          5151      7296    0.706            0.706
+2 1      1273          6424      7296    0.174            0.880
+3 0       872          7296      7296    0.120            1    
+
+$survivalMonths
+# A tibble: 6 × 6
+  var   count count_rolling count_all fraction fraction_rolling
+  <chr> <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>   5222          5222      7296  0.716              0.716
+2 12       39          5261      7296  0.00535            0.721
+3 6        31          5292      7296  0.00425            0.725
+4 5        27          5319      7296  0.00370            0.729
+5 18       27          5346      7296  0.00370            0.733
+6 14       25          5371      7296  0.00343            0.736
+
+$`1p/19q-codel`
+# A tibble: 3 × 6
+  var   count count_rolling count_all fraction fraction_rolling
+  <chr> <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>   6746          6746      7296   0.925             0.925
+2 NO      347          7093      7296   0.0476            0.972
+3 YES     203          7296      7296   0.0278            1    
+
+$`mutationIDH1/2`
+# A tibble: 3 × 6
+  var   count count_rolling count_all fraction fraction_rolling
+  <chr> <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>   6796          6796      7296   0.931             0.931
+2 MUT     419          7215      7296   0.0574            0.989
+3 WT       81          7296      7296   0.0111            1    
+
+$mutationH3
+# A tibble: 4 × 6
+  var   count count_rolling count_all fraction fraction_rolling
+  <chr> <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>   7129          7129      7296  0.977              0.977
+2 WT      101          7230      7296  0.0138             0.991
+3 K27      45          7275      7296  0.00617            0.997
+4 G34      21          7296      7296  0.00288            1    
+
+$mutationTERTpromoter
+# A tibble: 3 × 6
+  var   count count_rolling count_all fraction fraction_rolling
+  <chr> <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>   7056          7056      7296   0.967             0.967
+2 WT      121          7177      7296   0.0166            0.984
+3 MUT     119          7296      7296   0.0163            1    
+
+$amplificationEGFR
+# A tibble: 4 × 6
+  var     count count_rolling count_all fraction fraction_rolling
+  <chr>   <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>     6999          6999      7296 0.959               0.959
+2 NO        206          7205      7296 0.0282              0.988
+3 YES        89          7294      7296 0.0122              1.00 
+4 TRISOMY     2          7296      7296 0.000274            1    
+
+$methylationMGMTpromoter
+# A tibble: 3 × 6
+  var          count count_rolling count_all fraction fraction_rolling
+  <chr>        <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>          7029          7029      7296   0.963             0.963
+2 METHYLATED     177          7206      7296   0.0243            0.988
+3 UNMETHYLATED    90          7296      7296   0.0123            1    
+
+$mutationBRAF
+# A tibble: 4 × 6
+  var           count count_rolling count_all fraction fraction_rolling
+  <chr>         <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>           7176          7176      7296  0.984              0.984
+2 KIAA1549-BRAF    55          7231      7296  0.00754            0.991
+3 MUT              44          7275      7296  0.00603            0.997
+4 WT               21          7296      7296  0.00288            1    
+
+$amplificationMCYN
+# A tibble: 4 × 6
+  var      count count_rolling count_all fraction fraction_rolling
+  <chr>    <int>         <int>     <int>    <dbl>            <dbl>
+1 <NA>      6929          6929      7296 0.950               0.950
+2 NO         279          7208      7296 0.0382              0.988
+3 YES         87          7295      7296 0.0119              1.00 
+4 MYCN/ID2     1          7296      7296 0.000137            1    
+
+168      7296 0.000137
  169 AGZ_190_U133_2.CEL                                                                    1           169      7296 0.000137
  170 AGZ_191_U133_2.CEL                                                                    1           170      7296 0.000137
  171 AGZ_192_U133_2.CEL                                                                    1           171      7296 0.000137
