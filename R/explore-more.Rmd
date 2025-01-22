@@ -10,10 +10,11 @@ tellMe <- names(mapped_genes) %>%
 
 sample(tellMe, 50)
 
+
 glimpse(atlasDataClean)
 glimpse(geneExpressionData[1:25, 1:5])
 glimpse(gene_annotations)
-
+rownames(geneExpressionData[1:25, 1:5])
 
 ```
 
