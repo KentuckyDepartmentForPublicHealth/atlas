@@ -16,6 +16,53 @@ glimpse(geneExpressionData[1:25, 1:5])
 glimpse(gene_annotations)
 rownames(geneExpressionData[1:25, 1:5])
 
+# jan 23 2025
+
+# Load necessary library
+library(purrr)
+
+# Assuming 'mapped_genes' is a list or a vector where each element is like mapped_genes[1]
+result <- map(mapped_genes, function(x) {
+  if(is.list(x) && length(x) == 1) {
+    # If x is a list with one element, apply the operation
+    return(length(unlist(x[[1]])))
+  } else {
+    # If x does not match expected structure, return NA or another fallback value
+    return(NA)
+  }
+})
+
+# Convert the result to integers, assuming all results are numeric or can be converted
+integer_values <- as.integer(unlist(result))
+
+# Check if we have 6394 elements
+if(length(integer_values) == 6394) {
+  print("Successfully processed 6394 elements.")
+} else {
+  warning("The number of processed elements does not match 6394.")
+}
+
+# Print or use integer_values as needed
+print(integer_values)
+
+# Calculate the sum of the lengths of all elements in mapped_genes
+total_elements <- sum(lengths(mapped_genes))
+
+print(total_elements)
+
+# n = 406318.. ENTREZIDs in multiple categories?
+# Combine all elements into one vector, then find unique values and count them
+unique_elements <- unique(unlist(mapped_genes))
+total_unique_elements <- length(unique_elements)
+
+print(total_unique_elements)
+
+# Combine all elements into one vector
+all_values <- unlist(mapped_genes)
+
+# If you want to see the first few elements of this vector for verification:
+print(head(all_values))
+li(all_values, rownames(geneExpressionData))
 ```
 
 

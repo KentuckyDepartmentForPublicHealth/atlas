@@ -2,28 +2,24 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(tibble)
-library(plotly)  # Added library for Plotly
 
-# Convert rownames of geneExpressionData to a column
-# geneExpressionData <- geneExpressionData %>%
-#   rownames_to_column(var = "ENTREZID")
+# Ensure these data frames are loaded before running the app:
+# - `gene_annotations` should contain `SYMBOL`, `ENTREZID`, and `GENENAME`.
+# - `geneExpressionData` should be a data frame where rownames are `ENTREZID` and columns are filenames.
+# - `atlasDataClean` should contain metadata with columns such as `filename`, `grade`, `ageGroup`, `tumorType`, etc.
 
-# Pre-filter the data to include only the relevant genes (to be dynamically selected later)
-selected_genes <- unique(gene_annotations$SYMBOL) |> sort()
-
-# Shiny app
+# Shiny App
 ui <- fluidPage(
   titlePanel("mRNA Expression Boxplots with Gene Annotations (Facet Toggle)"),
   sidebarLayout(
     sidebarPanel(
-      selectInput(
+      uiOutput("max_options_slider"),  # Dynamic slider UI
+      selectizeInput(
         "selected_gene", 
         "Select a Gene", 
         multiple = TRUE,
-        size = 15,
-        selectize = FALSE,
-        choices = selected_genes
+        choices = NULL,
+        options = list(maxOptions = 5)  # Default value
       ),
       selectInput(
         "group_by",
@@ -39,42 +35,96 @@ ui <- fluidPage(
       width = 3
     ),
     mainPanel(
-      plotlyOutput("boxplot"),  # Changed to plotlyOutput
+      plotOutput("boxplot"),
       tableOutput("gene_info"),
       width = 9
     )
   )
 )
 
-server <- function(input, output) {
-  # Filter data dynamically to reduce memory usage
+server <- function(input, output, session) {
+  # Validate datasets at the start
+  validate(
+    need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
+    need(exists("geneExpressionData"), "Error: `geneExpressionData` is not loaded."),
+    need(exists("atlasDataClean"), "Error: `atlasDataClean` is not loaded.")
+  )
+  
+  # Calculate the total number of unique genes
+  total_unique_genes <- rownames(geneExpressionData) %>% unique() %>% length()
+  
+  # Filter SYMBOLs from gene_annotations that match ENTREZID in geneExpressionData
+  selected_genes <- gene_annotations %>%
+    filter(ENTREZID %in% rownames(geneExpressionData)) %>%
+    pull(SYMBOL) %>%
+    unique() %>%
+    sort()
+  
+  # Render a sliderInput with the correct max value
+  output$max_options_slider <- renderUI({
+    sliderInput(
+      "max_options",
+      "Maximum Options in Dropdown",
+      min = 1,
+      max = total_unique_genes,  # Dynamically adjust the max value
+      value = min(5, total_unique_genes),  # Default to 5 or the total number of genes if fewer
+      step = 1
+    )
+  })
+  
+  # Dynamically update the selectizeInput
+  observe({
+    updateSelectizeInput(
+      session,
+      'selected_gene',
+      choices = selected_genes,
+      options = list(maxOptions = input$max_options),
+      server = TRUE
+    )
+  })
+  
+  # Reactive filtering of data
   filtered_data <- reactive({
     req(input$selected_gene)  # Ensure a gene is selected
     
-    # Select the ENTREZID corresponding to the selected genes
+    # Get ENTREZID for selected SYMBOLs
     entrez_ids <- gene_annotations %>%
       filter(SYMBOL %in% input$selected_gene) %>%
       pull(ENTREZID)
     
-    # Subset gene expression data for the selected genes
-    gene_data <- geneExpressionData %>%
-      filter(ENTREZID %in% entrez_ids) %>%
-      pivot_longer(cols = -ENTREZID, names_to = "filename", values_to = "expression")
+    validate(
+      need(length(entrez_ids) > 0, "No matching genes found for the selected input.")
+    )
     
-    # Join only necessary columns from gene_annotations and atlasDataClean
-    gene_data %>%
+    # Subset geneExpressionData
+    gene_data <- geneExpressionData[rownames(geneExpressionData) %in% entrez_ids, ]
+    
+    validate(
+      need(nrow(gene_data) > 0, "Filtered gene expression data is empty.")
+    )
+    
+    # Convert to long format and join metadata
+    gene_data <- gene_data %>%
+      as.data.frame() %>%
+      mutate(ENTREZID = rownames(.)) %>%
+      pivot_longer(cols = -ENTREZID, names_to = "filename", values_to = "expression") %>%
       left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
-      left_join(atlasDataClean %>% select(filename, grade, ageGroup, tumorType, sex, compartment, fullName, country, diagnosisFinal), by = "filename")
+      left_join(atlasDataClean, by = "filename")
+    
+    gene_data
   })
   
-  # Render the boxplot with optional faceting using Plotly
-  output$boxplot <- renderPlotly({
-    req(filtered_data())
-    p <- ggplot(filtered_data(), aes(x = SYMBOL, y = expression, color = SYMBOL)) +
+  # Render the boxplot
+  output$boxplot <- renderPlot({
+    data <- filtered_data()
+    count <- nrow(data)
+    
+    p <- ggplot(data, aes(x = SYMBOL, y = expression, color = SYMBOL)) +
       geom_boxplot() +
       geom_jitter(width = 0.2, alpha = 0.5) +
       labs(
         title = "Expression of Selected Genes",
+        subtitle = paste0("Number of values contributing: n=", count),
         x = "Gene Symbol",
         y = "Expression Level"
       ) +
@@ -83,20 +133,17 @@ server <- function(input, output) {
         axis.text.x = element_text(angle = 45, hjust = 1)
       )
     
-    # Add faceting if use_facet is TRUE
+    # Add faceting if `use_facet` is TRUE
     if (input$use_facet) {
-      p <- p +
-        facet_wrap(~ .data[[input$group_by]], scales = "free") +
+      p <- p + facet_wrap(~ .data[[input$group_by]], scales = "free") +
         theme(strip.text = element_text(size = 12, face = "bold"))
     }
     
-    # Convert ggplot to plotly object
-    ggplotly(p)
+    p
   })
   
   # Render the gene information table
   output$gene_info <- renderTable({
-    req(filtered_data())
     filtered_data() %>%
       select(SYMBOL, GENENAME) %>%
       distinct()
