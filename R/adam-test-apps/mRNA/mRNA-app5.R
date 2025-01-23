@@ -5,8 +5,8 @@ library(tidyr)
 library(tibble)
 
 # Convert rownames of geneExpressionData to a column
-# geneExpressionData <- geneExpressionData %>%
-#   rownames_to_column(var = "ENTREZID")
+geneExpressionData <- geneExpressionData %>%
+  rownames_to_column(var = "ENTREZID")
 
 # Pre-filter the data to include only the relevant genes (to be dynamically selected later)
 selected_genes <- unique(gene_annotations$SYMBOL) |> sort()

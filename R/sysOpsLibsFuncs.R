@@ -24,6 +24,9 @@ library(RPostgres)
 # library(rvest)
 library(survival)
 
+library(shiny)
+library(bslib)
+
 # CHFS colors -------------------------------------------------------------
 chfs <- list(
   cols2 = c('#95D3F5', '#0C3151'),
