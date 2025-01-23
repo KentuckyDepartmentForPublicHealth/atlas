@@ -5,11 +5,11 @@ library(tidyr)
 library(tibble)
 
 # Convert rownames of geneExpressionData to a column
-geneExpressionData <- geneExpressionData %>%
-  rownames_to_column(var = "ENTREZID")
+# geneExpressionData <- geneExpressionData %>%
+#   rownames_to_column(var = "ENTREZID")
 
 # Pre-filter the data to include only the relevant genes (to be dynamically selected later)
-selected_genes <- unique(gene_annotations$SYMBOL)
+selected_genes <- unique(gene_annotations$SYMBOL) |> sort()
 
 # Shiny app
 ui <- fluidPage(
@@ -27,7 +27,7 @@ ui <- fluidPage(
       selectInput(
         "group_by",
         "Group By",
-        choices = c("grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country"),
+        choices = c("grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country", "diagnosisFinal"),
         selected = "grade"
       ),
       checkboxInput(
@@ -63,7 +63,7 @@ server <- function(input, output) {
     # Join only necessary columns from gene_annotations and atlasDataClean
     gene_data %>%
       left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
-      left_join(atlasDataClean %>% select(filename, grade, ageGroup, tumorType, sex, compartment, fullName, country), by = "filename")
+      left_join(atlasDataClean %>% select(filename, grade, ageGroup, tumorType, sex, compartment, fullName, country, diagnosisFinal), by = "filename")
   })
   
   # Render the boxplot with optional faceting
