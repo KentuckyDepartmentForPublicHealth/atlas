@@ -63,6 +63,59 @@ all_values <- unlist(mapped_genes)
 # If you want to see the first few elements of this vector for verification:
 print(head(all_values))
 li(all_values, rownames(geneExpressionData))
+
+# check gene annotations
+
+library(rentrez)
+
+# Function to check if an Entrez ID is valid
+check_entrez_id <- function(id) {
+  tryCatch({
+    # Query NCBI for the gene ID
+    result <- entrez_summary(db="gene", id=id)
+    return(TRUE)
+  }, error = function(e) {
+    # If an error occurs (e.g., ID not found), return FALSE
+    return(FALSE)
+  })
+}
+
+# Example IDs, replace with your full list
+ids_to_check <- filter(gene_annotations, is.na(SYMBOL)) %>% pull(ENTREZID)
+
+# Check validity
+valid_ids <- sapply(ids_to_check, check_entrez_id)
+print(valid_ids)
+
+filter(gene_annotations, is.na(SYMBOL)) %>% glimpse()
+
+#####
+
+library(rentrez)
+
+fetch_gene_info <- function(id) {
+  result <- entrez_summary(db="gene", id=id)
+  return(data.frame(ENTREZID = id, 
+                    SYMBOL = result$name, 
+                    GENENAME = result$description))
+}
+
+# Fetch info for missing IDs
+missing_ids <- gene_annotations$ENTREZID[is.na(gene_annotations$SYMBOL)]
+new_annotations <- do.call(rbind, lapply(missing_ids, fetch_gene_info))
+
+# Merge with existing annotations
+gene_annotations <- rbind(gene_annotations[!is.na(gene_annotations$SYMBOL), ], new_annotations)
+
+
+##
+
+# library(AnnotationHub)
+# Warning in install.packages :
+#   package ‘AnnotationHub’ is not available for this version of R
+# ah <- AnnotationHub()
+# # Query for human gene databases
+# query(ah, "Homo sapiens")  # Look for relevant databases
 ```
 
 
@@ -86,7 +139,7 @@ Organize these groupings into a structure suitable for Shiny selectors (lists or
 library(org.Hs.eg.db)
 
 # Map Entrez IDs to Gene Symbols and Names
-gene_annotations <- AnnotationDbi::select(org.Hs.eg.db,
+gene_annotations2 <- AnnotationDbi::select(org.Hs.eg.db,
                                           keys = rownames(geneExpressionData),
                                           columns = c("SYMBOL", "GENENAME"),
                                           keytype = "ENTREZID")
