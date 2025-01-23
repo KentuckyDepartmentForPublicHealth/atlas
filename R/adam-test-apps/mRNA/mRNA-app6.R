@@ -50,6 +50,9 @@ server <- function(input, output, session) {
     need(exists("atlasDataClean"), "Error: `atlasDataClean` is not loaded.")
   )
   
+  # Remove rows with NA ENTREZID in gene_annotations
+  gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
+  
   # Calculate the total number of unique genes
   total_unique_genes <- rownames(geneExpressionData) %>% unique() %>% length()
   
@@ -60,19 +63,23 @@ server <- function(input, output, session) {
     unique() %>%
     sort()
   
-  # Render a sliderInput with the correct max value
+  validate(
+    need(length(selected_genes) > 0, "Error: No matching genes in the dataset.")
+  )
+  
+  # Render sliderInput
   output$max_options_slider <- renderUI({
     sliderInput(
       "max_options",
       "Maximum Options in Dropdown",
       min = 1,
-      max = total_unique_genes,  # Dynamically adjust the max value
-      value = min(5, total_unique_genes),  # Default to 5 or the total number of genes if fewer
+      max = total_unique_genes,
+      value = min(5, total_unique_genes),
       step = 1
     )
   })
   
-  # Dynamically update the selectizeInput
+  # Dynamically update selectizeInput
   observe({
     updateSelectizeInput(
       session,
@@ -83,24 +90,22 @@ server <- function(input, output, session) {
     )
   })
   
-  # Reactive filtering of data
+  # Reactive filtered data
   filtered_data <- reactive({
-    req(input$selected_gene)  # Ensure a gene is selected
+    req(input$selected_gene)
     
-    # Get ENTREZID for selected SYMBOLs
     entrez_ids <- gene_annotations %>%
       filter(SYMBOL %in% input$selected_gene) %>%
       pull(ENTREZID)
     
     validate(
-      need(length(entrez_ids) > 0, "No matching genes found for the selected input.")
+      need(length(entrez_ids) > 0, "Error: No matching genes found for the selected input.")
     )
     
-    # Subset geneExpressionData
     gene_data <- geneExpressionData[rownames(geneExpressionData) %in% entrez_ids, ]
     
     validate(
-      need(nrow(gene_data) > 0, "Filtered gene expression data is empty.")
+      need(nrow(gene_data) > 0, "Error: No data found after filtering.")
     )
     
     # Convert to long format and join metadata
@@ -119,7 +124,7 @@ server <- function(input, output, session) {
     data <- filtered_data()
     count <- nrow(data)
     
-    p <- ggplot(data, aes(x = SYMBOL, y = expression, color = SYMBOL)) +
+    ggplot(data, aes(x = SYMBOL, y = expression, color = SYMBOL)) +
       geom_boxplot() +
       geom_jitter(width = 0.2, alpha = 0.5) +
       labs(
@@ -131,23 +136,18 @@ server <- function(input, output, session) {
       theme_minimal() +
       theme(
         axis.text.x = element_text(angle = 45, hjust = 1)
-      )
-    
-    # Add faceting if `use_facet` is TRUE
-    if (input$use_facet) {
-      p <- p + facet_wrap(~ .data[[input$group_by]], scales = "free") +
-        theme(strip.text = element_text(size = 12, face = "bold"))
-    }
-    
-    p
+      ) +
+      (if (input$use_facet) facet_wrap(~ .data[[input$group_by]], scales = "free") else NULL)
   })
   
-  # Render the gene information table
+  # Render gene info table
   output$gene_info <- renderTable({
+    req(filtered_data())
     filtered_data() %>%
       select(SYMBOL, GENENAME) %>%
       distinct()
   })
 }
+
 
 shinyApp(ui, server)
