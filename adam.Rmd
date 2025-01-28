@@ -28,7 +28,7 @@ load("dat/atlasData.RData")
 load("dat/geneExpressionData.RData")
 
 # Diverge from original data set
-# atlasDataClean <- atlasData
+atlasDataClean <- atlasData
 load("dat/atlasDataClean.RData")
 
 # annotations
@@ -41,6 +41,8 @@ load('dat/annotations.RData')
 ## Rename
 
 ```{r}
+
+message('Rename begin..')
 
 oldNames <- names(atlasData)
 
@@ -91,14 +93,14 @@ names(atlasDataClean) <- cleanNames
 
 colNames <- tibble(row = 1:length(oldNames), oldNames, cleanNames)
 
-
+message('Rename finished.')
 ```
 
 ## Transform
 
 ```{r}
 
-
+message("Transform begin..")
 
 atlasDataClean <- atlasDataClean %>%
   mutate(
@@ -110,12 +112,15 @@ atlasDataClean <- atlasDataClean %>%
 
 
 
+message("Transform finished.")
 
 ```
 
 ## Recode
 
 ```{r}
+
+message("Recode begin..")
 
 # Define the vector for both ageGroup levels and labels
 # age_groups <- c("FETAL", "0-5YRS", "5-10YRS", "10-20YRS", "20-40YRS", "40-60YRS", "60-80YRS", "80+YRS")
@@ -137,12 +142,17 @@ atlasDataClean <- atlasDataClean %>%
 # freq(atlasDataClean$survivalMonths) %>% filter(str_detect(var, '[^0-9.]')) # n=104 # not a digit, not a period
 # freq(atlasDataClean$age) %>% filter(str_detect(var, "[^0-9.]")) # n=590 # not a digit, not a period
 
+
+message("Recode finished.")
+
 ```
 
 
 ## Filter
 
 ```{r}
+
+message("Filter begin..")
 
 atlasDataClean <- atlasDataClean %>% 
   filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
@@ -151,6 +161,9 @@ atlasDataClean <- atlasDataClean %>%
 # verifies record deletion
 # select(atlasDataClean, sampleAnalysisGroup, diagnosisFinal) %>% filter(sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') %>% view
 
+message("Filter finished.")
+
+
 ```
 
 
@@ -158,9 +171,15 @@ atlasDataClean <- atlasDataClean %>%
 
 ```{r}
 
-atlasDataClean <- atlasDataClean %>% 
-  select(.cols = everything())
 
+message("Select begin..")
+
+
+
+atlasDataClean <- atlasDataClean %>% 
+  select(everything())
+
+message("Select finished.")
 
 ```
 
