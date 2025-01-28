@@ -6,26 +6,26 @@ library(tidyr)
 # Ensure these data frames are loaded before running the app:
 # - `gene_annotations` should contain `SYMBOL`, `ENTREZID`, and `GENENAME`.
 # - `geneExpressionData` should be a data frame where rownames are `ENTREZID` and columns are filenames.
-# - `atlasDataClean` should contain metadata with columns as shown in your data glimpse.
+# - `atlasDataClean` should contain metadata with columns such as `filename`, `grade`, `ageGroup`, `tumorType`, etc.
 
 # Shiny App
 ui <- fluidPage(
   titlePanel("mRNA Expression Boxplots with Gene Annotations (Facet Toggle)"),
   sidebarLayout(
     sidebarPanel(
-      uiOutput("max_options_slider"),
+      uiOutput("max_options_slider"),  # Dynamic slider UI
       selectizeInput(
         "selected_gene", 
         "Select a Gene", 
         multiple = TRUE,
         choices = NULL,
-        options = list(maxOptions = 5)
+        options = list(maxOptions = 5)  # Default value
       ),
       selectInput(
         "group_by",
         "Group By",
-        choices = c("country", "sex", "compartment", "tumor_type"),
-        selected = "country"
+        choices = c("grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country", "diagnosisFinal"),
+        selected = "grade"
       ),
       checkboxInput(
         "use_facet",
@@ -50,15 +50,11 @@ server <- function(input, output, session) {
     need(exists("atlasDataClean"), "Error: `atlasDataClean` is not loaded.")
   )
   
-  # Ensure ENTREZID is character type for consistency
-  gene_annotations$ENTREZID <- as.character(gene_annotations$ENTREZID)
-  rownames(geneExpressionData) <- as.character(rownames(geneExpressionData))
-  
   # Remove rows with NA ENTREZID in gene_annotations
   gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
   
   # Calculate the total number of unique genes
-  total_unique_genes <- length(unique(rownames(geneExpressionData)))
+  total_unique_genes <- rownames(geneExpressionData) %>% unique() %>% length()
   
   # Filter SYMBOLs from gene_annotations that match ENTREZID in geneExpressionData
   selected_genes <- gene_annotations %>%
@@ -115,10 +111,10 @@ server <- function(input, output, session) {
     # Convert to long format and join metadata
     gene_data <- gene_data %>%
       as.data.frame() %>%
-      rownames_to_column("ENTREZID") %>%
-      pivot_longer(cols = -.data$ENTREZID, names_to = "filename", values_to = "expression") %>%
+      mutate(ENTREZID = rownames(.)) %>%
+      pivot_longer(cols = -ENTREZID, names_to = "filename", values_to = "expression") %>%
       left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
-      left_join(atlasDataClean, by = c("filename" = ".cols1"))
+      left_join(atlasDataClean, by = "filename")
     
     gene_data
   })
@@ -128,20 +124,33 @@ server <- function(input, output, session) {
     data <- filtered_data()
     count <- nrow(data)
     
-    ggplot(data, aes(x = SYMBOL, y = expression, color = SYMBOL)) +
+    # Count for each facet
+    facet_counts <- data %>%
+      group_by(SYMBOL, .data[[input$group_by]]) %>%
+      summarise(n = n(), .groups = 'drop')
+    
+    # Modify plot according to facet usage
+    plot_base <- ggplot(data, aes(x = SYMBOL, y = expression, color = SYMBOL)) +
       geom_boxplot() +
       geom_jitter(width = 0.2, alpha = 0.5) +
       labs(
         title = "Expression of Selected Genes",
-        subtitle = paste0("Number of values contributing: n=", count),
+        subtitle = paste0("Total values contributing: n=", count),
         x = "Gene Symbol",
         y = "Expression Level"
       ) +
       theme_minimal() +
       theme(
         axis.text.x = element_text(angle = 45, hjust = 1)
-      ) +
-      (if (input$use_facet) facet_wrap(~ .data[[input$group_by]], scales = "free") else NULL)
+      )
+    
+    if(input$use_facet) {
+      plot_base <- plot_base +
+        facet_wrap(~ .data[[input$group_by]], scales = "free") +
+        geom_text(data = facet_counts, aes(label = paste0("n=", n), y = Inf), vjust = 1.5, size = 3)
+    }
+    
+    plot_base
   })
   
   # Render gene info table
