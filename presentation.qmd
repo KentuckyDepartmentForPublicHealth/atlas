@@ -61,4 +61,8 @@ ggplot(filtered_data, aes(x = Country, y = Freq, fill = Country)) +
   ))
 ```
 
-## 
+## Survival Analysis
+
+```{r}
+knitr::include_graphics("/Users/ethanheck/Desktop/Survival Intern Project/Survival/atlas/mistryimgcr.png")
+```
