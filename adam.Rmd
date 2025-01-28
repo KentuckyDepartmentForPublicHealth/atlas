@@ -158,7 +158,8 @@ atlasDataClean <- atlasDataClean %>%
 
 ```{r}
 
-
+atlasDataClean <- atlasDataClean %>% 
+  select(.cols = everything())
 
 
 ```

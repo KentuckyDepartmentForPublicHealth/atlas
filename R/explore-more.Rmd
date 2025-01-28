@@ -165,7 +165,7 @@ library(clusterProfiler)
 # head(kegg_annotations)
 
 # gene ontology terms
-go_annotations <- enrichGO(gene = rownames(geneExpressionData),
+go_annotations2 <- enrichGO(gene = rownames(geneExpressionData),
                             OrgDb = org.Hs.eg.db,
                             ont = "BP", # Biological Process
                             keyType = "ENTREZID")
@@ -198,6 +198,9 @@ go_expression <- sapply(names(mapped_genes), function(go_term) {
 
 save(go_expression, gene_annotations, go_annotations, go_to_genes_list, go_to_genes, mapped_genes, file = 'dat/annotations.RData')
 
+```
+
+```{r}
 library(pheatmap)
 
 # Remove GO terms with no mapped genes
