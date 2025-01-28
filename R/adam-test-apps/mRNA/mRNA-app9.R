@@ -124,15 +124,22 @@ server <- function(input, output, session) {
     data <- filtered_data()
     count <- nrow(data)
     
-    # Count for each facet
-    facet_counts <- data %>%
-      group_by(SYMBOL, .data[[input$group_by]]) %>%
-      summarise(n = n(), .groups = 'drop') 
+    # Count for each facet or overall counts
+    if(input$use_facet) {
+      facet_counts <- data %>%
+        group_by(SYMBOL, .data[[input$group_by]]) %>%
+        summarise(n = n(), .groups = 'drop') 
+    } else {
+      facet_counts <- data %>%
+        group_by(SYMBOL) %>%
+        summarise(n = n(), .groups = 'drop') 
+    }
     
     # Modify plot according to facet usage
     plot_base <- ggplot(data, aes(x = SYMBOL, y = expression, color = SYMBOL)) +
       geom_boxplot() +
       geom_jitter(width = 0.2, alpha = 0.5) +
+      geom_text(data = facet_counts, aes(label = paste0("n=", n), y = Inf), vjust = 1.5, size = 3) +
       labs(
         title = "Expression of Selected Genes",
         subtitle = paste0("Total values contributing: n=", count),
@@ -146,8 +153,7 @@ server <- function(input, output, session) {
     
     if(input$use_facet) {
       plot_base <- plot_base +
-        facet_wrap(~ .data[[input$group_by]], scales = "free") +
-        geom_text(data = facet_counts, aes(label = paste0("n=", n), y = Inf), vjust = 1.5, size = 3)
+        facet_wrap(~ .data[[input$group_by]], scales = "free")
     }
     
     plot_base
