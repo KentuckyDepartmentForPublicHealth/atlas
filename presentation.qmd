@@ -35,13 +35,21 @@ filtered_data <- nums %>%
   filter(Freq > 100) %>%
   rename(Country = Var1)
 
-ggplot(filtered_data, aes(x = '', y = Freq, fill = Country)) +
+ggplot(filtered_data, aes(x = Country, y = Freq, fill = Country)) +
   geom_bar(stat = "identity", width = 1) +
-  coord_polar(theta = "y") +
+  geom_text(aes(label = Country), vjust = -0.5) +
   labs(title = "Sample Country of Origin", x = NULL, y = NULL) +
-  theme_void() +
-  theme(plot.title = element_text(hjust = 0.5)) + 
-        scale_fill_manual(values = c(
+  theme_minimal() +
+  theme(
+   plot.background = element_rect(fill = "black", color = NA),  
+    panel.background = element_rect(fill = "black", color = NA), 
+    plot.title = element_text(color = "white", hjust = 0.5, size = 14),  
+    axis.title = element_text(color = "white"), 
+    axis.text = element_text(color = "white", size = 9),  
+    legend.position = "none",  
+    panel.grid = element_line(color = "gray40")  
+  ) +
+  scale_fill_manual(values = c(
     "China" = "#cd071e",
     "France" = "#000091",
     "Germany" = "#FFCC00",
@@ -51,7 +59,6 @@ ggplot(filtered_data, aes(x = '', y = Freq, fill = Country)) +
     "UK" = "#012169",
     "USA" = '#B31942'
   ))
-
 ```
 
 ## 
