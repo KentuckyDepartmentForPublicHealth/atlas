@@ -24,8 +24,8 @@ ui <- fluidPage(
       selectInput(
         "group_by",
         "Group By",
-        choices = c("grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country", "diagnosisFinal"),
-        selected = "grade"
+        choices = c("grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country", "diagnosisFinal", "histologyOriginal", "diagnosisClass") |> sort(),
+        selected = NA
       ),
       checkboxInput(
         "use_facet",
@@ -71,7 +71,7 @@ server <- function(input, output, session) {
   output$max_options_slider <- renderUI({
     sliderInput(
       "max_options",
-      "Maximum Options in Dropdown",
+      "Total unique genes",
       min = 1,
       max = total_unique_genes,
       value = min(5, total_unique_genes),
@@ -153,7 +153,7 @@ server <- function(input, output, session) {
     
     if(input$use_facet) {
       plot_base <- plot_base +
-        facet_wrap(~ .data[[input$group_by]], scales = "free")
+      facet_wrap(~ .data[[input$group_by]], scales = "free")
     }
     
     plot_base
