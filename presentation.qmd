@@ -1,0 +1,57 @@
+---
+title: "Data Exploration"
+author: "Ethan Heck"
+format: revealjs
+editor: visual
+---
+
+```{r, package import + data}
+#package and data import
+library(ggplot2)
+library(dplyr)
+Atlas_Data <- read.csv("/Users/ethanheck/Desktop/Survival Intern Project/Survival/atlas/atlas-data/Atlas_Data.csv")
+```
+
+## Background / Project Goals
+
+-   Study itself aims to demonstrate the distinct patter of gene expression (transcriptomic signature) of nervous system neoplasms using a data set of 7,375 samples.
+
+-   Shiny Atlas App Goals:
+
+    -   Dimensionality Reduction
+
+    -   mRNA Box Plots
+
+    -   Survival Analysis
+
+## Data Exploration #1
+
+```{r, creating pie chart}
+#Creating pie chart of country
+library(dplyr)
+library(ggplot2)
+nums <- data.frame(table(Atlas_Data$Country..listed.on.deposited.data.))
+filtered_data <- nums %>%
+  filter(Freq > 100) %>%
+  rename(Country = Var1)
+
+ggplot(filtered_data, aes(x = '', y = Freq, fill = Country)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Sample Country of Origin", x = NULL, y = NULL) +
+  theme_void() +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+        scale_fill_manual(values = c(
+    "China" = "#cd071e",
+    "France" = "#000091",
+    "Germany" = "#FFCC00",
+    "Japan" = "#BC002D",
+    "Netherlands" = "#003DA5",
+    "Switzerland" = "#DA291C",
+    "UK" = "#012169",
+    "USA" = '#B31942'
+  ))
+
+```
+
+## 
