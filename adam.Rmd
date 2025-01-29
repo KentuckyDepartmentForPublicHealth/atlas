@@ -154,6 +154,22 @@ message("Recode finished.")
 
 ```
 
+## Insert
+
+```{r}
+message("Insert begin..")
+
+
+atlasDataClean <- atlasDataClean %>% 
+  mutate(
+    isCancerous = factor(ifelse(diagnosisFinal %in% toupper(c("Cerebellum", "Cerebellum, Fetal", "Choroid Plexus", 
+                          "CNS", "Nerve Ganglia", "Peri. Nerve", "Pituitary", 
+                          "Retina", "Retina, Fetal")), 'NO', 'YES'))
+  )
+
+message("Insert finished.")
+
+```
 
 ## Filter
 
