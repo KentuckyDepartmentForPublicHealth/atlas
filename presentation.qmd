@@ -9,7 +9,9 @@ editor: visual
 #package and data import
 library(ggplot2)
 library(dplyr)
-Atlas_Data <- read.csv("/Users/ethanheck/Desktop/Survival Intern Project/Survival/atlas/atlas-data/Atlas_Data.csv")
+load("~/Desktop/Survival Intern Project/Survival/atlas/dat/atlasDataClean.RData")
+
+atlas_data <- data.frame(atlasDataClean)
 ```
 
 ## Background / Project Goals
@@ -24,13 +26,13 @@ Atlas_Data <- read.csv("/Users/ethanheck/Desktop/Survival Intern Project/Surviva
 
     -   Survival Analysis
 
-## Data Exploration #1
+## Data Exploration: Country of Origin
 
-```{r, creating pie chart}
-#Creating pie chart of country
+```{r, creating bar chart}
+#Creating bar chart of country
 library(dplyr)
 library(ggplot2)
-nums <- data.frame(table(Atlas_Data$Country..listed.on.deposited.data.))
+nums <- data.frame(table(atlas_data$country))
 filtered_data <- nums %>%
   filter(Freq > 100) %>%
   rename(Country = Var1)
@@ -50,19 +52,98 @@ ggplot(filtered_data, aes(x = Country, y = Freq, fill = Country)) +
     panel.grid = element_line(color = "gray40")  
   ) +
   scale_fill_manual(values = c(
-    "China" = "#cd071e",
-    "France" = "#000091",
-    "Germany" = "#FFCC00",
-    "Japan" = "#BC002D",
-    "Netherlands" = "#003DA5",
-    "Switzerland" = "#DA291C",
+    "CHINA" = "#cd071e",
+    "FRANCE" = "#000091",
+    "GERMANY" = "#FFCC00",
+    "JAPAN" = "#BC002D",
+    "NETHERLANDS" = "#003DA5",
+    "SWITZERLAND" = "#DA291C",
     "UK" = "#012169",
     "USA" = '#B31942'
   ))
 ```
 
+## Data Exploration: Histology 
+
+
+```{r}
+#table data for og histology 
+table(Atlas_Data$`Original histology`)
+#unique og histology - 67
+length(unique(Atlas_Data$`Original histology`))
+
+
+
+
+
+
+
+
+```
+
+
+
 ## Survival Analysis
 
 ```{r}
 knitr::include_graphics("/Users/ethanheck/Desktop/Survival Intern Project/Survival/atlas/mistryimgcr.png")
+```
+
+## Mistry's Prior Work
+
+-   The survival curves above were constructed to model the outcome, which in this case is final diagnosis.
+
+-   Tick marks represent censored values - censoring occurs when the individual is either:
+
+    -   Lost to follow up
+
+    -   Has an event outside of the set study period
+
+-   All curves are of diffuse gliomas which are tumors originating in the brain
+
+    ::: incremental
+    -   arises from glial cells, which originate in the CNS
+
+    -   "diffuse" eludes to the nature to move across the brain rather than being localized in one region.
+    :::
+
+## Gene Expression + Atlas Data
+
+-   Gene expression data
+
+    -   Columns are Gene Samples
+
+    -   Rows are genes identified via Entrez ID
+
+        -   eg Entrez ID of 1 corresponds to gene A1BG (Alpha 1 Beta - glycoprotein)
+
+    -   Values are gene expression for each gene across each sampled
+
+    -   Entrez ID's can be converted within R using the biomaRt package
+
+
+
+## Converting Entrez ID's to Gene's within R: biomaRt {.smaller}
+
+```{r, echo=TRUE}
+        library(biomaRt)
+
+        # Connect to Ensembl's BioMart database
+        mart <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+
+        # Example: Convert a vector of Entrez IDs to Gene Symbols
+        entrez_ids <- c(1, 2, 100, 1000, 100002576)  # Replace with your own Entrez IDs
+
+        gene_mapping <- getBM(
+            attributes = c("entrezgene_id", "hgnc_symbol"),
+            filters = "entrezgene_id",
+            values = entrez_ids,
+            mart = mart
+        )
+
+        # View the results
+        print(gene_mapping)
+
+
+
 ```
