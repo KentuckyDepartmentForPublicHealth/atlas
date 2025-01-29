@@ -25,7 +25,7 @@ ui <- fluidPage(
         "group_by",
         "Group By",
         choices = c("grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country", "diagnosisFinal", "histologyOriginal", "diagnosisClass") |> sort(),
-        selected = NA
+        selected = "grade"
       ),
       checkboxInput(
         "use_facet",
@@ -75,7 +75,7 @@ server <- function(input, output, session) {
       min = 1,
       max = total_unique_genes,
       value = min(5, total_unique_genes),
-      step = 1
+      step = 100
     )
   })
   
@@ -139,7 +139,7 @@ server <- function(input, output, session) {
     plot_base <- ggplot(data, aes(x = SYMBOL, y = expression, color = SYMBOL)) +
       geom_boxplot() +
       geom_jitter(width = 0.2, alpha = 0.5) +
-      geom_text(data = facet_counts, aes(label = paste0("n=", n), y = Inf), vjust = 1.5, size = 3) +
+      geom_text(data = facet_counts, aes(label = paste0("n=", n), y = Inf), vjust = 1.5, size = 5, fontface = 'bold', color = 'gray20') +
       labs(
         title = "Expression of Selected Genes",
         subtitle = paste0("Total values contributing: n=", count),
@@ -149,6 +149,7 @@ server <- function(input, output, session) {
       theme_minimal() +
       theme(
         axis.text.x = element_text(angle = 45, hjust = 1)
+        # panel.background = element_rect(fill = 'gray10')
       )
     
     if(input$use_facet) {
