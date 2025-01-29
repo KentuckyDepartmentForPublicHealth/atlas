@@ -1,7 +1,10 @@
 ---
 title: "Data Exploration"
 author: "Ethan Heck"
-format: revealjs
+format: 
+  revealjs:
+    theme: night
+    transition: fade
 editor: visual
 ---
 
@@ -39,7 +42,7 @@ filtered_data <- nums %>%
 
 ggplot(filtered_data, aes(x = Country, y = Freq, fill = Country)) +
   geom_bar(stat = "identity", width = 1) +
-  geom_text(aes(label = Country), vjust = -0.5) +
+  geom_text(aes(label = Freq), vjust = -0.5, color = "white") +
   labs(title = "Sample Country of Origin", x = NULL, y = NULL) +
   theme_minimal() +
   theme(
@@ -47,9 +50,9 @@ ggplot(filtered_data, aes(x = Country, y = Freq, fill = Country)) +
     panel.background = element_rect(fill = "black", color = NA), 
     plot.title = element_text(color = "white", hjust = 0.5, size = 14),  
     axis.title = element_text(color = "white"), 
-    axis.text = element_text(color = "white", size = 9),  
+    axis.text = element_text(color = "white", size = 7),  
     legend.position = "none",  
-    panel.grid = element_line(color = "gray40")  
+    panel.grid = element_blank()  
   ) +
   scale_fill_manual(values = c(
     "CHINA" = "#cd071e",
@@ -66,18 +69,40 @@ ggplot(filtered_data, aes(x = Country, y = Freq, fill = Country)) +
 ## Data Exploration: Histology 
 
 
-```{r}
+```{r, echo=FALSE }
 #table data for og histology 
-table(Atlas_Data$`Original histology`)
-#unique og histology - 67
-length(unique(Atlas_Data$`Original histology`))
+table(atlas_data$histologyOriginal)
+#unique og histology - 63
+length(unique(atlas_data$histologyOriginal))
 
 
+#creating bar chart similar to one above
+nums_hist <- data.frame(table(atlas_data$histologyOriginal))
+filtered_data_hist <- nums_hist %>%
+  filter(Freq > 189) %>%
+  rename(Histology = Var1)
 
+#used 189 to grab top 10 most freq to prevent visual noise on plot
 
-
-
-
+```
+--- 
+## Data Exploration: Histology Continued
+```{r}
+ggplot(filtered_data_hist, aes(x = Histology, y = Freq, fill = Histology)) +
+  geom_bar(stat = "identity", width = 1) +
+  geom_text(aes(label = Freq), vjust = -0.5, color = "white") +
+  labs(title = "Sample Original Histology: 10 Most Frequent", x = NULL, y = NULL ) +
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "black", color = NA),  
+    panel.background = element_rect(fill = "black", color = NA),  
+    plot.title = element_text(color = "white", hjust = 0.5, size = 14),
+    axis.title = element_text(color = "white"),
+    axis.text = element_text(color = "white", size = 7),
+    legend.position = "none",  
+    plot.caption = element_text(color = "white", size = 8, hjust = 0),
+    panel.grid = element_blank()  
+  )
 
 ```
 
@@ -146,4 +171,9 @@ knitr::include_graphics("/Users/ethanheck/Desktop/Survival Intern Project/Surviv
 
 
 
+```
+
+## WorkFlow Diagram
+```{r}
+knitr::include_graphics("/Users/ethanheck/Desktop/Survival Intern Project/Survival/atlas/workflow.png")
 ```
