@@ -29,8 +29,8 @@ ui <- fluidPage(
         selectInput(
           "group_by",
           "Group By",
-          choices = c("grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country", "diagnosisFinal", "histologyOriginal", "diagnosisClass") |> sort(),
-          selected = "grade"
+          choices = c("isCancerous", "grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country", "diagnosisFinal", "histologyOriginal", "diagnosisClass") |> sort(),
+          selected = "sex"
         )
       ),
       width = 3
