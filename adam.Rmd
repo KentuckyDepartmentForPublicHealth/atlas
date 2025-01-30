@@ -3,26 +3,17 @@
 
 ```{r options}
 
+
 source('R/sysOpsLibsFuncs.R')
 
 
 ```
 
-# ETL
+# Data
 
 ## Load
 
 ```{r data}
-
-# ubuntu
-# geneExpressionData <- readRDS('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds')
-# atlasData <- read_csv('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Atlas_Data.csv')
-
-# windows
-
-# geneExpressionData <- readRDS("P:/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds")
-# # atlasData <- read_csv('dat/Atlas_Data.csv')
-# save(atlasData, file = 'dat/atlasData.RData')
 
 load("dat/atlasData.RData")
 load("dat/geneExpressionData.RData")
@@ -128,9 +119,6 @@ message("Transform finished.")
 
 message("Recode begin..")
 
-# Define the vector for both ageGroup levels and labels
-# age_groups <- c("FETAL", "0-5YRS", "5-10YRS", "10-20YRS", "20-40YRS", "40-60YRS", "60-80YRS", "80+YRS")
-
 
 atlasDataClean <- atlasDataClean %>%
   mutate(
@@ -175,16 +163,16 @@ message("Insert finished.")
 
 ```{r}
 
-message("Filter begin..")
-
-atlasDataClean <- atlasDataClean %>% 
-  filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
-
-
-# verifies record deletion
-# select(atlasDataClean, sampleAnalysisGroup, diagnosisFinal) %>% filter(sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') %>% view
-
-message("Filter finished.")
+# message("Filter begin..")
+# 
+# atlasDataClean <- atlasDataClean %>% 
+#   filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
+# 
+# 
+# # verifies record deletion
+# # select(atlasDataClean, sampleAnalysisGroup, diagnosisFinal) %>% filter(sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') %>% view
+# 
+# message("Filter finished.")
 
 
 ```

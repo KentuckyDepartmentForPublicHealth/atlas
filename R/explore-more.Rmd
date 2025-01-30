@@ -91,6 +91,11 @@ filter(gene_annotations, is.na(SYMBOL)) %>% glimpse()
 
 #####
 
+```
+
+# rentrez
+
+```{r}
 library(rentrez)
 
 fetch_gene_info <- function(id) {
@@ -139,7 +144,7 @@ Organize these groupings into a structure suitable for Shiny selectors (lists or
 library(org.Hs.eg.db)
 
 # Map Entrez IDs to Gene Symbols and Names
-gene_annotations2 <- AnnotationDbi::select(org.Hs.eg.db,
+gene_annotations <- AnnotationDbi::select(org.Hs.eg.db,
                                           keys = rownames(geneExpressionData),
                                           columns = c("SYMBOL", "GENENAME"),
                                           keytype = "ENTREZID")
@@ -165,7 +170,7 @@ library(clusterProfiler)
 # head(kegg_annotations)
 
 # gene ontology terms
-go_annotations2 <- enrichGO(gene = rownames(geneExpressionData),
+go_annotations <- enrichGO(gene = rownames(geneExpressionData),
                             OrgDb = org.Hs.eg.db,
                             ont = "BP", # Biological Process
                             keyType = "ENTREZID")
@@ -199,6 +204,41 @@ go_expression <- sapply(names(mapped_genes), function(go_term) {
 save(go_expression, gene_annotations, go_annotations, go_to_genes_list, go_to_genes, mapped_genes, file = 'dat/annotations.RData')
 
 ```
+
+# check mapped_genes
+
+```{r}
+# Assuming mapped_genes is a list where each element can have different lengths
+lengths <- numeric(6394)  # Pre-allocate space for efficiency
+for (i in 1:6394) {
+  # Check if the list index exists to avoid errors
+  if (i <= length(mapped_genes)) {
+    lengths[i] <- length(mapped_genes[[i]])
+  } else {
+    lengths[i] <- NA  # or some default value if the index is out of bounds
+  }
+}
+# lengths now contains the length of each element in mapped_genes
+# No print statement needed; the vector 'lengths' is ready for use or further operations
+
+
+## check uniqueness
+# Combine all elements into one list
+all_elements <- unlist(mapped_genes, recursive = FALSE)
+
+# Find the distinct count of all items
+distinct_count <- length(unique(all_elements))
+
+# Optional: If you want to see the unique values
+# unique_values <- unique(all_elements)
+
+# Print or use the distinct count as needed
+print(distinct_count)
+
+#  > 14000/20360
+#  [1] 0.6876228 (of all genes represented in mapped_genes)
+```
+
 
 ```{r}
 library(pheatmap)
@@ -452,6 +492,31 @@ atlasDataClean %>%
 
 
 # extra
+
+## read
+
+```{r}
+# ubuntu
+# geneExpressionData <- readRDS('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds')
+# atlasData <- read_csv('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Atlas_Data.csv')
+
+# windows
+
+# geneExpressionData <- readRDS("P:/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds")
+# # atlasData <- read_csv('dat/Atlas_Data.csv')
+# save(atlasData, file = 'dat/atlasData.RData')
+```
+
+## vec
+
+```{r}
+
+# Define the vector for both ageGroup levels and labels
+# age_groups <- c("FETAL", "0-5YRS", "5-10YRS", "10-20YRS", "20-40YRS", "40-60YRS", "60-80YRS", "80+YRS")
+
+
+```
+
 
 
 
