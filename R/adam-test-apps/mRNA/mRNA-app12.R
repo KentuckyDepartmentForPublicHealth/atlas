@@ -9,20 +9,23 @@ ui <- fluidPage(
   titlePanel("mRNA Expression Boxplots with Gene Ontology and Gene Annotations"),
   sidebarLayout(
     sidebarPanel(
-      selectInput("go_term", "Select GO Term", choices = c("", names(go_to_genes_list)) |> sort()),
+      radioButtons("search_mode", "Search Mode:", 
+                   choices = c("Select GO Term", "Select All Genes"), 
+                   selected = "Select GO Term"),
+      conditionalPanel(
+        condition = "input.search_mode == 'Select GO Term'",
+        selectInput("go_term", "Select GO Term", choices = c("", names(go_to_genes_list))),
+        uiOutput("go_gene_selector")
+      ),
+      conditionalPanel(
+        condition = "input.search_mode == 'Select All Genes'",
+        selectizeInput("all_genes", "Select Genes", 
+                       choices = NULL, multiple = TRUE,
+                       options = list(maxOptions = 5))
+      ),
       uiOutput("max_options_slider"),
-      uiOutput("gene_selector"),
-      hidden(
-        checkboxInput("use_group_by", "Use Group By", value = FALSE)
-      ),
-      hidden(
-        selectInput(
-          "group_by",
-          "Group By",
-          choices = c("isCancerous", "grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country", "diagnosisFinal", "histologyOriginal", "diagnosisClass") |> sort(),
-          selected = "sex"
-        )
-      ),
+      checkboxInput("use_group_by", "Use Group By", value = FALSE),
+      uiOutput("group_by_selector"),
       width = 3
     ),
     mainPanel(
@@ -44,46 +47,46 @@ server <- function(input, output, session) {
   
   gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
   
-  # Dynamic total unique genes based on GO term selection
-  total_unique_genes <- reactive({
-    req(input$go_term)
-    if(input$go_term == "") {
-      return(0)  # No GO term selected, no genes to show
-    }
-    
-    go_genes <- go_to_genes_list[[input$go_term]]
-    gene_symbols <- gene_annotations %>%
-      filter(ENTREZID %in% go_genes) %>%
+  # Reactive for all genes
+  all_genes <- reactive({
+    gene_annotations %>%
+      filter(ENTREZID %in% rownames(geneExpressionData)) %>%
       pull(SYMBOL) %>%
-      unique()
-    
-    return(length(gene_symbols))
+      unique() %>%
+      sort()
   })
   
-  # Dynamic gene selector based on GO term selection
-  output$gene_selector <- renderUI({
-    req(input$go_term)
-    if(input$go_term == "") {
-      choices <- c()
-    } else {
+  # Update all genes selector when "Select All Genes" is chosen
+  observe({
+    if (input$search_mode == "Select All Genes") {
+      updateSelectizeInput(session, 'all_genes', 
+                           choices = all_genes(),
+                           options = list(maxOptions = min(input$max_options, length(all_genes()))),
+                           server = TRUE)
+    }
+  })
+  
+  # Dynamic total unique genes based on search mode
+  total_unique_genes <- reactive({
+    if(input$search_mode == "Select GO Term") {
+      req(input$go_term)
+      if(input$go_term == "") {
+        return(0)  # No GO term selected, no genes to show
+      }
+      
       go_genes <- go_to_genes_list[[input$go_term]]
       gene_symbols <- gene_annotations %>%
         filter(ENTREZID %in% go_genes) %>%
         pull(SYMBOL) %>%
         unique()
-      choices <- gene_symbols |> sort()
+      
+      return(length(gene_symbols))
+    } else {
+      return(length(all_genes()))
     }
-    
-    selectizeInput(
-      "selected_gene", 
-      "Select Genes", 
-      multiple = TRUE,
-      choices = choices,
-      options = list(maxOptions = min(input$max_options, length(choices)))
-    )
   })
   
-  # Render sliderInput for max options, dynamically based on the number of genes for the selected GO term
+  # Render sliderInput for max options, dynamically based on search mode
   output$max_options_slider <- renderUI({
     sliderInput(
       "max_options",
@@ -95,22 +98,45 @@ server <- function(input, output, session) {
     )
   })
   
-  # Show/hide group_by inputs
-  observe({
-    if(!is.null(input$selected_gene) && length(input$selected_gene) > 0) {
-      shinyjs::show("use_group_by")
-      if(input$use_group_by) shinyjs::show("group_by") else shinyjs::hide("group_by")
+  # Dynamic gene selector for GO Terms
+  output$go_gene_selector <- renderUI({
+    req(input$search_mode == "Select GO Term")
+    req(input$go_term)
+    if(input$go_term == "") {
+      choices <- c()
     } else {
-      shinyjs::hide("use_group_by")
-      shinyjs::hide("group_by")
+      go_genes <- go_to_genes_list[[input$go_term]]
+      gene_symbols <- gene_annotations %>%
+        filter(ENTREZID %in% go_genes) %>%
+        pull(SYMBOL) %>%
+        unique()
+      choices <- gene_symbols
+    }
+    
+    selectizeInput(
+      "selected_gene", 
+      "Select Genes", 
+      multiple = TRUE,
+      choices = choices,
+      options = list(maxOptions = min(input$max_options, length(choices)))
+    )
+  })
+  
+  # Reactive for selected genes based on search mode
+  selected_genes <- reactive({
+    if(input$search_mode == "Select GO Term") {
+      return(input$selected_gene %||% character(0))
+    } else {
+      return(input$all_genes %||% character(0))
     }
   })
   
+  # Filter data based on selected genes
   filtered_data <- reactive({
-    req(input$selected_gene)
+    req(selected_genes())
     
     entrez_ids <- gene_annotations %>%
-      filter(SYMBOL %in% input$selected_gene) %>%
+      filter(SYMBOL %in% selected_genes()) %>%
       pull(ENTREZID)
     
     if(length(entrez_ids) == 0) return(data.frame())
@@ -126,6 +152,28 @@ server <- function(input, output, session) {
       left_join(atlasDataClean, by = "filename")
     
     gene_data
+  })
+  
+  # Enable/Disable "Use Group By" based on gene selection
+  observe({
+    if(length(selected_genes()) > 0) {
+      shinyjs::show("use_group_by")
+    } else {
+      shinyjs::hide("use_group_by")
+      updateCheckboxInput(session, "use_group_by", value = FALSE)
+    }
+  })
+  
+  # Dynamic group_by selector
+  output$group_by_selector <- renderUI({
+    if(input$use_group_by && length(selected_genes()) > 0) {
+      selectInput(
+        "group_by",
+        "Group By",
+        choices = c("isCancerous", "grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country", "diagnosisFinal", "histologyOriginal", "diagnosisClass") |> sort(),
+        selected = "sex"
+      )
+    }
   })
   
   # Render the boxplot
