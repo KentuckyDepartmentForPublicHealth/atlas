@@ -23,7 +23,7 @@ load("dat/atlasDataClean.RData")
 # mRNA expression data n=20360 genes
 load("dat/geneExpressionData.RData")
 # gene annotations
-# load('dat/annotations.RData')
+load('dat/annotations.RData')
 
 
 ```
