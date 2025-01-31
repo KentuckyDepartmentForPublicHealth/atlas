@@ -1,3 +1,6 @@
+all_possible_genes <- select(gene_annotations, SYMBOL) %>% 
+  filter(!is.na(SYMBOL)) %>% 
+  pull(SYMBOL)
 
 # System
 
@@ -15,12 +18,16 @@ source('R/sysOpsLibsFuncs.R')
 
 ```{r data}
 
+# original sample data; n=7396
 load("dat/atlasData.RData")
-load("dat/geneExpressionData.RData")
+# cleaned 
 load("dat/atlasDataClean.RData")
-
-# annotations
+# mRNA expression data n=20396 genes
+load("dat/geneExpressionData.RData")
+# gene annotations
 load('dat/annotations.RData')
+
+
 ```
 
 ## Diverge
