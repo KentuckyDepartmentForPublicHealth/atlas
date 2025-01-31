@@ -1,0 +1,122 @@
+
+
+```{r}
+
+library(org.Hs.eg.db)
+
+# Column Availability
+# cols_available <- columns(org.Hs.eg.db)
+
+# Map Entrez IDs to Gene Symbols and Names
+gene_annotations <- AnnotationDbi::select(org.Hs.eg.db,
+                                          keys = rownames(geneExpressionData),
+                                          columns = c("SYMBOL", "GENENAME"),
+                                          # columns = cols_available,
+                                          keytype = "ENTREZID")
+
+# geneExpressionDataAnnotated <- merge(geneExpressionData, gene_annotations, by.x = "row.names", by.y = "ENTREZID", all.x = TRUE)
+
+```
+
+
+# Find missing
+
+```{r}
+library(rentrez)
+
+fetch_gene_info <- function(id) {
+  result <- entrez_summary(db="gene", id=id)
+  return(data.frame(ENTREZID = id, 
+                    SYMBOL = result$name, 
+                    GENENAME = result$description))
+}
+
+# Fetch info for missing IDs
+missing_ids <- gene_annotations$ENTREZID[is.na(gene_annotations$SYMBOL)]
+new_annotations <- do.call(rbind, lapply(missing_ids, fetch_gene_info))
+
+```
+
+# Add biological process
+
+```{r}
+# Assuming 'mapped_genes' is a list where keys are names and values are vectors of ENTREZIDs
+
+# Convert the list to a data frame where each ENTREZID can have multiple names
+library(data.table)
+
+# Create a data frame from the list
+mapped_genes_df <- data.table::rbindlist(
+  lapply(names(mapped_genes), function(name) {
+    data.frame(ENTREZID = mapped_genes[[name]], NAME = name)
+  }), fill = TRUE
+)
+
+# Convert ENTREZID to character if it's not already (to match with gene_annotations)
+mapped_genes_df$ENTREZID <- as.character(mapped_genes_df$ENTREZID)
+
+# Perform a left join (or merge) to add all NAMEs from mapped_genes_df to gene_annotations
+# where ENTREZID matches. This will create a row for each name per ENTREZID.
+result <- merge(gene_annotations, mapped_genes_df, by = "ENTREZID", all.x = TRUE)
+
+# If you want to aggregate names for each ENTREZID (since one ENTREZID can match multiple names)
+result <- result %>%
+  dplyr::group_by(ENTREZID, SYMBOL, GENENAME) %>%
+  dplyr::summarise(NAME = paste(unique(NAME), collapse = ", "), .groups = 'drop')
+
+# Display the head of the result
+head(result)
+
+```
+
+
+```{r}
+
+
+```
+
+
+```{r}
+all_possible_genes <- select(gene_annotations, SYMBOL) %>% 
+  filter(!is.na(SYMBOL)) %>% 
+  pull(SYMBOL)
+
+
+```
+
+
+```{r}
+
+
+```
+
+
+```{r}
+
+
+```
+
+
+```{r}
+
+
+```
+
+
+```{r}
+
+
+```
+
+
+```{r}
+
+
+```
+
+
+```{r}
+
+
+```
+
