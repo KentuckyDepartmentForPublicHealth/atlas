@@ -1,5 +1,5 @@
 
-
+# understand
 
 ```{r}
 # jan 21 2025
@@ -110,7 +110,7 @@ missing_ids <- gene_annotations$ENTREZID[is.na(gene_annotations$SYMBOL)]
 new_annotations <- do.call(rbind, lapply(missing_ids, fetch_gene_info))
 
 # Merge with existing annotations
-gene_annotations <- rbind(gene_annotations[!is.na(gene_annotations$SYMBOL), ], new_annotations)
+# gene_annotations <- rbind(gene_annotations[!is.na(gene_annotations$SYMBOL), ], new_annotations)
 
 
 ##
@@ -121,6 +121,71 @@ gene_annotations <- rbind(gene_annotations[!is.na(gene_annotations$SYMBOL), ], n
 # ah <- AnnotationHub()
 # # Query for human gene databases
 # query(ah, "Homo sapiens")  # Look for relevant databases
+```
+
+# rentrez II
+
+```{r}
+## RUN TIME: > 45 minutes
+
+# library(rentrez)
+# 
+# fetch_gene_info <- function(entrez_ids) {
+#   # Initialize an empty list to store results
+#   results <- list()
+# 
+#   # Loop through each Entrez ID
+#   for (id in entrez_ids) {
+#     try({
+#       # Fetch gene summary for each ID
+#       result <- entrez_summary(db="gene", id=id)
+#       results[[id]] <- data.frame(ENTREZID = id, 
+#                                   SYMBOL = result$name, 
+#                                   GENENAME = result$description)
+#     }, silent = TRUE)  # Silent error handling to continue with next ID if one fails
+#   }
+# 
+#   # Combine all results into one data frame
+#   if (length(results) > 0) {
+#     do.call(rbind, results)
+#   } else {
+#     data.frame(ENTREZID = character(), SYMBOL = character(), GENENAME = character())
+#   }
+# }
+# 
+# # Use the function with the rownames of geneExpressionData
+# gene_info <- fetch_gene_info(rownames(geneExpressionData))
+```
+
+# validated appender
+
+```{r}
+# Assuming 'mapped_genes' is a list where keys are names and values are vectors of ENTREZIDs
+
+# Convert the list to a data frame where each ENTREZID can have multiple names
+library(data.table)
+
+# Create a data frame from the list
+mapped_genes_df <- data.table::rbindlist(
+  lapply(names(mapped_genes), function(name) {
+    data.frame(ENTREZID = mapped_genes[[name]], NAME = name)
+  }), fill = TRUE
+)
+
+# Convert ENTREZID to character if it's not already (to match with gene_annotations)
+mapped_genes_df$ENTREZID <- as.character(mapped_genes_df$ENTREZID)
+
+# Perform a left join (or merge) to add all NAMEs from mapped_genes_df to gene_annotations
+# where ENTREZID matches. This will create a row for each name per ENTREZID.
+result <- merge(gene_annotations, mapped_genes_df, by = "ENTREZID", all.x = TRUE)
+
+# If you want to aggregate names for each ENTREZID (since one ENTREZID can match multiple names)
+result <- result %>%
+  dplyr::group_by(ENTREZID, SYMBOL, GENENAME) %>%
+  dplyr::summarise(NAME = paste(unique(NAME), collapse = ", "), .groups = 'drop')
+
+# Display the head of the result
+head(result)
 ```
 
 
@@ -135,6 +200,7 @@ Map genes to functional categories with Bioconductor tools.
 Create custom groupings based on literature or expert input.
 Organize these groupings into a structure suitable for Shiny selectors (lists or data frames).
 
+# org.Hs.eg.db
 
 ```{r}
 
@@ -143,15 +209,20 @@ Organize these groupings into a structure suitable for Shiny selectors (lists or
 
 library(org.Hs.eg.db)
 
+# Column Availability
+# cols_available <- columns(org.Hs.eg.db)
+
 # Map Entrez IDs to Gene Symbols and Names
 gene_annotations <- AnnotationDbi::select(org.Hs.eg.db,
                                           keys = rownames(geneExpressionData),
                                           columns = c("SYMBOL", "GENENAME"),
+                                          # columns = cols_available,
                                           keytype = "ENTREZID")
 
-head(gene_annotations)
-
-
+# head(gene_annotations)
+# select(gene_annotations, ONTOLOGY) %>% pull %>% unique()
+# freq(gene_annotations$ONTOLOGY)
+# table(gene_annotations$ONTOLOGY, useNA = "ifany")
 # handle unmapped IDs (none! found)
 # unmapped_ids <- setdiff(rownames(geneExpressionData), gene_annotations$ENTREZID)
 # print(unmapped_ids)
@@ -172,7 +243,7 @@ library(clusterProfiler)
 # gene ontology terms
 go_annotations <- enrichGO(gene = rownames(geneExpressionData),
                             OrgDb = org.Hs.eg.db,
-                            ont = "BP", # Biological Process
+                            ont = "BP", # Biological Process (or: “BP”, “MF”, “CC”, “ALL”)
                             keyType = "ENTREZID")
 head(go_annotations)
 
@@ -236,9 +307,11 @@ distinct_count <- length(unique(all_elements))
 print(distinct_count)
 
 #  > 14000/20360
+
 #  [1] 0.6876228 (of all genes represented in mapped_genes)
 ```
 
+## pheatmap
 
 ```{r}
 library(pheatmap)
@@ -281,6 +354,7 @@ ggplot(data = data.frame(GO = names(top_mean_expression), Expression = top_mean_
 
 ```
 
+## Ensembl
 
 ```{r}
 library(org.Hs.eg.db)
@@ -295,8 +369,11 @@ library(pheatmap)
 ensembl = useMart("ensembl", dataset="hsapiens_gene_ensembl")
 geneSymbols <- getBM(attributes = c("entrezgene_id", "hgnc_symbol"),
                      filters = "entrezgene_id", 
-                     values = rownames(geneExpressionData), 
+                     values = rownames(geneExpressionData),
+                     # values = test_ids,
                      mart = ensembl)
+
+# output = 18906 / 20360 = 0.93
 
 # Create unique gene symbols to avoid duplicate row name issues
 # Here, we ensure uniqueness by considering both Entrez ID and the original symbol
@@ -308,7 +385,7 @@ rownames(geneExpressionData) <- setNames(geneSymbols$unique_symbol,
                                          geneSymbols$entrezgene_id)[rownames(geneExpressionData)]
 
 # Use original Entrez IDs for GO and KEGG analysis
-entrez_ids <- rownames(geneExpressionData)
+entrez_ids <- rownames(geneExpressionData[1:100,])
 
 # Perform GO enrichment
 go_enrich <- enrichGO(gene = entrez_ids,
@@ -357,8 +434,8 @@ test_ids <- head(rownames(geneExpressionData))
 
 # Map these IDs to gene symbols
 mapped_genes <- AnnotationDbi::select(org.Hs.eg.db, 
-                                      # keys = test_ids, 
-                                      keys = rownames(geneExpressionData),
+                                      keys = test_ids,
+                                      # keys = rownames(geneExpressionData),
                                       columns = c("SYMBOL", "GENENAME", "GO", "PATH"), 
                                       keytype = "ENTREZID")
 print(mapped_genes)
@@ -375,26 +452,32 @@ print(mapped_genes)
 
 ```
 
+## kegg
 
 ```{r}
 library(KEGGREST)
+library(clusterProfiler)
 
 # Convert Entrez IDs to KEGG IDs
 entrez_ids <- rownames(geneExpressionData)
-kegg_ids <- keggConv("kegg", "hsa")  # Converts human Entrez IDs to KEGG IDs
+# kegg_ids <- keggConv("kegg", "hsa")  # Converts human Entrez IDs to KEGG IDs
+kegg_ids <- keggConv("hsa", "ncbi-geneid")
 
 # Filter your Entrez IDs to match KEGG
-valid_kegg_ids <- intersect(entrez_ids, names(kegg_ids))
+valid_kegg_ids <- intersect(entrez_ids, gsub(".*:", "", names(kegg_ids)))
 
 # Run enrichment analysis with valid KEGG IDs
 kegg_annotations <- enrichKEGG(gene = valid_kegg_ids,
                                 organism = "hsa", 
                                 keyType = "kegg")
 
+# length of intersection between keggID and ENTREZID in this dataset = 16949 / 20360 = 0.83
+
 ```
 
 # examine
 
+## non-tumor?
 
 ```{r cross-reference and explore}
 
@@ -455,6 +538,7 @@ glimpse(atlasData)
 
 
 
+## freqs
 
 ```{r freqs}
 
@@ -518,7 +602,7 @@ atlasDataClean %>%
 ```
 
 
-
+## NA-check
 
 ```{r na-check}
 library(tidyverse)

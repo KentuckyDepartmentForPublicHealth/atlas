@@ -1,28 +1,26 @@
-all_possible_genes <- select(gene_annotations, SYMBOL) %>% 
-  filter(!is.na(SYMBOL)) %>% 
-  pull(SYMBOL)
 
 # System
 
-```{r options}
+```{r options-libraries-functions}
 
+message('ETL begin..')
 
-source('R/sysOpsLibsFuncs.R')
+source('R/system.R')
 
 
 ```
 
-# Data
+# Pipeline
 
 ## Load
 
 ```{r data}
 
-# original sample data; n=7396
+# original sample data; n=7375
 load("dat/atlasData.RData")
 # cleaned 
 load("dat/atlasDataClean.RData")
-# mRNA expression data n=20396 genes
+# mRNA expression data n=20360 genes
 load("dat/geneExpressionData.RData")
 # gene annotations
 load('dat/annotations.RData')
@@ -208,6 +206,8 @@ message("Select finished.")
 
 
 save(atlasDataClean, file = 'dat/atlasDataClean.RData')
+
+message('ETL finished.')
 
 ```
 
