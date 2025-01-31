@@ -1,8 +1,3 @@
----
-output:
-  pdf_document: default
-  html_document: default
----
 # Transcriptomic Atlas of Nervous System Tumors
 
 This Shiny app is designed to explore and analyze a large, annotated transcriptomic atlas of nervous system tumors and non-tumor entities. It provides three main functionalities: mRNA boxplots, dimensionality reduction, and survival analysis.
@@ -68,7 +63,7 @@ This app draws inspiration from the glioVis R app and aims to provide similar fu
 
 1. Clone the repository:
    ```
-   git clone https://github.com/nervous-system-tumor-atlas-shiny-app.git
+   git clone https://github.com/KentuckyDepartmentForPublicHealth/atlas.git
    ```
 
 2. Install required R packages:
@@ -78,7 +73,7 @@ This app draws inspiration from the glioVis R app and aims to provide similar fu
 
 3. Run the app:
    ```
-   shiny::runApp("path/to/your/app")
+   shiny::runApp()
    ```
 
 ## Contributing
