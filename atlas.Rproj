@@ -1,9 +1,9 @@
 Version: 1.0
 ProjectId: dd8ca545-5101-49f3-af3f-e954879d9f9f
 
-RestoreWorkspace: Default
-SaveWorkspace: Default
-AlwaysSaveHistory: Default
+RestoreWorkspace: No
+SaveWorkspace: No
+AlwaysSaveHistory: No
 
 EnableCodeIndexing: Yes
 UseSpacesForTab: Yes
@@ -14,3 +14,7 @@ RnwWeave: Sweave
 LaTeX: pdfLaTeX
 
 BuildType: Makefile
+
+PythonType: system
+PythonVersion: 3.12.3
+PythonPath: /usr/bin/python3.12
