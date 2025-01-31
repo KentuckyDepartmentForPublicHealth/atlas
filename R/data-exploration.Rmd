@@ -1,5 +1,6 @@
 
 # understand
+# gene ontology biological processes (BP) cannot be merged into a DF with 20360 rows because "one to many" is the relationship of ENTREZID and BP
 
 ```{r}
 # jan 21 2025
@@ -188,6 +189,19 @@ result <- result %>%
 head(result)
 ```
 
+## this would be next step (see note next to 'understand')
+
+```{r}
+library(dplyr)
+
+# Update result SYMBOLs where they are NA and there's a matching ENTREZID in new_annotations
+result <- result %>%
+  left_join(new_annotations %>% select(ENTREZID, SYMBOL), by = "ENTREZID") %>%
+  mutate(SYMBOL = if_else(is.na(SYMBOL.x), SYMBOL.y, SYMBOL.x)) %>%
+  select(-SYMBOL.x, -SYMBOL.y)
+
+# Verify changes
+sum(is.na(result$SYMBOL))  # Should be less than 96 if matches exist
 
 # gene groupings
 

@@ -1,4 +1,5 @@
 
+# Main annotation assignment
 
 ```{r}
 
@@ -14,14 +15,16 @@ gene_annotations <- AnnotationDbi::select(org.Hs.eg.db,
                                           # columns = cols_available,
                                           keytype = "ENTREZID")
 
+# Potential shift in data stucture
 # geneExpressionDataAnnotated <- merge(geneExpressionData, gene_annotations, by.x = "row.names", by.y = "ENTREZID", all.x = TRUE)
 
 ```
 
 
-# Find missing
+# Find missing annotations
 
 ```{r}
+
 library(rentrez)
 
 fetch_gene_info <- function(id) {
@@ -37,56 +40,82 @@ new_annotations <- do.call(rbind, lapply(missing_ids, fetch_gene_info))
 
 ```
 
-# Add biological process
-
-```{r}
-# Assuming 'mapped_genes' is a list where keys are names and values are vectors of ENTREZIDs
-
-# Convert the list to a data frame where each ENTREZID can have multiple names
-library(data.table)
-
-# Create a data frame from the list
-mapped_genes_df <- data.table::rbindlist(
-  lapply(names(mapped_genes), function(name) {
-    data.frame(ENTREZID = mapped_genes[[name]], NAME = name)
-  }), fill = TRUE
-)
-
-# Convert ENTREZID to character if it's not already (to match with gene_annotations)
-mapped_genes_df$ENTREZID <- as.character(mapped_genes_df$ENTREZID)
-
-# Perform a left join (or merge) to add all NAMEs from mapped_genes_df to gene_annotations
-# where ENTREZID matches. This will create a row for each name per ENTREZID.
-result <- merge(gene_annotations, mapped_genes_df, by = "ENTREZID", all.x = TRUE)
-
-# If you want to aggregate names for each ENTREZID (since one ENTREZID can match multiple names)
-result <- result %>%
-  dplyr::group_by(ENTREZID, SYMBOL, GENENAME) %>%
-  dplyr::summarise(NAME = paste(unique(NAME), collapse = ", "), .groups = 'drop')
-
-# Display the head of the result
-head(result)
-
-```
+## Add annotations where SYMBOL is NA
 
 
 ```{r}
+
+# glimpse(gene_annotations)
+# table(is.na(gene_annotations$SYMBOL))
+# glimpse(new_annotations)
+library(dplyr)
+
+# Update gene_annotations where SYMBOL is NA using new_annotations
+gene_annotations <- gene_annotations %>%
+  left_join(new_annotations, by = "ENTREZID", suffix = c(".orig", ".new")) %>%
+  mutate(
+    SYMBOL = if_else(is.na(SYMBOL.orig), SYMBOL.new, SYMBOL.orig),
+    GENENAME = if_else(is.na(SYMBOL.orig), GENENAME.new, GENENAME.orig)
+  ) %>%
+  select(ENTREZID, SYMBOL, GENENAME)
+
+# Check the number of NAs in SYMBOL after updating
+# table(is.na(gene_annotations$SYMBOL))
+#freq(is.na(gene_annotations$SYMBOL))
+# li(gene_annotations$ENTREZID, rownames(geneExpressionData))
 
 
 ```
 
 
-```{r}
-all_possible_genes <- select(gene_annotations, SYMBOL) %>% 
-  filter(!is.na(SYMBOL)) %>% 
-  pull(SYMBOL)
 
+# Gene Ontology
+## Biological process 1
+
+```{r}
+
+library(clusterProfiler)
+
+# gene ontology terms
+go_annotations <- enrichGO(gene = rownames(geneExpressionData),
+                            OrgDb = org.Hs.eg.db,
+                            ont = "BP", # Biological Process (or: “BP”, “MF”, “CC”, “ALL”)
+                            keyType = "ENTREZID")
+# head(go_annotations)
+
+# Extract gene-to-GO mapping
+# This creates a named list where:
+# 
+# The names are GO terms (descriptions).
+# The values are comma-separated gene IDs.
+go_to_genes <- setNames(go_annotations@result$geneID, go_annotations@result$Description)
+
+# Split the gene IDs into vectors
+go_to_genes_list <- lapply(go_to_genes, function(x) unlist(strsplit(x, "/")))
+
+# Find overlap with your gene expression data
+# mapped_genes <- lapply(go_to_genes_list, function(genes) {
+#   intersect(genes, rownames(geneExpressionData))
+# })
 
 ```
 
 
+
 ```{r}
 
+# all_possible_genes <- select(gene_annotations, SYMBOL) %>% 
+#   filter(!is.na(SYMBOL)) %>% 
+#   pull(SYMBOL)
+
+
+```
+
+# Save
+
+```{r}
+
+save(gene_annotations, go_to_genes_list, file = 'dat/annotations.RData')
 
 ```
 
