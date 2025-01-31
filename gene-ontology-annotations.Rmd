@@ -1,7 +1,9 @@
 
-# Main annotation assignment
+# Primary annotation assignment
 
 ```{r}
+
+message('Annotation pipeline begin..')
 
 library(org.Hs.eg.db)
 
@@ -15,15 +17,23 @@ gene_annotations <- AnnotationDbi::select(org.Hs.eg.db,
                                           # columns = cols_available,
                                           keytype = "ENTREZID")
 
-# Potential shift in data stucture
+# Potential shift in data structure
 # geneExpressionDataAnnotated <- merge(geneExpressionData, gene_annotations, by.x = "row.names", by.y = "ENTREZID", all.x = TRUE)
+library(dplyr)
 
+# Assuming geneExpressionData is a data frame with gene IDs as row names
+geneExpressionDataAnnotated <- geneExpressionData %>% 
+  rownames_to_column(var = "ENTREZID") %>%  # Convert row names to a column
+  inner_join(gene_annotations, by = "ENTREZID") %>% 
+  select(ENTREZID, SYMBOL, GENENAME, everything())
 ```
 
 
 # Find missing annotations
 
 ```{r}
+
+message('Find missing annotations begin..')
 
 library(rentrez)
 
@@ -38,12 +48,16 @@ fetch_gene_info <- function(id) {
 missing_ids <- gene_annotations$ENTREZID[is.na(gene_annotations$SYMBOL)]
 new_annotations <- do.call(rbind, lapply(missing_ids, fetch_gene_info))
 
+message('Find missing finished.')
+
 ```
 
 ## Add annotations where SYMBOL is NA
 
 
 ```{r}
+
+message(paste0('Adding ', nrow(new_annotations), ' missing annotation(s)..'))
 
 # glimpse(gene_annotations)
 # table(is.na(gene_annotations$SYMBOL))
@@ -57,13 +71,14 @@ gene_annotations <- gene_annotations %>%
     SYMBOL = if_else(is.na(SYMBOL.orig), SYMBOL.new, SYMBOL.orig),
     GENENAME = if_else(is.na(SYMBOL.orig), GENENAME.new, GENENAME.orig)
   ) %>%
-  select(ENTREZID, SYMBOL, GENENAME)
+  dplyr::select(ENTREZID, SYMBOL, GENENAME)
 
 # Check the number of NAs in SYMBOL after updating
 # table(is.na(gene_annotations$SYMBOL))
 #freq(is.na(gene_annotations$SYMBOL))
 # li(gene_annotations$ENTREZID, rownames(geneExpressionData))
 
+message(paste0('Added ', nrow(new_annotations), ' missing annotation(s) finished.'))
 
 ```
 
@@ -73,6 +88,8 @@ gene_annotations <- gene_annotations %>%
 ## Biological process 1
 
 ```{r}
+
+message('Biological process begin..')
 
 library(clusterProfiler)
 
@@ -98,6 +115,8 @@ go_to_genes_list <- lapply(go_to_genes, function(x) unlist(strsplit(x, "/")))
 #   intersect(genes, rownames(geneExpressionData))
 # })
 
+message('Biological process finished.')
+
 ```
 
 
@@ -116,6 +135,8 @@ go_to_genes_list <- lapply(go_to_genes, function(x) unlist(strsplit(x, "/")))
 ```{r}
 
 save(gene_annotations, go_to_genes_list, file = 'dat/annotations.RData')
+
+message('Annotation pipeline finished.')
 
 ```
 

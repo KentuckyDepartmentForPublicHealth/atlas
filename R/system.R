@@ -1,5 +1,5 @@
 
-message('Loading toolz developed by Adam Berrones..')
+message('Setting system options, libraries, and functions.')
 
 # misc --------------------------------------------------------------------
 
@@ -10,20 +10,11 @@ message('Loading toolz developed by Adam Berrones..')
 options(dplyr.width = Inf, dplyr.print_max = 1e5, max.print = 1e5)
 
 library(tidyverse)
-# library(sqldf)
-# library(openxlsx)
 library(readxl)
-# library(rlang)
-# library(lobstr)
 library(scales)
 library(DBI)
 library(RPostgres)
-# library(sjlabelled)
-# library(Epi)
-# library(jsonlite)
-# library(rvest)
 library(survival)
-
 library(shiny)
 library(bslib)
 
@@ -376,6 +367,6 @@ lsf <- function(pkg) { listFuns(pkg) }
 # stopper -----------------------------------------------------------------
 
 
-message('Fully loaded!')
+message('System ready.')
 
 

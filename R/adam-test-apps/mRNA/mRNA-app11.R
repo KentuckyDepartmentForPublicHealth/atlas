@@ -152,7 +152,7 @@ server <- function(input, output, session) {
           group_by(SYMBOL, .data[[input$group_by]]) %>%
           summarise(n = n(), .groups = 'drop') 
         plot_base <- plot_base +
-          facet_wrap(~ .data[[input$group_by]], scales = "free") +
+          facet_wrap(~ .data[[input$group_by]], scales = "fixed") +
           geom_text(data = facet_counts, aes(label = paste0("n=", n), y = Inf), vjust = 1.5, size = 3, fontface = 'bold', color = 'gray20')
       } else {
         symbol_counts <- data %>%
