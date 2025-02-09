@@ -40,7 +40,10 @@ fit <- survfit(Surv(time = as.numeric(survivalMonths), event = mortality) ~ grad
 
 
 
-ggsurvplot(fit, risk.table = F, legend='right', xlab="Time (Months)")
+ggsurvplot(
+  fit,
+  data = atlasDataClean,
+  risk.table = TRUE)
 
 
 ####creating my own model, looking at survival stratified by grade w in those w diagnosis
@@ -64,8 +67,6 @@ ggsurvplot(fit, risk.table = F, legend='right', xlab="Time (Months)", title = "S
 ####converting surv obj to df allows for more graph control/customization easily via
 ###using ggplot2 directly#################
 
-survfit(Surv(time = as.numeric(survivalMonths), event = mortality) ~ grade , 
-        data = atlasDataClean)
 # Example survival model (stratified by 4 groups)
 fit <- survfit(Surv(time = as.numeric(survivalMonths), event = mortality) ~ grade , 
                data = atlasDataClean) 
@@ -96,7 +97,14 @@ ggplot(surv_df, aes(x = time, y = survival, color = group, fill = group)) +
   )
 
 
+###median surv time######
+##for whole survival table 
+summary(fit)$table
+
+
+## for just median survival times 
+summary(fit)$table[, "median"]
 
 
 
-###
+
