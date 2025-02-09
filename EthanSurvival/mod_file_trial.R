@@ -108,3 +108,44 @@ summary(fit)$table[, "median"]
 
 
 
+
+######COX PH FOR HRs####
+cox_model <- coxph(Surv(time = as.numeric(survivalMonths), event = mortality) ~ grade, 
+                   data = atlasDataClean)
+summary(cox_model)
+
+hr_values <- exp(coef(cox_model))
+
+# View the HRs
+print(hr_values)
+
+###R treats first categorical level as ref group, so HRs are against ref grade of 3
+
+
+
+
+#########################################################################################
+#NEW MOD BELOW- CHECKING STRATA OF AGE GROUPS 20-40,40-60,60-80,80+
+
+fit <- survfit(Surv(time = as.numeric(survivalMonths), event = mortality) ~ ageGroup , 
+               data = atlasDataClean)
+
+ggsurvplot(fit, risk.table = T, legend='right', xlab="Time (Months)")
+
+cox_mod <- coxph(Surv(time = as.numeric(survivalMonths), event = mortality) ~ ageGroup, 
+                 data = atlasDataClean)
+print(exp(coef(cox_mod)))
+##When plotted its visually cluttered due to 8 groups, maybe add option to select certain groups? 
+
+####CHANGING REF GROUP, provides more meaningful output        b#######
+# Sample data
+atlasDataClean$ageGroup <- factor(atlasDataClean$ageGroup)
+# Change the reference group to "ageGroup40-60YRS"
+atlasDataClean$ageGroup <- relevel(atlasDataClean$ageGroup, ref = "40-60YRS")
+fit <- survfit(Surv(time = as.numeric(survivalMonths), event = mortality) ~ ageGroup , 
+               data = atlasDataClean)
+cox_mod <- coxph(Surv(time = as.numeric(survivalMonths), event = mortality) ~ ageGroup, 
+                 data = atlasDataClean)
+print(exp(coef(cox_mod)))
+
+
