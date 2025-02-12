@@ -137,3 +137,29 @@ print(hr_values)
 grade 1
     -Grade 4 [19.99] - those with a grade 4 tumor are 20x likely to experience an event (death) than 
 grade 1
+
+#Other Categorical Variables where reference level matters
+-age group
+-sex
+-the other thing that truly changes is the interpretation
+    -Which level is designated as reference depends on question being proposed, what you desire to find
+    -Example: age group 0-19 may not be the best reference group since cancers are (comparatively) uncommon versus other groups so the hazard ratio will be assumed to be higher for other groups anyways. 
+
+#Potential Strata Options to be Explored
+-stratifying by diagnosis first: that is, looking at say tumor grade within a specific diagnosis (53 total)
+-stratifying by compartment and then by another strata such as comparing diganosis of interest 
+-by gene
+    -Using the sample link btw the two datasets to pull info only for certain genes 
+
+#Next thing to determine: Strata options for Atlas Site
+-Determining factors:
+    -Meaningful results, that is, the model strata need to make sense in context of desired output
+    -Biological Connections ie certain tumor types more common in certain compartments or age groups
+-GlioVis Inspiration:
+    -choose between adult or pediatric
+    -tumor type options
+    -Gene
+    -Histology
+    -Gender 
+
+
