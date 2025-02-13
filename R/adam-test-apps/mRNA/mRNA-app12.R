@@ -11,27 +11,39 @@ ui <- fluidPage(
     sidebarPanel(
       radioButtons("search_mode", "Search Mode:",
         choices = c("Select GO Term", "Select All Genes"),
-        selected = "Select GO Term"
+        selected = character(0)
       ),
       conditionalPanel(
-        condition = "input.search_mode == 'Select GO Term'",
+        condition = "input.search_mode !== null && input.search_mode === 'Select GO Term'",
         selectizeInput("go_term", "Select GO Term", choices = NULL),
-        # selectInput("go_term", "Select GO Term", choices = c("", names(go_to_genes_list))),
         uiOutput("go_gene_selector")
       ),
       conditionalPanel(
-        condition = "input.search_mode == 'Select All Genes'",
+        condition = "input.search_mode !== null && input.search_mode === 'Select All Genes'",
         selectizeInput("all_genes", "Select Genes",
           choices = NULL, multiple = TRUE,
           options = list(maxOptions = 5)
         )
       ),
       uiOutput("max_options_slider"),
-      checkboxInput("use_group_by", "Use Group By", value = FALSE),
-      uiOutput("group_by_selector"),
+      # Adjusted UI for the grouping selector
+      selectInput(
+        "group_by",
+        "Group By (Optional)",
+        choices = c(
+          "None", "ageGroup", "compartment", "country", "diagnosisClass",
+          "diagnosisFinal", "fullName", "grade", "histologyOriginal",
+          "isCancerous", "sex", "tumorType"
+        ) |> sort(),
+        selected = "None"
+      ),
       width = 3
     ),
     mainPanel(
+      conditionalPanel(
+        condition = "input.search_mode === null",
+        h3("Please select a search mode to proceed.")
+      ),
       plotOutput("boxplot"),
       tableOutput("gene_info"),
       width = 9
@@ -70,6 +82,7 @@ server <- function(input, output, session) {
 
   # Update all genes selector when "Select All Genes" is chosen
   observe({
+    req(input$search_mode)
     if (input$search_mode == "Select All Genes") {
       updateSelectizeInput(session, "all_genes",
         choices = all_genes(),
@@ -81,26 +94,28 @@ server <- function(input, output, session) {
 
   # Dynamic total unique genes based on search mode
   total_unique_genes <- reactive({
+    req(input$search_mode)
     if (input$search_mode == "Select GO Term") {
       req(input$go_term)
       if (input$go_term == "") {
         return(0) # No GO term selected, no genes to show
       }
-
       go_genes <- go_to_genes_list[[input$go_term]]
       gene_symbols <- gene_annotations %>%
         filter(ENTREZID %in% go_genes) %>%
         pull(SYMBOL) %>%
         unique()
-
       return(length(gene_symbols))
-    } else {
+    } else if (input$search_mode == "Select All Genes") {
       return(length(all_genes()))
+    } else {
+      return(0)
     }
   })
 
   # Render sliderInput for max options, dynamically based on search mode
   output$max_options_slider <- renderUI({
+    req(total_unique_genes())
     sliderInput(
       "max_options",
       "Total unique genes",
@@ -113,61 +128,63 @@ server <- function(input, output, session) {
 
   # Dynamic gene selector for GO Terms
   output$go_gene_selector <- renderUI({
-    req(input$search_mode == "Select GO Term")
-    req(input$go_term)
-    if (input$go_term == "") {
-      choices <- c()
-    } else {
-      go_genes <- go_to_genes_list[[input$go_term]]
-      gene_symbols <- gene_annotations %>%
-        filter(ENTREZID %in% go_genes) %>%
-        pull(SYMBOL) %>%
-        unique()
-      choices <- gene_symbols
+    req(input$search_mode)
+    if (input$search_mode == "Select GO Term") {
+      req(input$go_term)
+      if (input$go_term == "") {
+        choices <- c()
+      } else {
+        go_genes <- go_to_genes_list[[input$go_term]]
+        gene_symbols <- gene_annotations %>%
+          filter(ENTREZID %in% go_genes) %>%
+          pull(SYMBOL) %>%
+          unique()
+        choices <- gene_symbols
+      }
+      selectizeInput(
+        "selected_gene",
+        "Select Genes",
+        multiple = TRUE,
+        choices = choices,
+        options = list(maxOptions = min(input$max_options, length(choices)))
+      )
     }
-
-    selectizeInput(
-      "selected_gene",
-      "Select Genes",
-      multiple = TRUE,
-      choices = choices,
-      options = list(maxOptions = min(input$max_options, length(choices)))
-    )
   })
 
   # Reactive for selected genes based on search mode
   selected_genes <- reactive({
+    req(input$search_mode)
     if (input$search_mode == "Select GO Term") {
       return(input$selected_gene %||% character(0))
-    } else {
+    } else if (input$search_mode == "Select All Genes") {
       return(input$all_genes %||% character(0))
+    } else {
+      return(character(0))
     }
   })
 
   # Filter data based on selected genes
   filtered_data <- reactive({
     req(selected_genes())
-
+    if (length(selected_genes()) == 0) {
+      return(data.frame())
+    }
     entrez_ids <- gene_annotations %>%
       filter(SYMBOL %in% selected_genes()) %>%
       pull(ENTREZID)
-
     if (length(entrez_ids) == 0) {
       return(data.frame())
     }
-
     gene_data <- geneExpressionData[rownames(geneExpressionData) %in% entrez_ids, ]
     if (nrow(gene_data) == 0) {
       return(data.frame())
     }
-
     gene_data <- gene_data %>%
       as.data.frame() %>%
       mutate(ENTREZID = rownames(.)) %>%
       pivot_longer(cols = -ENTREZID, names_to = "filename", values_to = "expression") %>%
       left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
       left_join(atlasDataClean, by = "filename")
-
     gene_data
   })
 
@@ -183,18 +200,22 @@ server <- function(input, output, session) {
 
   # Dynamic group_by selector
   output$group_by_selector <- renderUI({
-    if (input$use_group_by) {
-      selectInput(
-        "group_by",
-        "Group By",
-        choices = c("isCancerous", "grade", "ageGroup", "tumorType", "sex", "compartment", "fullName", "country", "diagnosisFinal", "histologyOriginal", "diagnosisClass") |> sort(),
-        selected = "sex"
-      )
-    }
+    req(input$use_group_by)
+    selectInput(
+      "group_by",
+      "Group By",
+      choices = c(
+        "ageGroup", "compartment", "country", "diagnosisClass",
+        "diagnosisFinal", "fullName", "grade", "histologyOriginal",
+        "isCancerous", "sex", "tumorType"
+      ) |> sort(),
+      selected = "sex"
+    )
   })
 
   # Render the boxplot
   output$boxplot <- renderPlot({
+    req(selected_genes())
     data <- filtered_data()
     if (is.null(data) || nrow(data) == 0) {
       plot(NULL, xlab = "", ylab = "", main = "No data to display")
@@ -211,25 +232,31 @@ server <- function(input, output, session) {
         ) +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-      if (input$use_group_by) {
+      if (input$group_by != "None") {
         req(input$group_by)
         facet_counts <- data %>%
           group_by(SYMBOL, .data[[input$group_by]]) %>%
           summarise(n = n(), .groups = "drop")
         plot_base <- plot_base +
           facet_wrap(~ .data[[input$group_by]], scales = "free") +
-          geom_text(data = facet_counts, aes(label = paste0("n=", n), y = Inf), vjust = 1.5, size = 3, fontface = "bold", color = "gray20")
+          geom_text(
+            data = facet_counts, aes(label = paste0("n=", n), y = Inf),
+            vjust = 1.5, size = 3, fontface = "bold", color = "gray20"
+          )
       } else {
         symbol_counts <- data %>%
           group_by(SYMBOL) %>%
           summarise(n = n(), .groups = "drop")
         plot_base <- plot_base +
-          geom_text(data = symbol_counts, aes(label = paste0("n=", n), y = Inf), vjust = 1.5, size = 3, fontface = "bold", color = "gray20")
+          geom_text(
+            data = symbol_counts, aes(label = paste0("n=", n), y = Inf),
+            vjust = 1.5, size = 3, fontface = "bold", color = "gray20"
+          )
       }
       plot_base
     }
   })
+
   # Render gene info table
   output$gene_info <- renderTable({
     req(filtered_data())
@@ -239,4 +266,5 @@ server <- function(input, output, session) {
   })
 }
 
-shinyApp(ui, server)
+# Run the application
+shinyApp(ui = ui, server = server)
