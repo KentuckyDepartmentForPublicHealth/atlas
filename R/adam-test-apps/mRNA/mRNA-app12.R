@@ -52,6 +52,13 @@ ui <- fluidPage(
         # Placeholder for the dynamic group_by selectInput
         uiOutput("group_by_selector")
       ),
+
+      #-------------------------------#
+      #    Run and Reset Buttons      #
+      #-------------------------------#
+      br(), # Add a bit of space
+      actionButton("run", "Run Plot", class = "btn-primary"),
+      actionButton("reset", "Reset", class = "btn-warning"),
       width = 3
     ),
     mainPanel(
@@ -184,14 +191,14 @@ server <- function(input, output, session) {
   })
 
   #---- 8. Hide or show the "Use Group By" checkbox based on selected genes ----#
-  observe({
-    if (length(selected_genes()) > 0) {
-      shinyjs::show("use_group_by")
-    } else {
-      shinyjs::hide("use_group_by")
-      updateCheckboxInput(session, "use_group_by", value = FALSE)
-    }
-  })
+  # observe({
+  #   if (length(selected_genes()) > 0) {
+  #     shinyjs::show("use_group_by")
+  #   } else {
+  #     shinyjs::hide("use_group_by")
+  #     updateCheckboxInput(session, "use_group_by", value = FALSE)
+  #   }
+  # })
 
   #---- 9. Dynamically render the group_by dropdown (only if checkbox is TRUE) ----#
   output$group_by_selector <- renderUI({
@@ -209,44 +216,52 @@ server <- function(input, output, session) {
     }
   })
 
-  #---- 10. Filtered data based on selected genes ----#
-  filtered_data <- reactive({
-    req(selected_genes())
-    if (length(selected_genes()) == 0) {
-      return(data.frame())
-    }
+  #---------------------------------------------------------------------#
+  #  NEW: Use eventReactive() to delay data filtering until "Run" click  #
+  #---------------------------------------------------------------------#
+  filtered_data_event <- eventReactive(input$run, {
+    # Isolate all relevant inputs so the data only updates upon "Run"
+    # (not each time one of the inputs changes)
+    isolate({
+      req(input$search_mode)
+      req(selected_genes())
 
-    entrez_ids <- gene_annotations %>%
-      filter(SYMBOL %in% selected_genes()) %>%
-      pull(ENTREZID)
-    if (length(entrez_ids) == 0) {
-      return(data.frame())
-    }
+      if (length(selected_genes()) == 0) {
+        return(data.frame())
+      }
 
-    # Subset the gene expression matrix
-    gene_data <- geneExpressionData[rownames(geneExpressionData) %in% entrez_ids, ]
-    if (nrow(gene_data) == 0) {
-      return(data.frame())
-    }
+      entrez_ids <- gene_annotations %>%
+        filter(SYMBOL %in% selected_genes()) %>%
+        pull(ENTREZID)
+      if (length(entrez_ids) == 0) {
+        return(data.frame())
+      }
 
-    # Reshape and merge with annotations
-    gene_data <- gene_data %>%
-      as.data.frame() %>%
-      mutate(ENTREZID = rownames(.)) %>%
-      pivot_longer(
-        cols = -ENTREZID,
-        names_to = "filename",
-        values_to = "expression"
-      ) %>%
-      left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
-      left_join(atlasDataClean, by = "filename")
+      # Subset the gene expression matrix
+      gene_data <- geneExpressionData[rownames(geneExpressionData) %in% entrez_ids, ]
+      if (nrow(gene_data) == 0) {
+        return(data.frame())
+      }
 
-    gene_data
+      # Reshape and merge with annotations
+      gene_data <- gene_data %>%
+        as.data.frame() %>%
+        mutate(ENTREZID = rownames(.)) %>%
+        pivot_longer(
+          cols = -ENTREZID,
+          names_to = "filename",
+          values_to = "expression"
+        ) %>%
+        left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
+        left_join(atlasDataClean, by = "filename")
+
+      gene_data
+    })
   })
 
-  #---- 11. Boxplot Output ----#
+  #---- 11. Boxplot Output (Uses eventReactive data) ----#
   output$boxplot <- renderPlot({
-    data <- filtered_data()
+    data <- filtered_data_event()
     if (nrow(data) == 0) {
       plot(NULL, xlab = "", ylab = "", main = "No data to display")
       return()
@@ -295,15 +310,38 @@ server <- function(input, output, session) {
     p
   })
 
-  #---- 12. Render gene info table ----#
+  #---- 12. Render gene info table (Uses eventReactive data) ----#
   output$gene_info <- renderTable({
-    data <- filtered_data()
+    data <- filtered_data_event()
     if (nrow(data) == 0) {
       return(NULL)
     }
     data %>%
       select(SYMBOL, GENENAME) %>%
       distinct()
+  })
+
+  #--------------------------------------------------#
+  #    NEW: Reset Button to Clear/Undo All Inputs    #
+  #--------------------------------------------------#
+  observeEvent(input$reset, {
+    # Clear everything: radio buttons, selectize inputs, sliders, checkboxes, etc.
+    updateRadioButtons(session, "search_mode", selected = character(0))
+    updateSelectizeInput(session, "go_term", selected = NULL)
+    updateSelectizeInput(session, "selected_gene", selected = NULL)
+    updateSelectizeInput(session, "all_genes", selected = NULL)
+    if (!is.null(total_unique_genes())) {
+      # reset slider to 5 or 1, whichever is more appropriate as a "default"
+      updateSliderInput(session, "max_options", value = 5)
+    }
+    updateCheckboxInput(session, "use_group_by", value = FALSE)
+
+    # Optionally, hide or reset group_by selector
+    shinyjs::hide("group_by_selector")
+
+    # (Optional) You could also force the plot to display empty if you want:
+    # by clearing or invalidating the eventReactive. But typically, if no gene is
+    # selected, it will show "No data to display" anyway.
   })
 }
 
