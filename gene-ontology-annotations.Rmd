@@ -2,8 +2,7 @@
 # Primary annotation assignment
 
 ```{r}
-
-message('Annotation pipeline begin..')
+message("Annotation pipeline begin..")
 
 library(org.Hs.eg.db)
 
@@ -12,52 +11,52 @@ library(org.Hs.eg.db)
 
 # Map Entrez IDs to Gene Symbols and Names
 gene_annotations <- AnnotationDbi::select(org.Hs.eg.db,
-                                          keys = rownames(geneExpressionData),
-                                          columns = c("SYMBOL", "GENENAME"),
-                                          # columns = cols_available,
-                                          keytype = "ENTREZID")
+  keys = rownames(geneExpressionData),
+  columns = c("SYMBOL", "GENENAME"),
+  # columns = cols_available,
+  keytype = "ENTREZID"
+)
 
 # Potential shift in data structure
 # geneExpressionDataAnnotated <- merge(geneExpressionData, gene_annotations, by.x = "row.names", by.y = "ENTREZID", all.x = TRUE)
 library(dplyr)
 
 # Assuming geneExpressionData is a data frame with gene IDs as row names
-geneExpressionDataAnnotated <- geneExpressionData %>% 
-  rownames_to_column(var = "ENTREZID") %>%  # Convert row names to a column
-  inner_join(gene_annotations, by = "ENTREZID") %>% 
-  select(ENTREZID, SYMBOL, GENENAME, everything())
+geneExpressionDataAnnotated <- geneExpressionData %>%
+  rownames_to_column(var = "ENTREZID") %>% # Convert row names to a column
+  inner_join(gene_annotations, by = "ENTREZID") %>%
+  dplyr::select(ENTREZID, SYMBOL, GENENAME, everything())
 ```
 
 
 # Find missing annotations
 
 ```{r}
-
-message('Find missing annotations begin..')
+message("Find missing annotations begin..")
 
 library(rentrez)
 
 fetch_gene_info <- function(id) {
-  result <- entrez_summary(db="gene", id=id)
-  return(data.frame(ENTREZID = id, 
-                    SYMBOL = result$name, 
-                    GENENAME = result$description))
+  result <- entrez_summary(db = "gene", id = id)
+  return(data.frame(
+    ENTREZID = id,
+    SYMBOL = result$name,
+    GENENAME = result$description
+  ))
 }
 
 # Fetch info for missing IDs
 missing_ids <- gene_annotations$ENTREZID[is.na(gene_annotations$SYMBOL)]
 new_annotations <- do.call(rbind, lapply(missing_ids, fetch_gene_info))
 
-message('Find missing finished.')
-
+message("Find missing finished.")
 ```
 
 ## Add annotations where SYMBOL is NA
 
 
 ```{r}
-
-message(paste0('Adding ', nrow(new_annotations), ' missing annotation(s)..'))
+message(paste0("Adding ", nrow(new_annotations), " missing annotation(s).."))
 
 # glimpse(gene_annotations)
 # table(is.na(gene_annotations$SYMBOL))
@@ -75,11 +74,10 @@ gene_annotations <- gene_annotations %>%
 
 # Check the number of NAs in SYMBOL after updating
 # table(is.na(gene_annotations$SYMBOL))
-#freq(is.na(gene_annotations$SYMBOL))
+# freq(is.na(gene_annotations$SYMBOL))
 # li(gene_annotations$ENTREZID, rownames(geneExpressionData))
 
-message(paste0('Added ', nrow(new_annotations), ' missing annotation(s) finished.'))
-
+message(paste0("Added ", nrow(new_annotations), " missing annotation(s)."))
 ```
 
 
@@ -88,21 +86,22 @@ message(paste0('Added ', nrow(new_annotations), ' missing annotation(s) finished
 ## Biological process 1
 
 ```{r}
-
-message('Biological process begin..')
+message("Biological process begin..")
 
 library(clusterProfiler)
 
 # gene ontology terms
-go_annotations <- enrichGO(gene = rownames(geneExpressionData),
-                            OrgDb = org.Hs.eg.db,
-                            ont = "BP", # Biological Process (or: “BP”, “MF”, “CC”, “ALL”)
-                            keyType = "ENTREZID")
+go_annotations <- enrichGO(
+  gene = rownames(geneExpressionData),
+  OrgDb = org.Hs.eg.db,
+  ont = "BP", # Biological Process (or: “BP”, “MF”, “CC”, “ALL”)
+  keyType = "ENTREZID"
+)
 # head(go_annotations)
 
 # Extract gene-to-GO mapping
 # This creates a named list where:
-# 
+#
 # The names are GO terms (descriptions).
 # The values are comma-separated gene IDs.
 go_to_genes <- setNames(go_annotations@result$geneID, go_annotations@result$Description)
@@ -115,58 +114,47 @@ go_to_genes_list <- lapply(go_to_genes, function(x) unlist(strsplit(x, "/")))
 #   intersect(genes, rownames(geneExpressionData))
 # })
 
-message('Biological process finished.')
-
+message("Biological process finished.")
 ```
 
 
 
 ```{r}
-
-# all_possible_genes <- select(gene_annotations, SYMBOL) %>% 
-#   filter(!is.na(SYMBOL)) %>% 
+# all_possible_genes <- select(gene_annotations, SYMBOL) %>%
+#   filter(!is.na(SYMBOL)) %>%
 #   pull(SYMBOL)
-
-
 ```
 
 # Save
 
 ```{r}
+save(gene_annotations, go_to_genes_list, file = "dat/annotations.RData")
 
-save(gene_annotations, go_to_genes_list, file = 'dat/annotations.RData')
+message("Annotation pipeline finished.")
+```
 
-message('Annotation pipeline finished.')
+
+```{r}
 
 ```
 
 
 ```{r}
 
+```
+
+
+```{r}
 
 ```
 
 
 ```{r}
 
-
 ```
 
 
 ```{r}
-
-
-```
-
-
-```{r}
-
-
-```
-
-
-```{r}
-
 
 ```
 

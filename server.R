@@ -1,14 +1,7 @@
-
-## backend server code
-
-
-# toplevel ----------------------------------------------------------------
-
+# define server -----
 server <- function(input, output, session) {
-  
-# debug
+  # debug
   output$sessionInputVariables <- renderPrint({
     reactiveValuesToList(input)
   })
-  
-} #end server
+} # end server
