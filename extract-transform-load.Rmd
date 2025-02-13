@@ -2,12 +2,9 @@
 # System
 
 ```{r options-libraries-functions}
+message("ETL begin..")
 
-message('ETL begin..')
-
-source('R/system.R')
-
-
+source("R/system.R")
 ```
 
 # Pipeline
@@ -15,120 +12,118 @@ source('R/system.R')
 ## Load
 
 ```{r data}
+message("Loading data..")
 
 # original sample data; n=7375
 load("dat/atlasData.RData")
-# cleaned 
+# cleaned
 load("dat/atlasDataClean.RData")
 # mRNA expression data n=20360 genes
 load("dat/geneExpressionData.RData")
 # gene annotations
-load('dat/annotations.RData')
+load("dat/annotations.RData")
 
 
+message("Loaded data.")
 ```
 
 ## Diverge
 
 ```{r}
-message('Diverge begin..')
+message("Diverge begin..")
 
 # Diverge from original data set
 atlasDataClean <- atlasData
 
-message('Diverge done.')
+message("Diverge done.")
 ```
 
 
 ## Rename
 
 ```{r}
-
-message('Rename begin..')
+message("Rename begin..")
 
 oldNames <- names(atlasData)
 
 cleanNames <- c(
-  'filename',
-  'dataID',
-  'sampleID',
-  'institution',
-  'country',
-  'histologyOriginal',
-  'subgroup',
-  'locationOriginal',
-  'compartment',
-  'location',
-  'stageNeuroblastoma',
-  'stageMedulloblastoma',
-  'tissuePrep',
-  'sampleAnalysisGroup',
-  'diagnosis',
-  'grade',
-  'fullName',
-  'diagnosisClass',
-  'classifierLightGBM',
-  'classifierRandomForest',
-  'classifierEuclidean',
-  'classifierTSNE',
-  'diagnosisFinal',
-  'tsne1',
-  'tsne2',
-  'age',
-  'ageGroup',
-  'sex',
-  'tumorType',
-  'mortality',
-  'survivalMonths',
-  '1p/19q-codel',
-  'mutationIDH1/2',
-  'mutationH3',
-  'mutationTERTpromoter',
-  'amplificationEGFR',
-  'methylationMGMTpromoter',
-  'mutationBRAF',
-  'amplificationMCYN'
+  "filename",
+  "dataID",
+  "sampleID",
+  "institution",
+  "country",
+  "histologyOriginal",
+  "subgroup",
+  "locationOriginal",
+  "compartment",
+  "location",
+  "stageNeuroblastoma",
+  "stageMedulloblastoma",
+  "tissuePrep",
+  "sampleAnalysisGroup",
+  "diagnosis",
+  "grade",
+  "fullName",
+  "diagnosisClass",
+  "classifierLightGBM",
+  "classifierRandomForest",
+  "classifierEuclidean",
+  "classifierTSNE",
+  "diagnosisFinal",
+  "tsne1",
+  "tsne2",
+  "age",
+  "ageGroup",
+  "sex",
+  "tumorType",
+  "mortality",
+  "survivalMonths",
+  "1p/19q-codel",
+  "mutationIDH1/2",
+  "mutationH3",
+  "mutationTERTpromoter",
+  "amplificationEGFR",
+  "methylationMGMTpromoter",
+  "mutationBRAF",
+  "amplificationMCYN"
 )
-  
+
 names(atlasDataClean) <- cleanNames
 
 
 colNames <- tibble(row = 1:length(oldNames), oldNames, cleanNames)
 
-message('Rename finished.')
+message("Rename finished.")
 ```
 
 ## Transform
 
 ```{r}
-
 message("Transform begin..")
 
 atlasDataClean <- atlasDataClean %>%
   mutate(
-    across( 
-     .cols = where(is.character),
-     str_to_upper # ALL CAPS for only char data
+    across(
+      .cols = where(is.character),
+      str_to_upper # ALL CAPS for only char data
     )
-)
+  )
 
 
 
 message("Transform finished.")
-
 ```
 
 ## Recode
 
 ```{r}
-
 message("Recode begin..")
 
 
 atlasDataClean <- atlasDataClean %>%
   mutate(
-    tumorType = ifelse(tumorType %in% c('PRIMARY', 'RECURRENT'), tumorType, NA), # flip n=19 to NA because inexclusive
-    grade = ifelse(grade %in% paste0('GRADE ', 1:4), grade, NA), # flip n=11 to NA because inexclusive
+    tumorType = ifelse(tumorType %in% c("PRIMARY", "RECURRENT"), tumorType, NA), # flip n=19 to NA because inexclusive
+    grade = ifelse(grade %in% paste0("GRADE ", 1:4), grade, NA), # flip n=11 to NA because inexclusive
     survivalMonths = as.double(survivalMonths),
     ageGroup = factor(ageGroup, levels = c("FETAL", "0-5YRS", "5-10YRS", "10-20YRS", "20-40YRS", "40-60YRS", "60-80YRS", "80+YRS")),
     sex = factor(sex, labels = c("MALE", "FEMALE"), levels = c("M", "F")),
@@ -136,7 +131,7 @@ atlasDataClean <- atlasDataClean %>%
       c(grade, tumorType, compartment, fullName, country),
       as.factor
     )
-)
+  )
 
 
 # freq(atlasDataClean$survivalMonths) %>% filter(str_detect(var, '[^0-9.]')) # n=104 # not a digit, not a period
@@ -144,7 +139,6 @@ atlasDataClean <- atlasDataClean %>%
 
 
 message("Recode finished.")
-
 ```
 
 ## Insert
@@ -153,62 +147,54 @@ message("Recode finished.")
 message("Insert begin..")
 
 
-atlasDataClean <- atlasDataClean %>% 
+atlasDataClean <- atlasDataClean %>%
   mutate(
-    isCancerous = factor(ifelse(diagnosisFinal %in% toupper(c("Cerebellum", "Cerebellum, Fetal", "Choroid Plexus", 
-                          "CNS", "Nerve Ganglia", "Peri. Nerve", "Pituitary", 
-                          "Retina", "Retina, Fetal")), 'NO', 'YES'))
+    isCancerous = factor(ifelse(diagnosisFinal %in% toupper(c(
+      "Cerebellum", "Cerebellum, Fetal", "Choroid Plexus",
+      "CNS", "Nerve Ganglia", "Peri. Nerve", "Pituitary",
+      "Retina", "Retina, Fetal"
+    )), "NO", "YES"))
   )
 
 message("Insert finished.")
-
 ```
 
 ## Filter
 
 ```{r}
-
 # message("Filter begin..")
-# 
-# atlasDataClean <- atlasDataClean %>% 
+#
+# atlasDataClean <- atlasDataClean %>%
 #   filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
-# 
-# 
+#
+#
 # # verifies record deletion
 # # select(atlasDataClean, sampleAnalysisGroup, diagnosisFinal) %>% filter(sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') %>% view
-# 
+#
 # message("Filter finished.")
-
-
 ```
 
 
 ## Select
 
 ```{r}
-
-
 message("Select begin..")
 
 
 
-atlasDataClean <- atlasDataClean %>% 
+atlasDataClean <- atlasDataClean %>%
   select(everything())
 
 message("Select finished.")
-
 ```
 
 
 # Save
 
 ```{r}
+save(atlasDataClean, file = "dat/atlasDataClean.RData")
 
-
-save(atlasDataClean, file = 'dat/atlasDataClean.RData')
-
-message('ETL finished.')
-
+message("ETL finished.")
 ```
 
 
