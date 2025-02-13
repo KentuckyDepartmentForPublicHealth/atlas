@@ -123,12 +123,18 @@ message("Biological process finished.")
 # all_possible_genes <- select(gene_annotations, SYMBOL) %>%
 #   filter(!is.na(SYMBOL)) %>%
 #   pull(SYMBOL)
+
+all_valid_genes <- gene_annotations %>%
+  filter(ENTREZID %in% rownames(geneExpressionData)) %>%
+  pull(SYMBOL) %>%
+  unique() %>%
+  sort()
 ```
 
 # Save
 
 ```{r}
-save(gene_annotations, go_to_genes_list, file = "dat/annotations.RData")
+save(gene_annotations, go_to_genes_list, all_valid_genes, file = "dat/annotations.RData")
 
 message("Annotation pipeline finished.")
 ```
