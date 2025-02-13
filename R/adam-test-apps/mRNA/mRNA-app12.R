@@ -15,7 +15,8 @@ ui <- fluidPage(
       ),
       conditionalPanel(
         condition = "input.search_mode == 'Select GO Term'",
-        selectInput("go_term", "Select GO Term", choices = c("", names(go_to_genes_list))),
+        selectizeInput("go_term", "Select GO Term", choices = NULL),
+        # selectInput("go_term", "Select GO Term", choices = c("", names(go_to_genes_list))),
         uiOutput("go_gene_selector")
       ),
       conditionalPanel(
@@ -48,6 +49,15 @@ server <- function(input, output, session) {
   )
 
   gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
+
+  # Update the selectizeInput for "go_term" with server-side processing
+  updateSelectizeInput(
+    session,
+    inputId = "go_term",
+    choices = names(go_to_genes_list),
+    selected = NULL,
+    server = TRUE
+  )
 
   # Reactive for all genes
   all_genes <- reactive({
