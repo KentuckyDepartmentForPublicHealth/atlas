@@ -10,7 +10,9 @@ ui <- fluidPage(
   titlePanel("mRNA Expression Boxplots with Gene Ontology and Gene Annotations"),
   sidebarLayout(
     sidebarPanel(
-      # Radio buttons to pick the search mode
+      #------------------#
+      #   Search Mode    #
+      #------------------#
       radioButtons(
         "search_mode", "Search Mode:",
         choices = c("Select GO Term", "Select All Genes"),
@@ -37,19 +39,18 @@ ui <- fluidPage(
       # Slider to set how many choices appear in the dropdown
       uiOutput("max_options_slider"),
 
-      # Grouping selector
+      #----------------------#
+      #   "Use Group By" UI  #
+      #----------------------#
       conditionalPanel(
+        # Only show after a search mode has been chosen (you can tweak this condition)
         condition = "input.search_mode !== null && input.search_mode !== ''",
-        selectInput(
-          "group_by",
-          "Group By (Optional)",
-          choices = c(
-            "None", "ageGroup", "compartment", "country", "diagnosisClass",
-            "diagnosisFinal", "fullName", "grade", "histologyOriginal",
-            "isCancerous", "sex", "tumorType"
-          ) |> sort(),
-          selected = "None"
-        )
+
+        # A checkbox to turn grouping on/off
+        checkboxInput("use_group_by", "Use Group By", value = FALSE),
+
+        # Placeholder for the dynamic group_by selectInput
+        uiOutput("group_by_selector")
       ),
       width = 3
     ),
@@ -66,7 +67,7 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  #---- 1. Validate that all required datasets are loaded ----#
+  #---- 1. Validate required data ----#
   validate(
     need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
     need(exists("geneExpressionData"), "Error: `geneExpressionData` is not loaded."),
@@ -77,16 +78,12 @@ server <- function(input, output, session) {
   # Clean gene_annotations to ensure no NA ENTREZID
   gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
 
-  #---- 2. Prepare lists / reactive data for UI ----#
-
-  # All possible genes (by symbol) that appear in geneExpressionData
-  all_gene_symbols <- reactive({
-    gene_annotations %>%
-      filter(ENTREZID %in% rownames(geneExpressionData)) %>%
-      pull(SYMBOL) %>%
-      unique() %>%
-      sort()
-  })
+  #---- 2. Pre-compute or reactive for the gene lists ----#
+  all_valid_genes <- gene_annotations %>%
+    filter(ENTREZID %in% rownames(geneExpressionData)) %>%
+    pull(SYMBOL) %>%
+    unique() %>%
+    sort()
 
   # Populate GO terms in the go_term input (server-side selectize)
   updateSelectizeInput(
@@ -96,7 +93,7 @@ server <- function(input, output, session) {
     server = TRUE
   )
 
-  #---- 3. Compute total unique genes (for the slider) ----#
+  #---- 3. Dynamic total unique genes (for the slider) ----#
   total_unique_genes <- reactive({
     req(input$search_mode)
 
@@ -112,7 +109,7 @@ server <- function(input, output, session) {
         unique()
       length(gene_symbols)
     } else if (input$search_mode == "Select All Genes") {
-      length(all_gene_symbols())
+      length(all_valid_genes)
     } else {
       0
     }
@@ -131,8 +128,7 @@ server <- function(input, output, session) {
     )
   })
 
-  #---- 5. Update the "all_genes" input if in "Select All Genes" mode ----#
-  # Now we can directly reuse `all_valid_genes` in updateSelectizeInput:
+  #---- 5. Update the "all_genes" input if "Select All Genes" mode is chosen ----#
   observe({
     req(input$search_mode)
     if (input$search_mode == "Select All Genes") {
@@ -141,18 +137,18 @@ server <- function(input, output, session) {
         "all_genes",
         choices = all_valid_genes,
         options = list(
-          # e.g., show only up to `input$max_options` items in the dropdown at once
           maxOptions = min(input$max_options, length(all_valid_genes))
         ),
         server = TRUE
       )
     }
   })
+
   #---- 6. Dynamically render gene selector for GO Terms ----#
   output$go_gene_selector <- renderUI({
     req(input$search_mode == "Select GO Term", input$go_term)
 
-    # If nothing selected, return empty
+    # If no GO term is selected, return empty
     if (input$go_term == "") {
       choices <- character(0)
     } else {
@@ -187,18 +183,42 @@ server <- function(input, output, session) {
     }
   })
 
-  #---- 8. Filtered data based on selected genes ----#
+  #---- 8. Hide or show the "Use Group By" checkbox based on selected genes ----#
+  observe({
+    if (length(selected_genes()) > 0) {
+      shinyjs::show("use_group_by")
+    } else {
+      shinyjs::hide("use_group_by")
+      updateCheckboxInput(session, "use_group_by", value = FALSE)
+    }
+  })
+
+  #---- 9. Dynamically render the group_by dropdown (only if checkbox is TRUE) ----#
+  output$group_by_selector <- renderUI({
+    if (input$use_group_by) {
+      selectInput(
+        "group_by",
+        "Group By",
+        choices = c(
+          "isCancerous", "grade", "ageGroup", "tumorType", "sex",
+          "compartment", "fullName", "country", "diagnosisFinal",
+          "histologyOriginal", "diagnosisClass"
+        ) |> sort(),
+        selected = "sex"
+      )
+    }
+  })
+
+  #---- 10. Filtered data based on selected genes ----#
   filtered_data <- reactive({
     req(selected_genes())
     if (length(selected_genes()) == 0) {
       return(data.frame())
     }
 
-    # Convert symbols -> ENTREZIDs
     entrez_ids <- gene_annotations %>%
       filter(SYMBOL %in% selected_genes()) %>%
       pull(ENTREZID)
-
     if (length(entrez_ids) == 0) {
       return(data.frame())
     }
@@ -224,7 +244,7 @@ server <- function(input, output, session) {
     gene_data
   })
 
-  #---- 9. Boxplot Output ----#
+  #---- 11. Boxplot Output ----#
   output$boxplot <- renderPlot({
     data <- filtered_data()
     if (nrow(data) == 0) {
@@ -245,9 +265,8 @@ server <- function(input, output, session) {
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-    # If group_by != "None", facet by that group
-    if (input$group_by != "None") {
-      # Compute facet counts for labeling
+    # Only facet if "Use Group By" is on and a valid input$group_by is chosen
+    if (input$use_group_by && !is.null(input$group_by)) {
       facet_counts <- data %>%
         group_by(SYMBOL, .data[[input$group_by]]) %>%
         summarise(n = n(), .groups = "drop")
@@ -276,7 +295,7 @@ server <- function(input, output, session) {
     p
   })
 
-  #---- 10. Render gene info table ----#
+  #---- 12. Render gene info table ----#
   output$gene_info <- renderTable({
     data <- filtered_data()
     if (nrow(data) == 0) {
