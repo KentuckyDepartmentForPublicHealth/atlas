@@ -4,6 +4,12 @@ message("Setting system options, libraries, and functions.")
 
 # rm(list=ls())
 
+
+# image-save -----
+save.image(file = "dat/image-latest.RData")
+# load(file = "dat/image-latest.RData")
+
+
 # system options and libraries --------------------------------------------
 
 options(dplyr.width = Inf, dplyr.print_max = 1e5, max.print = 1e5)
@@ -44,7 +50,7 @@ currentDate <- readRDS(file = "dat/currentDate.rds")
 # helper functions --------------------------------------------------------
 
 # short viewer -----
-myView <- function(data, sample_size = 5000) {
+myView <- function(data, sample_size = 25) {
   # Check if sample_size is not larger than the number of rows in the dataset
   if (sample_size > nrow(data)) {
     sample_size <- nrow(data)

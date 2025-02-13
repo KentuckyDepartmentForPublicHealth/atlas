@@ -4,3 +4,4 @@
 .Ruserdata
 dat/geneExpressionData.RData
 .vscode/*
+dat/image-latest.RData
