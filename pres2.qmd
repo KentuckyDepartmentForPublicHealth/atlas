@@ -161,5 +161,9 @@ grade 1
     -Gene
     -Histology
     -Gender 
-
+#Using Gene Link to Stratify by Genes
+-Need to Link Gene name (annotation) to file names to pull out desired gene
+-This is what I plan on working on for the next week or so 
+-Needs to be a pipeline/system that will work efficently and can be based on user input in the future
+-Most important goal is to simply get it working!
 
