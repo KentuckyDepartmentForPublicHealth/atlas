@@ -3,65 +3,70 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(shinyjs)
-library(rlang) # For the %||% operator if needed
+library(rlang) # For %||% operator if needed
 
 ui <- fluidPage(
-  useShinyjs(),
+  useShinyjs(), # Enable shinyjs
   titlePanel("mRNA Expression Boxplots with Gene Ontology and Gene Annotations"),
   sidebarLayout(
     sidebarPanel(
-      #------------------#
-      #   Search Mode    #
-      #------------------#
+      # ----------------------- #
+      #     Search Mode Radio   #
+      # ----------------------- #
       radioButtons(
         "search_mode", "Search Mode:",
         choices = c("Select GO Term", "Select All Genes"),
-        selected = character(0)
+        selected = character(0) # Start unselected
       ),
 
-      # Conditionally show GO-term input and gene selector
+      # ------------------------------------- #
+      #   Conditional UI for "Select GO Term" #
+      # ------------------------------------- #
       conditionalPanel(
         condition = "input.search_mode === 'Select GO Term'",
-        selectizeInput("go_term", "Select GO Term", choices = NULL),
-        uiOutput("go_gene_selector")
+        selectizeInput(
+          "go_term",
+          "Select GO Term",
+          choices = NULL
+          # We'll set maxOptions in server updateSelectizeInput()
+        ),
+        uiOutput("go_gene_selector") # Dynamically rendered below
       ),
 
-      # Conditionally show the "All Genes" selector
+      # -------------------------------------- #
+      #   Conditional UI for "Select All Genes"#
+      # -------------------------------------- #
       conditionalPanel(
         condition = "input.search_mode === 'Select All Genes'",
         selectizeInput(
           "all_genes", "Select Genes",
           choices = NULL, multiple = TRUE,
-          options = list(maxOptions = 5)
+          options = list(maxOptions = 5) # will update in server
         )
       ),
 
-      # Slider to set how many choices appear in the dropdown
+      # ----------------------------- #
+      #   Dynamic Slider for Choices  #
+      # ----------------------------- #
       uiOutput("max_options_slider"),
 
-      #----------------------#
-      #   "Use Group By" UI  #
-      #----------------------#
-      conditionalPanel(
-        # Only show after a search mode has been chosen (you can tweak this condition)
-        condition = "input.search_mode !== null && input.search_mode !== ''",
+      # -------------------------------------------------- #
+      #   "Use Group By" Checkbox (Initially Hidden via JS) #
+      # -------------------------------------------------- #
+      checkboxInput("use_group_by", "Use Group By", value = FALSE),
 
-        # A checkbox to turn grouping on/off
-        checkboxInput("use_group_by", "Use Group By", value = FALSE),
-
-        # Placeholder for the dynamic group_by selectInput
-        uiOutput("group_by_selector")
-      ),
-
-      #-------------------------------#
-      #    Run and Reset Buttons      #
-      #-------------------------------#
-      br(), # Add a bit of space
+      # --------------------------------- #
+      #   UI Output: Group Selector       #
+      #   (Visible only if checkbox is on)#
+      # --------------------------------- #
+      uiOutput("group_by_selector"),
+      br(),
       actionButton("run", "Run Plot", class = "btn-primary"),
       actionButton("reset", "Reset", class = "btn-warning"),
       width = 3
     ),
     mainPanel(
+      # If no search mode chosen, show a help message
       conditionalPanel(
         condition = "input.search_mode === null || input.search_mode === ''",
         h3("Please select a search mode to proceed.")
@@ -74,7 +79,7 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  #---- 1. Validate required data ----#
+  # 1. Validate that required data objects exist
   validate(
     need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
     need(exists("geneExpressionData"), "Error: `geneExpressionData` is not loaded."),
@@ -82,25 +87,33 @@ server <- function(input, output, session) {
     need(exists("go_to_genes_list"), "Error: `go_to_genes_list` is not loaded.")
   )
 
-  # Clean gene_annotations to ensure no NA ENTREZID
+  # Ensure no NA ENTREZID
   gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
 
-  #---- 2. Pre-compute or reactive for the gene lists ----#
+  # 2. Precompute all valid genes
   all_valid_genes <- gene_annotations %>%
     filter(ENTREZID %in% rownames(geneExpressionData)) %>%
     pull(SYMBOL) %>%
     unique() %>%
     sort()
 
-  # Populate GO terms in the go_term input (server-side selectize)
+  # ---------------------------------- #
+  # Hide "Use Group By" by default on load
+  # ---------------------------------- #
+  shinyjs::hide("use_group_by") # We'll show it later if the user selects genes
+
+  # 3. Populate GO-Term dropdown, removing 1000-item limit
   updateSelectizeInput(
     session, "go_term",
     choices = names(go_to_genes_list),
     selected = NULL,
-    server = TRUE
+    server = TRUE,
+    options = list(maxOptions = 999999) # show all GO terms, not just first 1000
   )
 
-  #---- 3. Dynamic total unique genes (for the slider) ----#
+  # ------------------------ #
+  #   Reactive: # of genes   #
+  # ------------------------ #
   total_unique_genes <- reactive({
     req(input$search_mode)
 
@@ -110,11 +123,12 @@ server <- function(input, output, session) {
         return(0)
       }
       go_genes <- go_to_genes_list[[input$go_term]] %||% character(0)
-      gene_symbols <- gene_annotations %>%
-        filter(ENTREZID %in% go_genes) %>%
-        pull(SYMBOL) %>%
-        unique()
-      length(gene_symbols)
+      length(
+        gene_annotations %>%
+          filter(ENTREZID %in% go_genes) %>%
+          pull(SYMBOL) %>%
+          unique()
+      )
     } else if (input$search_mode == "Select All Genes") {
       length(all_valid_genes)
     } else {
@@ -122,12 +136,14 @@ server <- function(input, output, session) {
     }
   })
 
-  #---- 4. Render the slider for max options ----#
+  # ----------------------------- #
+  #  Render the "max_options" UI  #
+  # ----------------------------- #
   output$max_options_slider <- renderUI({
     req(total_unique_genes() > 0)
     sliderInput(
       "max_options",
-      label = "Number of Genes to Display in Dropdown",
+      "Number of Genes to Display in Dropdown",
       min = 1,
       max = total_unique_genes(),
       value = min(5, total_unique_genes()),
@@ -135,27 +151,40 @@ server <- function(input, output, session) {
     )
   })
 
-  #---- 5. Update the "all_genes" input if "Select All Genes" mode is chosen ----#
-  observe({
-    req(input$search_mode)
+  # --------------------- #
+  #  Update all_genes UI  #
+  # --------------------- #
+  observeEvent(input$search_mode, {
     if (input$search_mode == "Select All Genes") {
       updateSelectizeInput(
         session,
         "all_genes",
         choices = all_valid_genes,
-        options = list(
-          maxOptions = min(input$max_options, length(all_valid_genes))
-        ),
+        options = list(maxOptions = 5),
         server = TRUE
       )
     }
   })
 
-  #---- 6. Dynamically render gene selector for GO Terms ----#
+  observeEvent(input$max_options, {
+    if (input$search_mode == "Select All Genes") {
+      updateSelectizeInput(
+        session,
+        "all_genes",
+        choices = all_valid_genes,
+        options = list(maxOptions = min(input$max_options, length(all_valid_genes))),
+        server = TRUE
+      )
+    }
+  })
+
+  # ----------------------- #
+  #  Render GO gene select  #
+  # ----------------------- #
   output$go_gene_selector <- renderUI({
     req(input$search_mode == "Select GO Term", input$go_term)
 
-    # If no GO term is selected, return empty
+    # If no GO term is selected, choices is empty
     if (input$go_term == "") {
       choices <- character(0)
     } else {
@@ -178,30 +207,48 @@ server <- function(input, output, session) {
     )
   })
 
-  #---- 7. Reactive expression for the final set of selected genes ----#
-  selected_genes <- reactive({
-    req(input$search_mode)
-    if (input$search_mode == "Select GO Term") {
+  # -------------------- #
+  # Reactive for # Genes #
+  # -------------------- #
+  # This tracks how many genes (SYMBOLs) the user has chosen, regardless of mode.
+  selected_genes_now <- reactive({
+    # Safely handle the case where input$search_mode is character(0)
+    search_mode <- input$search_mode
+
+    # If user has not selected anything yet,
+    # search_mode might be character(0) => length zero
+    if (is.null(search_mode) || length(search_mode) == 0) {
+      # No search mode chosen; return empty
+      return(character(0))
+    }
+
+    if (search_mode == "Select GO Term") {
       input$selected_gene %||% character(0)
-    } else if (input$search_mode == "Select All Genes") {
+    } else if (search_mode == "Select All Genes") {
       input$all_genes %||% character(0)
     } else {
       character(0)
     }
   })
 
-  #---- 8. Hide or show the "Use Group By" checkbox based on selected genes ----#
-  # observe({
-  #   if (length(selected_genes()) > 0) {
-  #     shinyjs::show("use_group_by")
-  #   } else {
-  #     shinyjs::hide("use_group_by")
-  #     updateCheckboxInput(session, "use_group_by", value = FALSE)
-  #   }
-  # })
 
-  #---- 9. Dynamically render the group_by dropdown (only if checkbox is TRUE) ----#
+  # ----------------------------------------------------- #
+  # Observe # Genes; show/hide "Use Group By" accordingly #
+  # ----------------------------------------------------- #
+  observe({
+    if (length(selected_genes_now()) > 0) {
+      shinyjs::show("use_group_by")
+    } else {
+      shinyjs::hide("use_group_by")
+      updateCheckboxInput(session, "use_group_by", value = FALSE)
+    }
+  })
+
+  # ------------------------------------- #
+  #  UI Output for the group_by selector  #
+  # ------------------------------------- #
   output$group_by_selector <- renderUI({
+    # Only render the selectInput if user actually checked "Use Group By"
     if (input$use_group_by) {
       selectInput(
         "group_by",
@@ -216,34 +263,36 @@ server <- function(input, output, session) {
     }
   })
 
-  #---------------------------------------------------------------------#
-  #  NEW: Use eventReactive() to delay data filtering until "Run" click  #
-  #---------------------------------------------------------------------#
-  filtered_data_event <- eventReactive(input$run, {
-    # Isolate all relevant inputs so the data only updates upon "Run"
-    # (not each time one of the inputs changes)
+  # ---------------------------------------------------------------- #
+  #  eventReactive: Actually filter data and store group-by choices  #
+  #  Triggered only by "Run Plot"                                    #
+  # ---------------------------------------------------------------- #
+  final_data <- eventReactive(input$run, {
     isolate({
-      req(input$search_mode)
-      req(selected_genes())
-
-      if (length(selected_genes()) == 0) {
-        return(data.frame())
+      # 1) Determine which genes the user selected
+      chosen_genes <- selected_genes_now()
+      if (length(chosen_genes) == 0) {
+        # Return an empty data.frame and relevant flags
+        return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
       }
 
+      # 2) Convert chosen SYMBOLs to ENTREZID
       entrez_ids <- gene_annotations %>%
-        filter(SYMBOL %in% selected_genes()) %>%
+        filter(SYMBOL %in% chosen_genes) %>%
         pull(ENTREZID)
+
+      # If no valid ENTREZID, no data
       if (length(entrez_ids) == 0) {
-        return(data.frame())
+        return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
       }
 
-      # Subset the gene expression matrix
+      # 3) Subset gene expression matrix
       gene_data <- geneExpressionData[rownames(geneExpressionData) %in% entrez_ids, ]
       if (nrow(gene_data) == 0) {
-        return(data.frame())
+        return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
       }
 
-      # Reshape and merge with annotations
+      # 4) Pivot longer and join metadata
       gene_data <- gene_data %>%
         as.data.frame() %>%
         mutate(ENTREZID = rownames(.)) %>%
@@ -252,49 +301,67 @@ server <- function(input, output, session) {
           names_to = "filename",
           values_to = "expression"
         ) %>%
-        left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
+        left_join(
+          gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME),
+          by = "ENTREZID"
+        ) %>%
         left_join(atlasDataClean, by = "filename")
 
-      gene_data
+      # 5) Also capture whether user wants to group, and which grouping var
+      do_group <- input$use_group_by
+      grp_var <- input$group_by
+
+      list(
+        df      = gene_data,
+        doGroup = do_group,
+        grpVar  = grp_var
+      )
     })
   })
 
-  #---- 11. Boxplot Output (Uses eventReactive data) ----#
+  # ----------------------- #
+  #  Render the Box Plot    #
+  # ----------------------- #
   output$boxplot <- renderPlot({
-    data <- filtered_data_event()
+    all_stuff <- final_data()
+    data <- all_stuff$df
+    gflag <- all_stuff$doGroup
+    gvar <- all_stuff$grpVar
+
+    # No data => empty plot
     if (nrow(data) == 0) {
       plot(NULL, xlab = "", ylab = "", main = "No data to display")
       return()
     }
 
-    count <- nrow(data)
     p <- ggplot(data, aes(x = SYMBOL, y = expression, color = SYMBOL)) +
       geom_boxplot() +
       geom_jitter(width = 0.2, alpha = 0.5) +
       labs(
         title = "Expression of Selected Genes",
-        subtitle = paste0("Total values contributing: n=", count),
+        subtitle = paste0("Total values: n=", nrow(data)),
         x = "Gene Symbol",
         y = "Expression Level"
       ) +
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-    # Only facet if "Use Group By" is on and a valid input$group_by is chosen
-    if (input$use_group_by && !is.null(input$group_by)) {
+    # If user wants grouping, add facet wrap
+    if (gflag && !is.null(gvar) && gvar != "") {
+      # Summarize n per facet
       facet_counts <- data %>%
-        group_by(SYMBOL, .data[[input$group_by]]) %>%
+        group_by(SYMBOL, .data[[gvar]]) %>%
         summarise(n = n(), .groups = "drop")
 
       p <- p +
-        facet_wrap(~ .data[[input$group_by]], scales = "free") +
+        facet_wrap(as.formula(paste("~", gvar)), scales = "free") +
         geom_text(
           data = facet_counts,
           aes(label = paste0("n=", n), y = Inf),
           vjust = 1.5, size = 3, fontface = "bold", color = "gray20"
         )
     } else {
-      # Single group (no facet), but add n labels per symbol
+      # Otherwise, just label total n for each gene
       symbol_counts <- data %>%
         group_by(SYMBOL) %>%
         summarise(n = n(), .groups = "drop")
@@ -310,9 +377,12 @@ server <- function(input, output, session) {
     p
   })
 
-  #---- 12. Render gene info table (Uses eventReactive data) ----#
+  # ---------------------------- #
+  #  Render Gene Info Table      #
+  # ---------------------------- #
   output$gene_info <- renderTable({
-    data <- filtered_data_event()
+    all_stuff <- final_data()
+    data <- all_stuff$df
     if (nrow(data) == 0) {
       return(NULL)
     }
@@ -321,27 +391,31 @@ server <- function(input, output, session) {
       distinct()
   })
 
-  #--------------------------------------------------#
-  #    NEW: Reset Button to Clear/Undo All Inputs    #
-  #--------------------------------------------------#
+  # ----------------------------- #
+  #   Reset Button to Clear All   #
+  # ----------------------------- #
   observeEvent(input$reset, {
-    # Clear everything: radio buttons, selectize inputs, sliders, checkboxes, etc.
+    # 1. Reset search mode to no selection
     updateRadioButtons(session, "search_mode", selected = character(0))
+
+    # 2. Clear GO term & selected genes
     updateSelectizeInput(session, "go_term", selected = NULL)
     updateSelectizeInput(session, "selected_gene", selected = NULL)
+
+    # 3. Clear "All Genes"
     updateSelectizeInput(session, "all_genes", selected = NULL)
+
+    # 4. Reset slider to 5 (or 1, whichever you prefer)
     if (!is.null(total_unique_genes())) {
-      # reset slider to 5 or 1, whichever is more appropriate as a "default"
       updateSliderInput(session, "max_options", value = 5)
     }
+
+    # 5. Uncheck "Use Group By"
+    shinyjs::hide("use_group_by") # Hide it again
     updateCheckboxInput(session, "use_group_by", value = FALSE)
 
-    # Optionally, hide or reset group_by selector
-    shinyjs::hide("group_by_selector")
-
-    # (Optional) You could also force the plot to display empty if you want:
-    # by clearing or invalidating the eventReactive. But typically, if no gene is
-    # selected, it will show "No data to display" anyway.
+    # 6. Reset group_by (if needed)
+    updateSelectInput(session, "group_by", selected = "sex")
   })
 }
 
