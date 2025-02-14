@@ -60,8 +60,45 @@ ui <- fluidPage(
       # --------------------------------- #
       uiOutput("group_by_selector"),
       br(),
-      actionButton("run", "Run Plot", class = "btn-primary"),
-      actionButton("reset", "Reset", class = "btn-warning"),
+      fluidRow(
+        column(
+          12,
+          div(
+            style = "text-align: center;",
+            actionButton("run", "Run Plot",
+              icon = icon("play"),
+              class = "btn-primary btn-lg",
+              style = "width: 90%; margin: 10px;"
+            )
+          )
+        )
+      ),
+      fluidRow(
+        column(
+          12,
+          div(
+            style = "text-align: center;",
+            actionButton("reset", "Clear",
+              icon = icon("eraser"),
+              class = "btn-warning btn-lg",
+              style = "width: 90%; margin: 10px;"
+            )
+          )
+        )
+      ),
+      fluidRow(
+        column(
+          12,
+          div(
+            style = "text-align: center;",
+            actionButton("reload", "Reload",
+              icon = icon("sync"),
+              class = "btn-danger btn-lg",
+              style = "width: 90%; margin: 10px;"
+            )
+          )
+        )
+      ),
       width = 3
     ),
     mainPanel(
@@ -98,6 +135,10 @@ server <- function(input, output, session) {
 
   # Hide "Use Group By" by default on load
   shinyjs::hide("use_group_by")
+  # Reload Page on Reload Button
+  observeEvent(input$reload, {
+    shinyjs::refresh()
+  })
 
   # 3. Populate GO-Term dropdown, removing 1000-item limit
   updateSelectizeInput(
