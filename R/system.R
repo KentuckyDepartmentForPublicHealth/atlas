@@ -6,7 +6,7 @@ message("Setting system options, libraries, and functions.")
 
 
 # image-save -----
-save.image(file = "dat/image-latest.RData")
+#save.image(file = "dat/image-latest.RData")
 # load(file = "dat/image-latest.RData")
 
 
@@ -15,11 +15,11 @@ save.image(file = "dat/image-latest.RData")
 options(dplyr.width = Inf, dplyr.print_max = 1e5, max.print = 1e5)
 
 library(tidyverse)
-library(readxl)
-library(scales)
-library(DBI)
-library(RPostgres)
-library(survival)
+# library(readxl)
+# library(scales)
+# library(DBI)
+# library(RPostgres)
+# library(survival)
 library(shiny)
 library(bslib)
 
@@ -282,9 +282,9 @@ deltaP <- function(x, y, as_decimal = F) {
 # either this or that -----------------------------------------------------
 
 
-`%||%` <- function(a, b) {
-  ifelse(!is.na(a), a, b)
-}
+# `%||%` <- function(a, b) {
+#   ifelse(!is.na(a), a, b)
+# }
 
 # create a data frame with interval dates ---------------------------------
 

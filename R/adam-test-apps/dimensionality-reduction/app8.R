@@ -4,9 +4,9 @@ library(dplyr)
 library(DT)
 
 # Preloaded gene choices for faster performance
-load("dat/geneExpressionData.RData")
-load("dat/atlasDataClean.RData")
-load('dat/annotations.RData')
+# load("dat/geneExpressionData.RData")
+# load("dat/atlasDataClean.RData")
+# load('dat/annotations.RData')
 # Preloaded gene choices for better performance
 geneChoices <- unique(c("All Genes", gene_annotations$SYMBOL))
 
