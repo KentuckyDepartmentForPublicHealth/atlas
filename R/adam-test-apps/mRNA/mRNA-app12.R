@@ -3,6 +3,8 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(shinyjs)
+# remotes::install_github("daattali/shinyjs")
+library(shinyalert)
 library(rlang) # For %||% operator if needed
 
 ui <- fluidPage(
@@ -300,13 +302,26 @@ server <- function(input, output, session) {
   #  Triggered only by "Run Plot"                                    #
   # ---------------------------------------------------------------- #
   final_data <- eventReactive(input$run, {
+    # Get the currently selected genes using the same function
+    # that's used in the data processing
+    chosen_genes <- selected_genes_now()
+    
+    if (length(chosen_genes) == 0) {
+      shinyalert::shinyalert(
+        "Oops!", "You must select at least one gene to run the plot.", 
+        type = "error",
+        confirmButtonCol = '#0B3B60',
+        size = 'm'
+      )
+      return(NULL)
+    }
+
     isolate({
-      # 1) Determine which genes the user selected
-      chosen_genes <- selected_genes_now()
-      if (length(chosen_genes) == 0) {
-        # Return an empty data.frame and relevant flags
-        return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
-      }
+      # Remove this redundant check since we already did it above
+      # chosen_genes <- selected_genes_now()
+      # if (length(chosen_genes) == 0) {
+      #   return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
+      # }
 
       # 2) Convert chosen SYMBOLs to ENTREZID
       entrez_ids <- gene_annotations %>%
@@ -354,17 +369,22 @@ server <- function(input, output, session) {
   # ----------------------- #
   #  Render the Box Plot    #
   # ----------------------- #
-  output$boxplot <- renderPlot({
-    all_stuff <- final_data()
-    data <- all_stuff$df
-    gflag <- all_stuff$doGroup
-    gvar <- all_stuff$grpVar
-
-    # No data => empty plot
-    if (nrow(data) == 0) {
-      plot(NULL, xlab = "", ylab = "", main = "No data to display")
-      return()
-    }
+output$boxplot <- renderPlot({
+  # Get the data
+  all_stuff <- final_data()
+  
+  # Check if all_stuff is NULL or data is empty
+  if (is.null(all_stuff) || nrow(all_stuff$df) == 0) {
+    plot.new()
+    text(0.5, 0.5, "No data to display", cex = 1.2)
+    return()
+  }
+  
+  # If we get here, we know all_stuff exists and has data
+  data <- all_stuff$df
+  gflag <- all_stuff$doGroup
+  gvar <- all_stuff$grpVar
+  # Create the plot
 
     p <- ggplot(data, aes(x = SYMBOL, y = expression, color = SYMBOL)) +
       geom_boxplot() +
@@ -412,17 +432,24 @@ server <- function(input, output, session) {
   # ---------------------------- #
   #  Render Gene Info Table      #
   # ---------------------------- #
-  output$gene_info <- renderTable({
-    all_stuff <- final_data()
-    data <- all_stuff$df
-    if (nrow(data) == 0) {
-      return(NULL)
-    }
-    data %>%
-      select(SYMBOL, GENENAME) %>%
-      distinct()
-  })
-
+output$gene_info <- renderTable({
+  # Get the data
+  all_stuff <- final_data()
+  
+  # Check if all_stuff is NULL before trying to access $df
+  if (is.null(all_stuff)) {
+    return(NULL)
+  }
+  
+  data <- all_stuff$df
+  if (nrow(data) == 0) {
+    return(NULL)
+  }
+  
+  data %>%
+    select(SYMBOL, GENENAME) %>%
+    distinct()
+})
   # ----------------------------- #
   #   Reset Button to Clear All   #
   # ----------------------------- #
