@@ -28,7 +28,6 @@ ui <- fluidPage(
           "go_term",
           "Select GO Term",
           choices = NULL
-          # We'll set maxOptions in server updateSelectizeInput()
         ),
         uiOutput("go_gene_selector") # Dynamically rendered below
       ),
@@ -97,10 +96,8 @@ server <- function(input, output, session) {
     unique() %>%
     sort()
 
-  # ---------------------------------- #
   # Hide "Use Group By" by default on load
-  # ---------------------------------- #
-  shinyjs::hide("use_group_by") # We'll show it later if the user selects genes
+  shinyjs::hide("use_group_by")
 
   # 3. Populate GO-Term dropdown, removing 1000-item limit
   updateSelectizeInput(
@@ -115,7 +112,7 @@ server <- function(input, output, session) {
   #   Reactive: # of genes   #
   # ------------------------ #
   total_unique_genes <- reactive({
-    req(input$search_mode)
+    req(input$search_mode) # Must have a non-empty search_mode to proceed
 
     if (input$search_mode == "Select GO Term") {
       req(input$go_term)
@@ -154,8 +151,9 @@ server <- function(input, output, session) {
   # --------------------- #
   #  Update all_genes UI  #
   # --------------------- #
+  # ## FIX ## use isTRUE(...) to avoid length zero warnings
   observeEvent(input$search_mode, {
-    if (input$search_mode == "Select All Genes") {
+    if (isTRUE(input$search_mode == "Select All Genes")) {
       updateSelectizeInput(
         session,
         "all_genes",
@@ -167,7 +165,8 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$max_options, {
-    if (input$search_mode == "Select All Genes") {
+    # ## FIX ##
+    if (isTRUE(input$search_mode == "Select All Genes")) {
       updateSelectizeInput(
         session,
         "all_genes",
@@ -210,27 +209,20 @@ server <- function(input, output, session) {
   # -------------------- #
   # Reactive for # Genes #
   # -------------------- #
-  # This tracks how many genes (SYMBOLs) the user has chosen, regardless of mode.
   selected_genes_now <- reactive({
-    # Safely handle the case where input$search_mode is character(0)
-    search_mode <- input$search_mode
-
-    # If user has not selected anything yet,
-    # search_mode might be character(0) => length zero
-    if (is.null(search_mode) || length(search_mode) == 0) {
-      # No search mode chosen; return empty
+    # If user has not selected a search mode yet => zero-length => return empty
+    if (is.null(input$search_mode) || length(input$search_mode) == 0) {
       return(character(0))
     }
 
-    if (search_mode == "Select GO Term") {
+    if (input$search_mode == "Select GO Term") {
       input$selected_gene %||% character(0)
-    } else if (search_mode == "Select All Genes") {
+    } else if (input$search_mode == "Select All Genes") {
       input$all_genes %||% character(0)
     } else {
       character(0)
     }
   })
-
 
   # ----------------------------------------------------- #
   # Observe # Genes; show/hide "Use Group By" accordingly #
@@ -248,7 +240,6 @@ server <- function(input, output, session) {
   #  UI Output for the group_by selector  #
   # ------------------------------------- #
   output$group_by_selector <- renderUI({
-    # Only render the selectInput if user actually checked "Use Group By"
     if (input$use_group_by) {
       selectInput(
         "group_by",
@@ -338,10 +329,10 @@ server <- function(input, output, session) {
       geom_boxplot() +
       geom_jitter(width = 0.2, alpha = 0.5) +
       labs(
-        title = "Expression of Selected Genes",
+        title    = "Expression of Selected Genes",
         subtitle = paste0("Total values: n=", nrow(data)),
-        x = "Gene Symbol",
-        y = "Expression Level"
+        x        = "Gene Symbol",
+        y        = "Expression Level"
       ) +
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -405,16 +396,16 @@ server <- function(input, output, session) {
     # 3. Clear "All Genes"
     updateSelectizeInput(session, "all_genes", selected = NULL)
 
-    # 4. Reset slider to 5 (or 1, whichever you prefer)
+    # 4. Reset slider to 5
     if (!is.null(total_unique_genes())) {
       updateSliderInput(session, "max_options", value = 5)
     }
 
-    # 5. Uncheck "Use Group By"
-    shinyjs::hide("use_group_by") # Hide it again
+    # 5. Uncheck & hide "Use Group By"
+    shinyjs::hide("use_group_by")
     updateCheckboxInput(session, "use_group_by", value = FALSE)
 
-    # 6. Reset group_by (if needed)
+    # 6. Reset group_by
     updateSelectInput(session, "group_by", selected = "sex")
   })
 }
