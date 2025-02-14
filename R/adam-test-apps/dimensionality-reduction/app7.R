@@ -26,8 +26,13 @@ server <- function(input, output) {
     data <- filteredData()
     validate(need(nrow(data) > 0, "No data available to plot."))
     
-    num_classes <- length(unique(data$diagnosisClass))
-    custom_colors <- setNames(rainbow(num_classes), unique(data$diagnosisClass))
+    # Calculate centroids for each diagnosisFinal
+    centroids <- data %>%
+      group_by(diagnosisFinal) %>%
+      summarise(tsne1 = median(tsne1), tsne2 = median(tsne2))
+    
+    num_classes <- length(unique(data$diagnosisFinal))
+    custom_colors <- setNames(rainbow(num_classes), unique(data$diagnosisFinal))
     
     p <- plot_ly(data = data,
                  x = ~tsne1, y = ~tsne2,
@@ -45,7 +50,16 @@ server <- function(input, output) {
         plot_bgcolor = '#111111', 
         paper_bgcolor = '#111111',
         font = list(color = 'white'),
-        dragmode = 'select'  # Enable selection
+        dragmode = 'select',  # Enable selection
+        annotations = lapply(1:nrow(centroids), function(i) {
+          list(
+            x = centroids$tsne1[i],
+            y = centroids$tsne2[i],
+            text = centroids$diagnosisFinal[i],
+            showarrow = FALSE,
+            font = list(size = 10, color = 'white')
+          )
+        })
       )
     
     # Register the event if necessary
