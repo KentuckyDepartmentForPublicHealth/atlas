@@ -569,6 +569,7 @@ map(atlasDataClean[, , drop = F], ~ freq(.x) %>% head())
 sink('dat/all-freqs'); map(atlasData, ~ freq(.x)); sink()
 sink('dat/all-freqs2'); map(atlasDataClean, ~ freq(.x)); sink()
 sink('out/all-freqs3'); map(atlasDataClean, ~ freq(.x)); sink()
+sink('out/all-freqs4'); map(select(atlasDataClean, -c('filename', 'dataID', 'sampleID', 'tsne1', 'tsne2')), ~ freq(.x)); sink()
 
 atlasData %>% filter(as.logical(is_tumor)) %>% pull('Final diagnosis') %>% freq
 atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq

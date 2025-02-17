@@ -149,7 +149,7 @@ message("Insert begin..")
 
 atlasDataClean <- atlasDataClean %>%
   mutate(
-    isCancerous = factor(ifelse(diagnosisFinal %in% toupper(c(
+    isNeoplasm = factor(ifelse(diagnosisFinal %in% toupper(c(
       "Cerebellum", "Cerebellum, Fetal", "Choroid Plexus",
       "CNS", "Nerve Ganglia", "Peri. Nerve", "Pituitary",
       "Retina", "Retina, Fetal"
@@ -163,14 +163,14 @@ message("Insert finished.")
 
 ```{r}
 # message("Filter begin..")
-#
+
 # atlasDataClean <- atlasDataClean %>%
 #   filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
-#
-#
+
+
 # # verifies record deletion
 # # select(atlasDataClean, sampleAnalysisGroup, diagnosisFinal) %>% filter(sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') %>% view
-#
+
 # message("Filter finished.")
 ```
 
