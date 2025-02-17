@@ -1,4 +1,33 @@
 
+# assign missing diagnosis class to testing data set?
+
+```{r, groupings}
+
+atlasDataClean2 %>% 
+  group_by(diagnosisClass, diagnosisFinal) %>%
+  summarise(n = n()) %>% 
+  arrange(diagnosisFinal)
+
+
+```
+
+# attempt to use the diagnosisFinal to assign missing diagnosisClass
+```{r}
+# Create a reference mapping from existing valid entries
+diagnosis_mapping <- atlasDataClean %>%
+  filter(diagnosisClass != "#N/A" & !is.na(diagnosisClass)) %>%
+  distinct(diagnosisFinal, diagnosisClass)
+
+# Apply the mapping to fill in #N/A values
+atlasDataClean2 <- atlasDataClean %>%
+  # left join safer; but for now, same output as inner_join
+  left_join(diagnosis_mapping, by = "diagnosisFinal", suffix = c("", "_new")) %>% 
+  mutate(diagnosisClass = ifelse(diagnosisClass == "#N/A" | is.na(diagnosisClass),
+                                diagnosisClass_new,
+                                diagnosisClass)) %>%
+  select(-diagnosisClass_new)
+```
+
 # understand
 # gene ontology biological processes (BP) cannot be merged into a DF with 20360 rows because "one to many" is the relationship of ENTREZID and BP
 

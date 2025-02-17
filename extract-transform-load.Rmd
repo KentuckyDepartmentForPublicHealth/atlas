@@ -119,6 +119,10 @@ message("Transform finished.")
 ```{r}
 message("Recode begin..")
 
+# Create a reference mapping from existing valid entries
+diagnosis_mapping <- atlasDataClean %>%
+  filter(diagnosisClass != "#N/A" & !is.na(diagnosisClass)) %>%
+  distinct(diagnosisFinal, diagnosisClass)
 
 atlasDataClean <- atlasDataClean %>%
   mutate(
@@ -131,7 +135,17 @@ atlasDataClean <- atlasDataClean %>%
       c(grade, tumorType, compartment, fullName, country),
       as.factor
     )
-  )
+  ) %>% 
+  # Apply the mapping to fill in #N/A values
+  # left join safer; but for now, same output as inner_join
+  left_join(diagnosis_mapping, by = "diagnosisFinal", suffix = c("", "_new")) %>% 
+  mutate(diagnosisClass = ifelse(diagnosisClass == "#N/A" | is.na(diagnosisClass),
+                                diagnosisClass_new,
+                                diagnosisClass)) %>%
+  select(-diagnosisClass_new)
+
+# clean up
+rm(diagnosis_mapping)
 
 
 # freq(atlasDataClean$survivalMonths) %>% filter(str_detect(var, '[^0-9.]')) # n=104 # not a digit, not a period
@@ -162,16 +176,16 @@ message("Insert finished.")
 ## Filter
 
 ```{r}
-# message("Filter begin..")
+message("Filter begin..")
 
-# atlasDataClean <- atlasDataClean %>%
-#   filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
+atlasDataClean <- atlasDataClean %>%
+  filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
 
 
-# # verifies record deletion
-# # select(atlasDataClean, sampleAnalysisGroup, diagnosisFinal) %>% filter(sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') %>% view
+# verifies record deletion
+# select(atlasDataClean, sampleAnalysisGroup, diagnosisFinal) %>% filter(sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') %>% view
 
-# message("Filter finished.")
+message("Filter finished.")
 ```
 
 
