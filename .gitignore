@@ -5,3 +5,4 @@
 dat/geneExpressionData.RData
 .vscode/*
 dat/image-latest.RData
+**/chat_history.json
