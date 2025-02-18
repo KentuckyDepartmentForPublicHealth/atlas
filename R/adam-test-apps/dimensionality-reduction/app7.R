@@ -3,6 +3,7 @@ library(plotly)
 library(dplyr)
 library(DT)
 
+
 # Define tumor colors
 tumor_colors <- c(
   "#6a0033", "#e4016e", "#ff527b", "#360e15", "#ff757c", "#dc002d", 
@@ -17,7 +18,7 @@ tumor_colors <- c(
 
 ui <- fluidPage(
   titlePanel("t-SNE Dimensionality Reduction"),
-  plotlyOutput("tsnePlot"),
+  plotlyOutput("tsnePlot", height = "600px"),
   DT::dataTableOutput("dataTable")
 )
 
@@ -116,11 +117,11 @@ server <- function(input, output) {
     p <- layout(
       p,
       title = "t-SNE Dimensionality Reduction",
-      xaxis = list(title = "t-SNE 1", color = 'white'),
-      yaxis = list(title = "t-SNE 2", color = 'white'),
-      plot_bgcolor = '#111111',
-      paper_bgcolor = '#111111',
-      font = list(color = 'white'),
+      xaxis = list(title = "t-SNE 1", color = 'black'),
+      yaxis = list(title = "t-SNE 2", color = 'black'),
+      plot_bgcolor = '#white',
+      paper_bgcolor = '#white',
+      font = list(color = 'black'),
       dragmode = 'select',
       legend = list(
         itemclick = "toggleothers",
@@ -132,7 +133,10 @@ server <- function(input, output) {
           y = centroids$tsne2[i],
           text = centroids$diagnosisFinal[i],
           showarrow = FALSE,
-          font = list(size = 10, color = 'white')
+          font = list(size = 10, color = 'gray10')
+          # bgcolor = 'black'
+        # pad = list(l = 0, r = 0, t = 0, b = 0)  # No padding
+   # pad = list(l = 2, r = 2, t = 1, b = 1)
         )
       })
     )
@@ -147,15 +151,21 @@ server <- function(input, output) {
   
   output$dataTable <- DT::renderDataTable({
     select_data <- selected_points()
-    if (!is.null(select_data) && nrow(select_data) > 0) {
-      point_keys <- as.numeric(select_data$key)
-      selected_data <- atlasDataClean[atlasDataClean$key %in% point_keys, ]
-      if(nrow(selected_data) > 0) {
-        return(DT::datatable(selected_data))
-      }
-      return(DT::datatable(data.frame(Message = "No valid points selected")))
-    }
-    return(DT::datatable(data.frame(Message = "No points selected")))
+    
+    # Validate that some points have been selected
+    validate(
+      need(!is.null(select_data) && nrow(select_data) > 0, "Must select at least one data point. Selection cannot be empty.")
+    )
+    
+    point_keys <- as.numeric(select_data$key)
+    selected_data <- atlasDataClean[atlasDataClean$key %in% point_keys, ]
+    
+    # Validate that there are valid points after subsetting
+    validate(
+      need(nrow(selected_data) > 0, "No valid points selected.")
+    )
+    
+    DT::datatable(selected_data)
   })
 }
 

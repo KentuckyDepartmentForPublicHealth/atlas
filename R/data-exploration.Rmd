@@ -1,6 +1,10 @@
 
 ```{r}
 freq(atlasDataClean$diagnosisClass)
+
+unique(atlasDataClean$sampleID) %>% length()
+
+group_by(atlasDataClean, sampleID) %>% count(sort = T) %>% filter(n > 1)
 ```
 
 # assign missing diagnosis class to testing data set?
