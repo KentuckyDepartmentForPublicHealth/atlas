@@ -11,7 +11,7 @@ library(shiny)
 
 # Define UI using navbarPage for two tabs
 ui <- navbarPage(
-  title = "Kaplan Meier Curves App",
+  title = "Atlas: Survival Analysis",
   # CSS to custom color top bar ---- had to generate template w chat gpt
   tags$head(tags$style(HTML("
     .navbar {
@@ -50,7 +50,8 @@ ui <- navbarPage(
             label = 'Select strata:', # What user sees
             choices = allowed_vars, # Choices are each unique value from the bmi variable
             selected = allowed_vars[1] # Default choice set to first index
-          )
+          ),
+          checkboxInput("show_hr", "Display Hazard Ratios", value = FALSE)
         ),
         mainPanel(
           plotOutput("kmplt"), # Output for Kaplan-Meier plot
