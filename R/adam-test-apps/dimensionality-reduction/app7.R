@@ -3,6 +3,27 @@ library(plotly)
 library(dplyr)
 library(DT)
 
+  # Function to generate color palette
+  generate_palette <- function(n) {
+    preset_colors <- c(
+      "#6a0033", "#e4016e", "#ff527b", "#360e15", "#ff757c", "#dc002d", 
+      "#ff9170", "#7a2000", "#ff7e40", "#ac5300", "#da6c00", "#401f00",
+      "#ffb173", "#d79600", "#6a4800", "#d6c6b2", "#ddaf00", "#d6ca6f",
+      "#6e6900", "#1d1c10", "#8db600", "#1b7a00", "#8ddb76", "#00b861",
+      "#9ad5b1", "#005d3f", "#01bbb7", "#00444d", "#01afc7", "#54d8f9",
+      "#0189dd", "#8ab5ff", "#5292ff", "#004690", "#00317f", "#4263ff",
+      "#240a4e", "#271332", "#fa63ff", "#760078", "#ff77f6", "#8a005f",
+      "#ffa5ca"
+    )
+    
+    if (n <= length(preset_colors)) {
+      return(preset_colors[1:n])
+    } else {
+      # If we need more colors than preset, extend with interpolation
+      colorRampPalette(preset_colors)(n)
+    }
+  }
+  
 ui <- fluidPage(
   titlePanel("t-SNE Dimensionality Reduction"),
   plotlyOutput("tsnePlot"),
@@ -34,9 +55,7 @@ server <- function(input, output) {
     
     # Create a custom color palette for 'diagnosisFinal'
     diagnosisFinal_levels <- levels(data$diagnosisFinal)
-    num_diagnosisFinal <- length(diagnosisFinal_levels)
-    custom_colors <- setNames(rainbow(num_diagnosisFinal), diagnosisFinal_levels)
-    
+  custom_colors <- setNames(generate_palette(length(diagnosisFinal_levels)), diagnosisFinal_levels)    
     # Calculate centroids for each diagnosisFinal
     centroids <- data %>%
       group_by(diagnosisFinal) %>%

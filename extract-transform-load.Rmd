@@ -144,7 +144,7 @@ atlasDataClean <- atlasDataClean %>%
                                 diagnosisClass)) %>%
   select(-diagnosisClass_new)
 
-# clean up
+# clean up reference data
 rm(diagnosis_mapping)
 
 
@@ -152,7 +152,6 @@ rm(diagnosis_mapping)
 # freq(atlasDataClean$age) %>% filter(str_detect(var, "[^0-9.]")) # n=590 # not a digit, not a period
 
 
-message("Recode finished.")
 ```
 
 ## Insert

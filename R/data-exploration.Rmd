@@ -1,9 +1,13 @@
 
+```{r}
+freq(atlasDataClean$diagnosisClass)
+```
+
 # assign missing diagnosis class to testing data set?
 
 ```{r, groupings}
 
-atlasDataClean2 %>% 
+atlasDataClean %>% 
   group_by(diagnosisClass, diagnosisFinal) %>%
   summarise(n = n()) %>% 
   arrange(diagnosisFinal)
@@ -26,6 +30,8 @@ atlasDataClean2 <- atlasDataClean %>%
                                 diagnosisClass_new,
                                 diagnosisClass)) %>%
   select(-diagnosisClass_new)
+
+rm(diagnosis_mapping)
 ```
 
 # understand
