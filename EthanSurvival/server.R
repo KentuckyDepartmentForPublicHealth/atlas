@@ -52,6 +52,9 @@ server <- function(input, output, session) {
   
   # Configuring output for hazard ratios
   output$hazard_ratios <- renderPrint({
+    
+    req(input$show_hr)
+    
     data <- filtered_dat()
     
     # Creating Cox PH model
