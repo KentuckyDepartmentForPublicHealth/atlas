@@ -37,8 +37,8 @@ ui <- tagList(
             selectInput(
               inputId = 'diagnosis',
               label = 'Select Diagnosis:',
-              choices = unique_diagnosis,
-              selected = unique_diagnosis[1]
+              choices = c("All", unique_diagnosis),  
+              selected = "All"  
             ),
             selectInput(
               inputId = 'Strata',

@@ -7,25 +7,25 @@
 #    https://shiny.posit.co/
 #
 
-library(dplyr)
-library(survival)
-library(survminer)
 
 server <- function(input, output, session) {
   # Reactive filtered data based on user input
   filtered_dat <- reactive({
-    atlasDataClean %>%
-      dplyr::filter(
-        diagnosis %in% input$diagnosis  # Filter by selected diagnosis
-      )
+    if (input$diagnosis == "All") {
+      atlasDataClean  
+    } else {
+      atlasDataClean %>%
+        dplyr::filter(diagnosis == input$diagnosis)  # Subset if specific diagnosis selected
+    }
   })
+  
   
   output$kmplt <- renderPlot({
     data <- filtered_dat()
     req(nrow(data) > 0)
     
     # Fit survival model
-    fit <- survfit2(as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata)), data = data)
+    fit <- survfit(as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata)), data = data)
     
     # Base Kaplan-Meier plot using ggsurvfit
     p <- ggsurvfit(fit) +
