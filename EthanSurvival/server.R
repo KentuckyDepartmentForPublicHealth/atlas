@@ -20,21 +20,21 @@ server <- function(input, output, session) {
       )
   })
   
-  # Create KM plot
   output$kmplt <- renderPlot({
     data <- filtered_dat()
+    req(nrow(data) > 0)
     
     # Fit survival model
     fit <- survfit2(as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata)), data = data)
     
-    # Plot using ggsurvfit
-    ggsurvfit(fit) +
+    # Base Kaplan-Meier plot using ggsurvfit
+    p <- ggsurvfit(fit) +
       labs(
         x = "Time (Days)",
         y = "Survival Probability",
         title = "Kaplan-Meier Plot"
       ) +
-      scale_color_discrete() +  # Use color instead of fill
+      scale_color_discrete() +  
       theme(
         panel.background = element_rect(fill = "white", color = NA),  
         plot.background = element_rect(fill = "white", color = NA),   
@@ -48,7 +48,17 @@ server <- function(input, output, session) {
         legend.text = element_text(color = "black"),                  
         legend.title = element_text(color = "black")                  
       )
+    
+    # Conditionally add the risk table if checkbox is checked
+    if (input$show_risk_table) {
+      p <- p + add_risktable()
+    }
+    
+    # Return the final plot
+    p
   })
+  
+  
   
   output$hazard_table <- render_gt({
     req(input$show_hr)  # Ensure checkbox is checked
