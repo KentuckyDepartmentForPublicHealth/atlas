@@ -71,13 +71,16 @@ server <- function(input, output, session) {
     ci <- exp(confint(cox_model))
     p <- cox_summary$coefficients[, "Pr(>|z|)"]
     
-    # Create a table with hazard ratio details
+    # Clean up row names (remove "get(input$Strata)" prefix)
+    clean_labels <- gsub("^get\\(input\\$Strata\\)", "", rownames(cox_summary$coefficients))
+    
+    # Create a cleaner table with renamed columns
     hr_table <- data.frame(
-      Group_Comparison = rownames(cox_summary$coefficients),
-      Hazard_Ratio = round(hr, 2),
-      CI_Lower = round(ci[, 1], 2),
-      CI_Upper = round(ci[, 2], 2),
-      P_Value = signif(p, 3)
+      "Group" = clean_labels,  # Use cleaned labels
+      "Hazard Ratio" = round(hr, 2),
+      "95% CI Lower" = round(ci[, 1], 2),
+      "95% CI Upper" = round(ci[, 2], 2),
+      "P-Value" = signif(p, 3)
     )
     
     # Print the reference level before showing the table
@@ -87,7 +90,6 @@ server <- function(input, output, session) {
     print(hr_table, row.names = FALSE)
   })
 }
-
 
 
 
