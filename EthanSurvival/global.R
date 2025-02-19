@@ -5,6 +5,7 @@ library(ggplot2)
 library(dplyr)
 library(shiny)
 library(gt)
+library(ggsurvfit)
 
 #data
 load("~/atlas/dat/atlasDataClean.RData")
