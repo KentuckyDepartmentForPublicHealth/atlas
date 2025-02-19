@@ -4,8 +4,7 @@ library(survminer)
 library(ggplot2)
 library(dplyr)
 library(shiny)
-library(ggsurvfit)
-
+library(gt)
 
 #data
 load("~/atlas/dat/atlasDataClean.RData")
