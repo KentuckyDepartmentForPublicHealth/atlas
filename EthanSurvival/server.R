@@ -57,6 +57,11 @@ server <- function(input, output, session) {
     
     data <- filtered_dat()
     
+    #ensuring strata is factor
+    data[[input$Strata]] <- as.factor(data[[input$Strata]])
+    
+    #ref level
+    ref_lvl <- levels(data[[input$Strata]])[1]
     # Creating Cox PH model
     cox_model <- coxph(Surv(survivalMonths, mortality) ~ get(input$Strata), data = data)
     cox_summary <- summary(cox_model)
@@ -75,10 +80,14 @@ server <- function(input, output, session) {
       P_Value = signif(p, 3)
     )
     
+    # Print the reference level before showing the table
+    cat("Reference Level:", ref_lvl, "\n\n")
+    
     # Display the table
     print(hr_table, row.names = FALSE)
   })
 }
+
 
 
 
