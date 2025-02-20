@@ -9,25 +9,31 @@
 
 library(shiny)
 
+library(shiny)
+
 ui <- tagList(
-  tags$head(tags$style(HTML("
-    .navbar {
-      background-color: #ADD8E6 !important; /* Light blue background */
-      border-bottom: 2px solid #33c4ff;   /* Optional accent border */
-    }
-    .navbar .navbar-brand {
-      color: #000000 !important; /* Black text for title */
-      font-weight: bold; /* Bold title */
-    }
-    .navbar .navbar-nav .nav-link {
-      color: #000000 !important; /* Black text for tabs */
-    }
-    .navbar .navbar-nav .nav-link:hover {
-      color: #ff5733 !important; /* Orange hover effect for links */
-    }
-  "))),
+  tags$head(
+    tags$style(HTML("
+      .navbar {
+        background-color: #ADD8E6 !important; /* Light blue background */
+        border-bottom: 2px solid #33c4ff;   /* Optional accent border */
+      }
+      .navbar .navbar-brand {
+        color: #000000 !important; /* Black text for title */
+        font-weight: bold; /* Bold title */
+      }
+      .navbar .navbar-nav .nav-link {
+        color: #000000 !important; /* Black text for tabs */
+      }
+      .navbar .navbar-nav .nav-link:hover {
+        color: #ff5733 !important; /* Orange hover effect for links */
+      }
+    "))
+  ),
+  
   navbarPage(
     title = "Atlas: Survival Analysis",
+    
     tabPanel(
       "Kaplan Meier Curves",
       fluidPage(
@@ -35,14 +41,14 @@ ui <- tagList(
         sidebarLayout(
           sidebarPanel(
             selectInput(
-              inputId = 'diagnosis',
-              label = 'Select Diagnosis:',
-              choices = c("All", unique_diagnosis),  
-              selected = "All"  
+              inputId = "diagnosis",
+              label = "Select Diagnosis:",
+              choices = c("All", unique_diagnosis),
+              selected = "All"
             ),
             selectInput(
-              inputId = 'Strata',
-              label = 'Select strata:',
+              inputId = "Strata",
+              label = "Select strata:",
               choices = allowed_vars,
               selected = allowed_vars[1]
             ),
@@ -59,10 +65,8 @@ ui <- tagList(
               column(12, gt_output("risk_table"))  # Risk Table below, spanning full width
             )
           )
-          )
         )
       )
     )
   )
-
-
+)
