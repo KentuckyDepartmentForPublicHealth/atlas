@@ -24,10 +24,13 @@ server <- function(input, output, session) {
     data <- filtered_dat()
     req(nrow(data) > 0)
     
-    # Fit survival model
-    fit <- survfit(as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata)), data = data)
+    # Ensure mortality is correctly coded: 1 = event, 0 = censored
+    data$event_status <- ifelse(is.na(data$mortality), 0, data$mortality)
     
-    # Base Kaplan-Meier plot using ggsurvfit
+    # Fit survival model
+    fit <- survfit(Surv(survivalMonths, event_status) ~ data[[input$Strata]], data = data)
+    
+    # Create Kaplan-Meier plot
     p <- ggsurvfit(fit) +
       labs(
         x = "Time (Days)",
@@ -49,15 +52,15 @@ server <- function(input, output, session) {
         legend.title = element_text(color = "black")                  
       )
     
-    # Conditionally add the risk table if checkbox is checked
-    if (input$show_risk_table) {
-      p <- p + add_risktable()
-    }
+    # Apply censoring marks if checkbox is checked
+    p <- if (input$show_censoring) p + add_censor_mark(shape = 3, size = 3, color = "red") else p
     
-    # Return the final plot
+    # Apply risk table if checkbox is checked
+    p <- if (input$show_risk_table) p + add_risktable() else p
+    
+    # Return final plot
     p
   })
-  
   
   
   output$hazard_table <- render_gt({
