@@ -9,101 +9,114 @@
 
 
 server <- function(input, output, session) {
-  # Reactive filtered data based on user input
+  
+  # Reactive filtered data based on the selected diagnosis
   filtered_dat <- reactive({
     if (input$diagnosis == "All") {
-      atlasDataClean  
+      atlasDataClean
     } else {
       atlasDataClean %>%
-        dplyr::filter(diagnosis == input$diagnosis)  # Subset if specific diagnosis selected
+        dplyr::filter(diagnosis == input$diagnosis)
     }
   })
   
-  
+  # Render Kaplan-Meier plot
   output$kmplt <- renderPlot({
     data <- filtered_dat()
     req(nrow(data) > 0)
     
-    # Ensure mortality is correctly coded: 1 = event, 0 = censored
+    # Recode mortality: NA becomes 0 (censored), 1 remains as event
     data$event_status <- ifelse(is.na(data$mortality), 0, data$mortality)
     
-    # Fit survival model
+    # Fit survival model using the selected strata
     fit <- survfit(Surv(survivalMonths, event_status) ~ data[[input$Strata]], data = data)
     
-    # Create Kaplan-Meier plot
+    # Create the Kaplan-Meier plot with custom labels and theme
     p <- ggsurvfit(fit) +
       labs(
         x = "Time (Days)",
         y = "Survival Probability",
         title = "Kaplan-Meier Plot"
       ) +
-      scale_color_discrete() +  
+      scale_color_discrete() +
       theme(
-        panel.background = element_rect(fill = "white", color = NA),  
-        plot.background = element_rect(fill = "white", color = NA),   
-        panel.grid.major = element_line(color = "grey"),              
-        panel.grid.minor = element_line(color = "grey", linetype = "dotted"),
-        axis.text = element_text(color = "black", size = 14),                   
-        axis.title = element_text(color = "black"),                   
-        plot.title = element_text(color = "black", face = "bold", size = 16, hjust = 0.5),  
-        plot.subtitle = element_text(color = "black", size = 12),     
-        legend.background = element_rect(fill = "white", color = NA), 
-        legend.text = element_text(color = "black"),                  
-        legend.title = element_text(color = "black")                  
+        panel.background    = element_rect(fill = "white", color = NA),
+        plot.background     = element_rect(fill = "white", color = NA),
+        panel.grid.major    = element_line(color = "grey"),
+        panel.grid.minor    = element_line(color = "grey", linetype = "dotted"),
+        axis.text           = element_text(color = "black", size = 14),
+        axis.title          = element_text(color = "black"),
+        plot.title          = element_text(color = "black", face = "bold", size = 16, hjust = 0.5),
+        plot.subtitle       = element_text(color = "black", size = 12),
+        legend.background   = element_rect(fill = "white", color = NA),
+        legend.text         = element_text(color = "black"),
+        legend.title        = element_text(color = "black")
       )
     
-    # Apply censoring marks if checkbox is checked
-    p <- if (input$show_censoring) p + add_censor_mark(shape = 3, size = 3, color = "red") else p
+    # Conditionally add censoring marks if the checkbox is checked
+    p <- if (input$show_censoring) {
+      p + add_censor_mark(shape = 3, size = 3, color = "red")
+    } else {
+      p
+    }
     
-    # Apply risk table if checkbox is checked
-    p <- if (input$show_risk_table) p + add_risktable() else p
+    # Conditionally add the risk table (default styling) if the checkbox is checked
+    p <- if (input$show_risk_table) {
+      p + add_risktable()
+    } else {
+      p
+    }
     
-    # Return final plot
+    # Return the final plot object
     p
   })
   
-  
+  # Render Hazard Ratios table using gt
   output$hazard_table <- render_gt({
-    req(input$show_hr)  # Ensure checkbox is checked
+    req(input$show_hr)  # Only show if the checkbox is checked
     
     data <- filtered_dat()
-    req(nrow(data) > 0)  # Ensure data isn't empty
+    req(nrow(data) > 0)
     
-    # Ensure Strata is categorical if necessary
+    # Ensure the strata variable is treated as a factor if not numeric
     if (!is.numeric(data[[input$Strata]])) {
       data[[input$Strata]] <- as.factor(data[[input$Strata]])
     }
     
-    # Get reference level
-    ref_lvl <- if (is.factor(data[[input$Strata]])) levels(data[[input$Strata]])[1] else "Continuous Variable"
+    # Get the reference level from the factor levels
+    ref_lvl <- if (is.factor(data[[input$Strata]])) {
+      levels(data[[input$Strata]])[1]
+    } else {
+      "Continuous Variable"
+    }
     
-    # Create Cox model using correct formula
+    # Fit a Cox proportional hazards model
     cox_model <- coxph(as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata)), data = data)
     cox_summary <- summary(cox_model)
     
-    # Extract hazard ratios
-    hr <- exp(cox_summary$coefficients[, "coef"])
-    ci <- exp(confint(cox_model))
-    p <- cox_summary$coefficients[, "Pr(>|z|)"]
+    # Extract hazard ratios, confidence intervals, and p-values
+    hr_vals <- exp(cox_summary$coefficients[, "coef"])
+    ci_vals <- exp(confint(cox_model))
+    p_vals  <- cox_summary$coefficients[, "Pr(>|z|)"]
     
-    # Clean row names
+    # Clean up the row names for better display
     clean_labels <- gsub("^get\\(input\\$Strata\\)", "", rownames(cox_summary$coefficients)) %>%
-      gsub("([a-z])([A-Z])", "\\1 \\2", .) %>%  # space between camelCase words
-      gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>%  # btw numbers and letters
-      gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>% # btw letters and numbers
-      tools::toTitleCase()
+      gsub("([a-z])([A-Z])", "\\1 \\2", .) %>%  # Insert space between camelCase words
+      gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>%  # Insert space between numbers and letters
+      gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>%  # Insert space between letters and numbers
+      tools::toTitleCase()  # Capitalize first letter of each word
     
-    # Build table
+    # Build the hazard ratio table
     hr_table <- data.frame(
-      "Group" = clean_labels,
-      "Hazard Ratio" = round(hr, 2),
-      "95% CI Lower" = round(ci[, 1], 2),
-      "95% CI Upper" = round(ci[, 2], 2),
-      "P-Value" = signif(p, 3),
-      check.names = FALSE
+      "Group"         = clean_labels,
+      "Hazard Ratio"  = round(hr_vals, 2),
+      "95% CI Lower"  = round(ci_vals[, 1], 2),
+      "95% CI Upper"  = round(ci_vals[, 2], 2),
+      "P-Value"       = signif(p_vals, 3),
+      check.names     = FALSE
     )
     
-    # Return the gt table
+    # Return the formatted gt table
     gt(hr_table) %>%
       tab_header(
         title = md("**Hazard Ratios**"),
@@ -114,18 +127,17 @@ server <- function(input, output, session) {
         decimals = 2
       ) %>%
       cols_label(
-        `Group` = "Strata Group",
-        `Hazard Ratio` = "HR",
-        `95% CI Lower` = "Lower CI",
-        `95% CI Upper` = "Upper CI",
-        `P-Value` = "P-Value"
+        Group = "Strata Group",
+        "Hazard Ratio" = "HR",
+        "95% CI Lower" = "Lower CI",
+        "95% CI Upper" = "Upper CI",
+        "P-Value" = "P-Value"
       ) %>%
       tab_options(
         table.font.size = "14px",
         column_labels.font.weight = "bold"
       )
   })
-  
 }
 
 
