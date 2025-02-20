@@ -8,8 +8,16 @@ library(gt)
 library(ggsurvfit)
 
 #data
-load("~/atlas/dat/atlasDataClean.RData")
+#windows load
+#load("~/atlas/dat/atlasDataClean.RData")
+
+#mac load
+load("~/Desktop/Survival Intern Project/Survival/atlas/dat/atlasDataClean.RData")
+
+
 atlasDataClean <- subset(atlasDataClean,atlasDataClean$survivalMonths != "NA")
+
+#fixing NAs so that they are properly reflected as censored observations
 atlasDataClean$mortality <- ifelse(is.na(atlasDataClean$mortality), 0, atlasDataClean$mortality)
 
 atlasDataClean$survivalMonths <- as.numeric(atlasDataClean$survivalMonths)
