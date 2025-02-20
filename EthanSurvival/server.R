@@ -87,7 +87,11 @@ server <- function(input, output, session) {
     p <- cox_summary$coefficients[, "Pr(>|z|)"]
     
     # Clean row names
-    clean_labels <- gsub("^get\\(input\\$Strata\\)", "", rownames(cox_summary$coefficients))
+    clean_labels <- gsub("^get\\(input\\$Strata\\)", "", rownames(cox_summary$coefficients)) %>%
+      gsub("([a-z])([A-Z])", "\\1 \\2", .) %>%  # space between camelCase words
+      gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>%  # btw numbers and letters
+      gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>% # btw letters and numbers
+      tools::toTitleCase()
     
     # Build table
     hr_table <- data.frame(
