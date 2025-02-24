@@ -9,7 +9,6 @@
 
 
 server <- function(input, output, session) {
-  
   # Reactive filtered data based on the selected diagnosis
   filtered_dat <- reactive({
     if (input$diagnosis == "All") {
@@ -38,8 +37,16 @@ server <- function(input, output, session) {
     # Recode mortality: NA becomes 0 (censored), 1 remains as event
     data$event_status <- ifelse(is.na(data$mortality), 0, data$mortality)
     
-    # Fit survival model using the selected strata
-    fit <- survfit(Surv(survivalMonths, event_status) ~ data[[input$Strata]], data = data)
+    # Create a clean factor for the strata variable with better labels
+    strata_var <- input$Strata
+    data$strata_factor <- factor(data[[strata_var]])
+    
+    # Get clear labels for the legend
+    unique_levels <- levels(data$strata_factor)
+    nice_labels <- paste0(unique_levels, "YRS")
+    
+    # Fit survival model using the clean factor
+    fit <- survfit(Surv(survivalMonths, event_status) ~ strata_factor, data = data)
     
     # Create the Kaplan-Meier plot with custom labels and theme
     p <- ggsurvfit(fit) +
@@ -48,7 +55,11 @@ server <- function(input, output, session) {
         y = "Survival Probability",
         title = "Kaplan-Meier Plot"
       ) +
-      scale_color_discrete() +
+      # Apply custom color scale with clean labels
+      scale_color_discrete(
+        name = strata_var,
+        labels = function(x) gsub("strata_factor=", "", x)
+      ) +
       theme(
         panel.background    = element_rect(fill = "white", color = NA),
         plot.background     = element_rect(fill = "white", color = NA),
@@ -149,7 +160,6 @@ server <- function(input, output, session) {
       )
   })
 }
-
 
 
 
