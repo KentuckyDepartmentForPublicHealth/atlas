@@ -9,10 +9,10 @@ library(ggsurvfit)
 
 #data
 #windows load
-#load("~/atlas/dat/atlasDataClean.RData")
+load("~/atlas/dat/atlasDataClean.RData")
 
 #mac load
-load("~/Desktop/Survival Intern Project/Survival/atlas/dat/atlasDataClean.RData")
+#load("~/Desktop/Survival Intern Project/Survival/atlas/dat/atlasDataClean.RData")
 
 
 atlasDataClean <- subset(atlasDataClean,atlasDataClean$survivalMonths != "NA")
@@ -27,3 +27,9 @@ allowed_vars <- c("ageGroup", "tumorType", "grade", "sex", "locationOriginal","c
 
 unique_diagnosis <- unique(atlasDataClean$diagnosisFinal)
 
+#Option below simply filters out diagnoses with less than 30 patients, one possible approach
+#valid_diagnoses <- names(table(atlasDataClean$diagnosisFinal)[table(atlasDataClean$diagnosisFinal) > 30])
+#unique_diagnosis <- c("All", valid_diagnoses)
+
+
+#Another option w warning message display 
