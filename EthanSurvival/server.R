@@ -20,19 +20,15 @@ server <- function(input, output, session) {
     }
   })
   
-  # Render Kaplan-Meier plot
   output$kmplt <- renderPlotly({
     data <- filtered_dat()
     req(nrow(data) > 0)  # Ensure data is not empty
     
-    # Count observations for selected diagnosis
-    obs_count <- nrow(data)
-    
-    # If fewer than 30 observations, display a warning message instead of the plot
-    if (obs_count < 30) {
-      plot.new()  # Create an empty plot area
+    # If fewer than 30 observations, display a warning message
+    if (nrow(data) < 30) {
+      plot.new()
       text(0.5, 0.5, "Too few observations to display Kaplan-Meier curve.", cex = 0.9, col = "red")
-      return()  # Exit the function early
+      return()
     }
     
     # Recode mortality: NA becomes 0 (censored), 1 remains as event
@@ -42,20 +38,26 @@ server <- function(input, output, session) {
     strata_var <- input$Strata
     data$strata_factor <- factor(data[[strata_var]])
     
+    # Generate clean labels for legend
+    clean_labels <- levels(data$strata_factor)
+    clean_labels <- gsub("strata_factor=", "", clean_labels)  # Remove unnecessary prefixes
+    
     # Fit survival model using the clean factor
     fit <- survfit(Surv(survivalMonths, event_status) ~ strata_factor, data = data)
     
-    # Create the Kaplan-Meier plot with custom labels and theme
+    # Create the Kaplan-Meier plot
     p <- ggsurvfit(fit) +
       labs(
         x = "Time (Days)",
         y = "Survival Probability",
         title = "Kaplan-Meier Plot"
       ) +
-      scale_color_discrete(
-        name = strata_var,
-        labels = function(x) gsub("strata_factor=", "", x)
-      ) +
+      scale_color_manual(
+        name = strata_var, 
+        values = RColorBrewer::brewer.pal(length(clean_labels), "Set1"),  # Assign colors manually
+        labels = clean_labels  # Ensure legend labels are formatted correctly
+      )  +
+      theme_minimal() +
       theme(
         panel.background    = element_rect(fill = "white", color = NA),
         plot.background     = element_rect(fill = "white", color = NA),
@@ -64,7 +66,6 @@ server <- function(input, output, session) {
         axis.text           = element_text(color = "black", size = 14),
         axis.title          = element_text(color = "black"),
         plot.title          = element_text(color = "black", face = "bold", size = 16, hjust = 0.5),
-        plot.subtitle       = element_text(color = "black", size = 12),
         legend.background   = element_rect(fill = "white", color = NA),
         legend.text         = element_text(color = "black"),
         legend.title        = element_text(color = "black")
@@ -80,10 +81,24 @@ server <- function(input, output, session) {
       p <- p + add_risktable()
     }
     
-    # Return the final plot object
-    p
-  })
-  
+    # Convert to plotly and manually rename traces
+    plotly_obj <- ggplotly(p) %>%
+      layout(
+        legend = list(
+          title = list(text = strata_var),
+          x = 1, y = 1,
+          traceorder = "normal",
+          font = list(size = 12)
+        )
+      )
+    
+    # Rename trace names to match clean_labels
+    for (i in seq_along(clean_labels)) {
+      plotly_obj$x$data[[i]]$name <- clean_labels[i]
+    }
+    
+    plotly_obj  # Return fixed plotly object
+  })  
   # Render Hazard Ratios table using gt
   output$hazard_table <- render_gt({
     req(input$show_hr)  # Only show if the checkbox is checked
@@ -114,10 +129,10 @@ server <- function(input, output, session) {
     
     # Clean up the row names for better display
     clean_labels <- gsub("^get\\(input\\$Strata\\)", "", rownames(cox_summary$coefficients)) %>%
-      gsub("([a-z])([A-Z])", "\\1 \\2", .) %>%  # Insert space between camelCase words
-      gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>%  # Insert space between numbers and letters
-      gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>%  # Insert space between letters and numbers
-      tools::toTitleCase()  # Capitalize first letter of each word
+      gsub("([a-z])([A-Z])", "\\1 \\2", .) %>%  
+      gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>%  
+      gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>%  
+      tools::toTitleCase()  
     
     # Build the hazard ratio table
     hr_table <- data.frame(
