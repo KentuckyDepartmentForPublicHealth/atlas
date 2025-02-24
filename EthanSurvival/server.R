@@ -23,7 +23,17 @@ server <- function(input, output, session) {
   # Render Kaplan-Meier plot
   output$kmplt <- renderPlot({
     data <- filtered_dat()
-    req(nrow(data) > 0)
+    req(nrow(data) > 0)  # Ensure data is not empty
+    
+    # Count observations for selected diagnosis
+    obs_count <- nrow(data)
+    
+    # If fewer than 30 observations, display a warning message instead of the plot
+    if (obs_count < 30) {
+      plot.new()  # Create an empty plot area
+      text(0.5, 0.5, "Too few observations to display Kaplan-Meier curve.", cex = 0.9, col = "red")
+      return()  # Exit the function early
+    }
     
     # Recode mortality: NA becomes 0 (censored), 1 remains as event
     data$event_status <- ifelse(is.na(data$mortality), 0, data$mortality)
@@ -60,7 +70,7 @@ server <- function(input, output, session) {
       p
     }
     
-    # Conditionally add the risk table (default styling) if the checkbox is checked
+    # Conditionally add the risk table if the checkbox is checked
     p <- if (input$show_risk_table) {
       p + add_risktable()
     } else {
