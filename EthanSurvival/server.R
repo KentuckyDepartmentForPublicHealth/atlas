@@ -9,6 +9,7 @@
 
 
 server <- function(input, output, session) {
+  
   # Reactive filtered data based on the selected diagnosis
   filtered_dat <- reactive({
     if (input$diagnosis == "All") {
@@ -20,7 +21,7 @@ server <- function(input, output, session) {
   })
   
   # Render Kaplan-Meier plot
-  output$kmplt <- renderPlot({
+  output$kmplt <- renderPlotly({
     data <- filtered_dat()
     req(nrow(data) > 0)  # Ensure data is not empty
     
@@ -41,10 +42,6 @@ server <- function(input, output, session) {
     strata_var <- input$Strata
     data$strata_factor <- factor(data[[strata_var]])
     
-    # Get clear labels for the legend
-    unique_levels <- levels(data$strata_factor)
-    nice_labels <- paste0(unique_levels, "YRS")
-    
     # Fit survival model using the clean factor
     fit <- survfit(Surv(survivalMonths, event_status) ~ strata_factor, data = data)
     
@@ -55,7 +52,6 @@ server <- function(input, output, session) {
         y = "Survival Probability",
         title = "Kaplan-Meier Plot"
       ) +
-      # Apply custom color scale with clean labels
       scale_color_discrete(
         name = strata_var,
         labels = function(x) gsub("strata_factor=", "", x)
@@ -75,17 +71,13 @@ server <- function(input, output, session) {
       )
     
     # Conditionally add censoring marks if the checkbox is checked
-    p <- if (input$show_censoring) {
-      p + add_censor_mark(shape = 3, size = 3, color = "red")
-    } else {
-      p
+    if (input$show_censoring) {
+      p <- p + add_censor_mark(shape = 3, size = 3, color = "red")
     }
     
     # Conditionally add the risk table if the checkbox is checked
-    p <- if (input$show_risk_table) {
-      p + add_risktable()
-    } else {
-      p
+    if (input$show_risk_table) {
+      p <- p + add_risktable()
     }
     
     # Return the final plot object
@@ -160,6 +152,9 @@ server <- function(input, output, session) {
       )
   })
 }
+      
+      
+      
 
 
 
