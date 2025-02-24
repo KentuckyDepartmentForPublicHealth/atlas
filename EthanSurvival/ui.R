@@ -58,7 +58,7 @@ ui <- tagList(
           ),
           mainPanel(
             fluidRow(
-              column(8, plotOutput("kmplt", width = "100%", height = "500px")),  # Larger KM plot
+              column(8, plotlyOutput("kmplt", width = "100%", height = "500px")),  # Larger KM plot
               column(4, gt_output("hazard_table"))  # Smaller Hazard Ratios table
             ),
             fluidRow(

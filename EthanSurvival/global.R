@@ -6,13 +6,13 @@ library(dplyr)
 library(shiny)
 library(gt)
 library(ggsurvfit)
-
+library(plotly)
 #data
 #windows load
-load("~/atlas/dat/atlasDataClean.RData")
+#load("~/atlas/dat/atlasDataClean.RData")
 
 #mac load
-#load("~/Desktop/Survival Intern Project/Survival/atlas/dat/atlasDataClean.RData")
+load("~/Desktop/Survival Intern Project/Survival/atlas/dat/atlasDataClean.RData")
 
 
 atlasDataClean <- subset(atlasDataClean,atlasDataClean$survivalMonths != "NA")
