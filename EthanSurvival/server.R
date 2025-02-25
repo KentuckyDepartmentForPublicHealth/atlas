@@ -47,7 +47,7 @@ server <- function(input, output, session) {
     # Create the Kaplan-Meier plot
     p <- ggsurvfit(fit) +
       labs(
-        x = "Time (Days)",
+        x = "Time (Months)",
         y = "Survival Probability",
         title = "Kaplan-Meier Plot"
       ) +
