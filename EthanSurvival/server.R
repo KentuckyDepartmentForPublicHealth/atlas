@@ -9,7 +9,6 @@
 
 
 server <- function(input, output, session) {
-  
   # Reactive filtered data based on the selected diagnosis
   filtered_dat <- reactive({
     if (input$diagnosis == "All") {
@@ -56,7 +55,7 @@ server <- function(input, output, session) {
         name = strata_var, 
         values = RColorBrewer::brewer.pal(length(clean_labels), "Set1"),  # Assign colors manually
         labels = clean_labels  # Ensure legend labels are formatted correctly
-      )  +
+      ) +
       theme_minimal() +
       theme(
         panel.background    = element_rect(fill = "white", color = NA),
@@ -81,24 +80,73 @@ server <- function(input, output, session) {
       p <- p + add_risktable()
     }
     
-    # Convert to plotly and manually rename traces
-    plotly_obj <- ggplotly(p) %>%
+    # Convert to plotly 
+    plotly_obj <- ggplotly(p)
+    
+    # Function to calculate number at risk at specific timepoints
+    get_n_at_risk <- function(timepoints, strata_level, data) {
+      sapply(timepoints, function(t) {
+        sum(data$strata_factor == strata_level & data$survivalMonths >= t)
+      })
+    }
+    
+    # Extract time points from the plot data
+    all_data_points <- plotly_obj$x$data
+    
+    # Update each trace with custom hover text including number at risk
+    for (i in seq_along(clean_labels)) {
+      # Get the current trace data
+      trace_data <- all_data_points[[i]]
+      
+      # Skip if this isn't a line trace (e.g., risk table)
+      if (!("line" %in% names(trace_data)) || is.null(trace_data$x)) {
+        next
+      }
+      
+      # Get time points for this curve
+      time_points <- trace_data$x
+      
+      # Calculate number at risk at each time point
+      n_at_risk <- get_n_at_risk(time_points, levels(data$strata_factor)[i], data)
+      
+      # Get survival probabilities
+      survival_probs <- trace_data$y
+      
+      # Create custom hover text
+      hover_text <- mapply(
+        function(t, s, n) {
+          sprintf(
+            "Time: %.1f days<br>Survival: %.3f<br>At risk: %d", 
+            t, s, n
+          )
+        },
+        time_points,
+        survival_probs,
+        n_at_risk,
+        SIMPLIFY = TRUE
+      )
+      
+      # Update the trace with new hover text
+      plotly_obj$x$data[[i]]$text <- hover_text
+      plotly_obj$x$data[[i]]$hoverinfo <- "text"
+      plotly_obj$x$data[[i]]$name <- clean_labels[i]
+    }
+    
+    # Update layout
+    plotly_obj <- plotly_obj %>%
       layout(
         legend = list(
           title = list(text = strata_var),
           x = 1, y = 1,
           traceorder = "normal",
           font = list(size = 12)
-        )
+        ),
+        hovermode = "closest"
       )
     
-    # Rename trace names to match clean_labels
-    for (i in seq_along(clean_labels)) {
-      plotly_obj$x$data[[i]]$name <- clean_labels[i]
-    }
-    
     plotly_obj  # Return fixed plotly object
-  })  
+  })
+  
   # Render Hazard Ratios table using gt
   output$hazard_table <- render_gt({
     req(input$show_hr)  # Only show if the checkbox is checked
@@ -129,10 +177,10 @@ server <- function(input, output, session) {
     
     # Clean up the row names for better display
     clean_labels <- gsub("^get\\(input\\$Strata\\)", "", rownames(cox_summary$coefficients)) %>%
-      gsub("([a-z])([A-Z])", "\\1 \\2", .) %>%  
-      gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>%  
-      gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>%  
-      tools::toTitleCase()  
+      gsub("([a-z])([A-Z])", "\\1 \\2", .) %>%
+      gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>%
+      gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>%
+      tools::toTitleCase()
     
     # Build the hazard ratio table
     hr_table <- data.frame(
@@ -167,10 +215,3 @@ server <- function(input, output, session) {
       )
   })
 }
-      
-      
-      
-
-
-
-
