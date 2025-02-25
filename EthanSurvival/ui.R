@@ -75,7 +75,7 @@ ui <- tagList(
                ),
                mainPanel(
                  plotlyOutput("hr_plot"),   # Plotly-based hazard ratio plot
-                 dataTableOutput("hr_table") # Table with HR estimates
+                 dataTableOutput("hazard_table") # Table with HR estimates
          )
       )
     )

@@ -153,42 +153,47 @@ server <- function(input, output, session) {
     plotly_obj  # Return fixed plotly object
   })
   
-  # Render Hazard Ratios table using gt
-  output$hazard_table <- render_gt({
-    req(input$show_hr)  # Only show if the checkbox is checked
-    
+  # Fit Cox Model ONCE
+  cox_model <- reactive({
     data <- filtered_dat()
-    req(nrow(data) > 0)
+    req(nrow(data) > 0)  # Ensure we have data
     
     # Ensure the strata variable is treated as a factor if not numeric
     if (!is.numeric(data[[input$Strata]])) {
       data[[input$Strata]] <- as.factor(data[[input$Strata]])
     }
     
-    # Get the reference level from the factor levels
-    ref_lvl <- if (is.factor(data[[input$Strata]])) {
-      levels(data[[input$Strata]])[1]
-    } else {
-      "Continuous Variable"
-    }
+    # Fit Cox proportional hazards model
+    coxph(as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata)), data = data)
+  })
+  
+  hr_data <- reactive({
+    broom::tidy(cox_model(), exponentiate = TRUE, conf.int = TRUE) %>% 
+      dplyr::mutate(term = gsub("_", " ", term))  # Clean term names
+  })
+  
+  # Render Hazard Ratios Table using gt
+  output$hazard_table <- render_gt({
+    req(input$show_hr)  # Only show if checkbox is checked
     
-    # Fit a Cox proportional hazards model
-    cox_model <- coxph(as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata)), data = data)
-    cox_summary <- summary(cox_model)
+    data <- filtered_dat()
+    req(nrow(data) > 0)
+    
+    cox_summary <- summary(cox_model())
     
     # Extract hazard ratios, confidence intervals, and p-values
     hr_vals <- exp(cox_summary$coefficients[, "coef"])
-    ci_vals <- exp(confint(cox_model))
+    ci_vals <- exp(confint(cox_model()))
     p_vals  <- cox_summary$coefficients[, "Pr(>|z|)"]
     
-    # Clean up the row names for better display
+    # Clean up row names for better display
     clean_labels <- gsub("^get\\(input\\$Strata\\)", "", rownames(cox_summary$coefficients)) %>%
       gsub("([a-z])([A-Z])", "\\1 \\2", .) %>%
       gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>%
       gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>%
       tools::toTitleCase()
     
-    # Build the hazard ratio table
+    # Build Hazard Ratio Table
     hr_table <- data.frame(
       "Group"         = clean_labels,
       "Hazard Ratio"  = round(hr_vals, 2),
@@ -198,11 +203,11 @@ server <- function(input, output, session) {
       check.names     = FALSE
     )
     
-    # Return the formatted gt table
+    # Render table
     gt(hr_table) %>%
       tab_header(
         title = md("**Hazard Ratios**"),
-        subtitle = paste("Reference Level:", ref_lvl)
+        subtitle = "Estimated from Cox Proportional Hazards Model"
       ) %>%
       fmt_number(
         columns = c("Hazard Ratio", "95% CI Lower", "95% CI Upper"),
@@ -220,4 +225,29 @@ server <- function(input, output, session) {
         column_labels.font.weight = "bold"
       )
   })
+  
+  # Render Hazard Ratios Plot using Plotly
+  output$hr_plot <- renderPlotly({
+    p <- ggplot(hr_data(), aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
+      geom_pointrange(color = "blue", size = 1) +  
+      geom_hline(yintercept = 1, linetype = "dashed", color = "red") +  
+      coord_flip() +  
+      labs(
+        title = "Hazard Ratios from Cox Model",
+        x = "Covariates",
+        y = "Hazard Ratio (95% CI)"
+      ) +
+      theme_minimal()
+    
+    ggplotly(p) %>%
+      config(
+        modeBarButtonsToRemove = c("pan2d", "select2d", "autoscale", "resetScale2d", 
+                                   "toggleSpikelines", "hoverClosestCartesian", 
+                                   "hoverCompareCartesian"),
+        modeBarButtonsToAdd = c("zoom2d", "lasso2d", "toImage"),
+        displaylogo = FALSE
+      )
+  })
 }
+
+
