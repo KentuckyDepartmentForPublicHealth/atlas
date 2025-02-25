@@ -7,6 +7,7 @@ library(shiny)
 library(gt)
 library(ggsurvfit)
 library(plotly)
+library(broom)
 #data
 #windows load
 #load("~/atlas/dat/atlasDataClean.RData")
