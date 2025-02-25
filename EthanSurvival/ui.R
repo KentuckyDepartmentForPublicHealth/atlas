@@ -67,6 +67,17 @@ ui <- tagList(
           )
         )
       )
+    ),
+    tabPanel("Hazard Ratios",
+             sidebarLayout(
+               sidebarPanel(
+                 helpText("This tab displays the hazard ratios from a Cox proportional hazards model.")
+               ),
+               mainPanel(
+                 plotlyOutput("hr_plot"),   # Plotly-based hazard ratio plot
+                 dataTableOutput("hr_table") # Table with HR estimates
+         )
+      )
     )
   )
 )
