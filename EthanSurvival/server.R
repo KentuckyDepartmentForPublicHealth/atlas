@@ -132,7 +132,6 @@ server <- function(input, output, session) {
       plotly_obj$x$data[[i]]$name <- clean_labels[i]
     }
     
-    # Update layout
     plotly_obj <- plotly_obj %>%
       layout(
         legend = list(
@@ -142,6 +141,13 @@ server <- function(input, output, session) {
           font = list(size = 12)
         ),
         hovermode = "closest"
+      ) %>%
+      config(
+        modeBarButtonsToRemove = c("pan2d", "select2d", "autoscale", "resetScale2d", 
+                                   "toggleSpikelines", "hoverClosestCartesian", 
+                                   "hoverCompareCartesian"),
+        modeBarButtonsToAdd = c("zoom2d", "lasso2d", "toImage"),
+        displaylogo = FALSE
       )
     
     plotly_obj  # Return fixed plotly object
