@@ -8,6 +8,10 @@ library(gt)
 library(ggsurvfit)
 library(plotly)
 library(broom)
+library(gtsummary)
+library(cardx)
+
+
 #data
 #windows load
 load("~/atlas/dat/atlasDataClean.RData")

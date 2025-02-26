@@ -8,6 +8,7 @@
 #
 
 
+
 server <- function(input, output, session) {
   # Reactive filtered data based on the selected diagnosis
   # Modify the filtered_dat reactive expression in server.R to include histology filtering
@@ -82,11 +83,6 @@ server <- function(input, output, session) {
     # Conditionally add censoring marks if the checkbox is checked
     if (input$show_censoring) {
       p <- p + add_censor_mark(shape = 3, size = 3, color = "red")
-    }
-    
-    # Conditionally add the risk table if the checkbox is checked
-    if (input$show_risk_table) {
-      p <- p + add_risktable()
     }
     
     # Convert to plotly 
@@ -181,6 +177,31 @@ server <- function(input, output, session) {
       dplyr::mutate(term = gsub("_", " ", term))  # Clean term names
   })
   
+  output$risk_table <- render_gt({
+    data <- filtered_dat()
+    req(nrow(data) > 0)
+    req(input$show_risk_table)
+    
+    # Create the survival fit
+    fit <- survfit(Surv(survivalMonths, mortality) ~ get(input$Strata), data = data)
+    
+    # Use tbl_survfit without the size modification
+    tbl <- gtsummary::tbl_survfit(
+      fit,
+      times = c(0, 12, 24, 36, 48, 60), # Show risk at 0, 12, 24, 36, 48, and 60 months
+      label_header = "Months"
+    )
+    
+    # Convert to gt table and apply styling there instead
+    tbl %>% 
+      gtsummary::as_gt() %>%
+      gt::tab_header(title = "Risk Table") %>%
+      gt::opt_row_striping() %>%
+      gt::tab_options(
+        table.font.size = "small",
+        data_row.padding = gt::px(2)
+      )
+  })
   # Render Hazard Ratios Table using gt
   output$hazard_table <- render_gt({
     req(input$show_hr)  # Only show if checkbox is checked

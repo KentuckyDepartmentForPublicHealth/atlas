@@ -71,7 +71,12 @@ ui <- tagList(
               )
             ),
             fluidRow(
-              column(12, gt_output("risk_table"))
+              column(12, 
+                     conditionalPanel(
+                       condition = "input.show_risk_table == true",
+                       gt_output("risk_table")
+                     )
+              )
             )
           )
         )
