@@ -7,10 +7,6 @@
 #    https://shiny.posit.co/
 #
 
-library(shiny)
-
-library(shiny)
-
 ui <- tagList(
   tags$head(
     tags$style(HTML("
@@ -44,6 +40,12 @@ ui <- tagList(
               inputId = "diagnosis",
               label = "Select Diagnosis:",
               choices = c("All", unique_diagnosis),
+              selected = "All"
+            ),
+            selectInput(
+              inputId = "histology",
+              label = "Select Histology:",
+              choices = c("All", unique(atlasDataClean$histologyOriginal)),  # Add this new input
               selected = "All"
             ),
             selectInput(

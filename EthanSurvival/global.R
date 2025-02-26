@@ -25,7 +25,7 @@ atlasDataClean$survivalMonths <- as.numeric(atlasDataClean$survivalMonths)
 
 
 ###########strata
-allowed_vars <- c("ageGroup", "tumorType", "grade", "sex","histologyOriginal")
+allowed_vars <- c("ageGroup", "tumorType", "grade", "sex")
 
 ##setting ref level for each strata
 atlasDataClean$ageGroup <- relevel(factor(atlasDataClean$ageGroup), ref = "40-60YRS")
