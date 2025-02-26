@@ -65,6 +65,12 @@ ui <- tagList(
               column(12, plotlyOutput("kmplt", width = "100%", height = "500px"))
             ),
             fluidRow(
+              column(12,
+                     verbatimTextOutput("log_rank_results"),
+                     style = "margin-top: 20px; margin-bottom: 20px;"
+              )
+            ),
+            fluidRow(
               column(12, gt_output("risk_table"))
             )
           )
