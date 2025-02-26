@@ -7,22 +7,24 @@
 #    https://shiny.posit.co/
 #
 
+# Update ui.R - Remove the checkbox and reorganize the tabs
+
 ui <- tagList(
   tags$head(
     tags$style(HTML("
       .navbar {
-        background-color: #ADD8E6 !important; /* Light blue background */
-        border-bottom: 2px solid #33c4ff;   /* Optional accent border */
+        background-color: #ADD8E6 !important;
+        border-bottom: 2px solid #33c4ff;
       }
       .navbar .navbar-brand {
-        color: #000000 !important; /* Black text for title */
-        font-weight: bold; /* Bold title */
+        color: #000000 !important;
+        font-weight: bold;
       }
       .navbar .navbar-nav .nav-link {
-        color: #000000 !important; /* Black text for tabs */
+        color: #000000 !important;
       }
       .navbar .navbar-nav .nav-link:hover {
-        color: #ff5733 !important; /* Orange hover effect for links */
+        color: #ff5733 !important;
       }
     "))
   ),
@@ -30,6 +32,7 @@ ui <- tagList(
   navbarPage(
     title = "Atlas: Survival Analysis",
     
+    # First tab - Kaplan Meier Curves
     tabPanel(
       "Kaplan Meier Curves",
       fluidPage(
@@ -45,7 +48,7 @@ ui <- tagList(
             selectInput(
               inputId = "histology",
               label = "Select Histology:",
-              choices = c("All", unique(atlasDataClean$histologyOriginal)),  # Add this new input
+              choices = c("All", unique(atlasDataClean$histologyOriginal)),
               selected = "All"
             ),
             selectInput(
@@ -54,31 +57,67 @@ ui <- tagList(
               choices = allowed_vars,
               selected = allowed_vars[1]
             ),
-            checkboxInput("show_hr", "Display Hazard Ratios", value = FALSE),
             checkboxInput("show_risk_table", "Show Risk Table", value = FALSE),
             checkboxInput("show_censoring", "Show Censoring Marks", value = FALSE)
           ),
           mainPanel(
             fluidRow(
-              column(8, plotlyOutput("kmplt", width = "100%", height = "500px")),  # Larger KM plot
-              column(4, gt_output("hazard_table"))  # Smaller Hazard Ratios table
+              column(12, plotlyOutput("kmplt", width = "100%", height = "500px"))
             ),
             fluidRow(
-              column(12, gt_output("risk_table"))  # Risk Table below, spanning full width
+              column(12, gt_output("risk_table"))
             )
           )
         )
       )
     ),
-    tabPanel("Hazard Ratios",
-             sidebarLayout(
-               sidebarPanel(
-                 helpText("This tab displays the hazard ratios from a Cox proportional hazards model.")
-               ),
-               mainPanel(
-                 plotlyOutput("hr_plot"),   # Plotly-based hazard ratio plot
-                 dataTableOutput("hazard_table") # Table with HR estimates
-         )
+    
+    # Second tab - Hazard Ratios
+    tabPanel(
+      "Hazard Ratios",
+      fluidPage(
+        sidebarLayout(
+          sidebarPanel(
+            selectInput(
+              inputId = "diagnosis_hr",
+              label = "Select Diagnosis:",
+              choices = c("All", unique_diagnosis),
+              selected = "All"
+            ),
+            selectInput(
+              inputId = "histology_hr",
+              label = "Select Histology:",
+              choices = c("All", unique(atlasDataClean$histologyOriginal)),
+              selected = "All"
+            ),
+            selectInput(
+              inputId = "Strata_hr",
+              label = "Select strata:",
+              choices = allowed_vars,
+              selected = allowed_vars[1]
+            ),
+            checkboxInput("show_hr", "Display Hazard Ratios", value = TRUE),
+            helpText("This tab displays the hazard ratios from a Cox proportional hazards model.")
+          ),
+          mainPanel(
+            fluidRow(
+              column(12, 
+                     conditionalPanel(
+                       condition = "input.show_hr",
+                       gt_output("hazard_table")
+                     )
+              )
+            ),
+            fluidRow(
+              column(12, 
+                     conditionalPanel(
+                       condition = "input.show_hr",
+                       plotlyOutput("hr_plot")
+                     )
+              )
+            )
+          )
+        )
       )
     )
   )
