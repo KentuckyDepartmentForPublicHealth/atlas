@@ -10,15 +10,24 @@
 
 server <- function(input, output, session) {
   # Reactive filtered data based on the selected diagnosis
+  # Modify the filtered_dat reactive expression in server.R to include histology filtering
   filtered_dat <- reactive({
-    if (input$diagnosis == "All") {
+    # Start with the diagnosis filter
+    data <- if (input$diagnosis == "All") {
       atlasDataClean
     } else {
       atlasDataClean %>%
         dplyr::filter(diagnosis == input$diagnosis)
     }
+    
+    # Then apply histology filter
+    if (input$histology != "All") {
+      data <- data %>%
+        dplyr::filter(histologyOriginal == input$histology)
+    }
+    
+    data
   })
-  
   output$kmplt <- renderPlotly({
     data <- filtered_dat()
     req(nrow(data) > 0)  # Ensure data is not empty
