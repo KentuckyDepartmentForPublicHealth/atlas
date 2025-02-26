@@ -10,10 +10,10 @@ library(plotly)
 library(broom)
 #data
 #windows load
-#load("~/atlas/dat/atlasDataClean.RData")
+load("~/atlas/dat/atlasDataClean.RData")
 
 #mac load
-load("~/Desktop/Survival Intern Project/Survival/atlas/dat/atlasDataClean.RData")
+#load("~/Desktop/Survival Intern Project/Survival/atlas/dat/atlasDataClean.RData")
 
 
 atlasDataClean <- subset(atlasDataClean,atlasDataClean$survivalMonths != "NA")
@@ -22,8 +22,16 @@ atlasDataClean <- subset(atlasDataClean,atlasDataClean$survivalMonths != "NA")
 atlasDataClean$mortality <- ifelse(is.na(atlasDataClean$mortality), 0, atlasDataClean$mortality)
 
 atlasDataClean$survivalMonths <- as.numeric(atlasDataClean$survivalMonths)
-#strata
-allowed_vars <- c("ageGroup", "tumorType", "grade", "sex", "locationOriginal","compartment","histologyOriginal")
+
+
+###########strata
+allowed_vars <- c("ageGroup", "tumorType", "grade", "sex","histologyOriginal")
+
+##setting ref level for each strata
+atlasDataClean$ageGroup <- relevel(factor(atlasDataClean$ageGroup), ref = "40-60YRS")
+atlasDataClean$tumorType <- relevel(factor(atlasDataClean$tumorType), ref = "1")
+atlasDataClean$grade <- relevel(factor(atlasDataClean$grade), ref = "1")
+atlasDataClean$sex <- relevel(factor(atlasDataClean$sex), ref = "M")
 
 
 unique_diagnosis <- unique(atlasDataClean$diagnosisFinal)
@@ -33,4 +41,3 @@ unique_diagnosis <- unique(atlasDataClean$diagnosisFinal)
 #unique_diagnosis <- c("All", valid_diagnoses)
 
 
-#Another option w warning message display 
