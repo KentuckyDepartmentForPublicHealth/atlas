@@ -257,6 +257,28 @@ server <- function(input, output, session) {
         displaylogo = FALSE
       )
   })
+  # Create log-rank test output
+  output$log_rank_results <- renderText({
+    data <- filtered_dat()
+    req(nrow(data) > 0)
+    
+    # Perform log-rank test
+    surv_diff <- survdiff(
+      Surv(survivalMonths, mortality) ~ get(input$Strata), 
+      data = data
+    )
+    
+    # Format results
+    p_value <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
+    
+    paste0(
+      "Log-rank test results:\n",
+      "Chi-square statistic: ", round(surv_diff$chisq, 2), "\n",
+      "Degrees of freedom: ", length(surv_diff$n) - 1, "\n",
+      "P-value: ", format.pval(p_value, digits = 3)
+    )
+  })
+
 }
 
 
