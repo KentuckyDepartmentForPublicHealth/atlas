@@ -177,22 +177,41 @@ server <- function(input, output, session) {
       dplyr::mutate(term = gsub("_", " ", term))  # Clean term names
   })
   
+  # Risk table output
   output$risk_table <- render_gt({
     data <- filtered_dat()
     req(nrow(data) > 0)
     req(input$show_risk_table)
     
-    # Create the survival fit
-    fit <- survfit(Surv(survivalMonths, mortality) ~ get(input$Strata), data = data)
-    
-    # Use tbl_survfit without the size modification
-    tbl <- gtsummary::tbl_survfit(
-      fit,
-      times = c(0, 12, 24, 36, 48, 60), # Show risk at 0, 12, 24, 36, 48, and 60 months
-      label_header = "Months"
+    # Clean the strata variable name for display
+    strata_label <- switch(input$Strata,
+                           "diagnosis" = "Diagnosis",
+                           "histologyOriginal" = "Histology",
+                           "gender" = "Gender",
+                           "race" = "Race",
+                           input$Strata  # default fallback
     )
     
-    # Convert to gt table and apply styling there instead
+    # Create clean labels by removing "input$Strata="
+    data[[input$Strata]] <- gsub("input\\$Strata=", "", data[[input$Strata]])
+    
+    fit <- survfit(Surv(survivalMonths, mortality) ~ get(input$Strata), data = data)
+    
+    tbl <- gtsummary::tbl_survfit(
+      fit,
+      times = c(0, 12, 24, 36, 48, 60),
+      label_header = "{time} Months"
+    ) %>%
+      # Clean up the strata labels in the table
+      modify_table_body(
+        ~.x %>%
+          dplyr::mutate(
+            label = gsub("input\\$Strata=", "", label)
+          )
+      ) %>%
+      # Set the column header for the strata
+      modify_header(label = strata_label)
+    
     tbl %>% 
       gtsummary::as_gt() %>%
       gt::tab_header(title = "Risk Table") %>%
