@@ -54,6 +54,12 @@ ui <- tagList(
               column(12, plotlyOutput("kmplt", width = "100%", height = "500px"))
             ),
             fluidRow(
+              column(12, 
+                     downloadButton("download_km_plot", "Download Plot"),
+                     style = "margin-top: 10px; margin-bottom: 10px;"
+              )
+            ),
+            fluidRow(
               column(12,
                      verbatimTextOutput("log_rank_results"),
                      style = "margin-top: 20px; margin-bottom: 20px;"
@@ -72,7 +78,6 @@ ui <- tagList(
       )
     ),
     
-    # Second tab - Hazard Ratios (with new separate inputs)
     tabPanel(
       "Hazard Ratios",
       fluidPage(
@@ -99,7 +104,7 @@ ui <- tagList(
             checkboxInput("show_hr", "Display Hazard Ratios", value = TRUE),
             helpText("This tab displays the hazard ratios from a Cox proportional hazards model.")
           ),
-          mainPanel(
+          mainPanel(  # Remove the nested mainPanel
             fluidRow(
               column(12, 
                      conditionalPanel(
@@ -112,13 +117,15 @@ ui <- tagList(
               column(12, 
                      conditionalPanel(
                        condition = "input.show_hr",
-                       plotlyOutput("hr_plot", height = "500px")
+                       plotlyOutput("hr_plot", height = "500px"),
+                       downloadButton("download_hr_plot", "Download Plot"),
+                       style = "margin-top: 10px"
                      )
               )
             )
-          )
-        )
-      )
-    )
-  )
+          )  
+        )  
+      )  
+    )  
+  )  
 )
