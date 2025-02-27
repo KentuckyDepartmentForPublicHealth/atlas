@@ -78,54 +78,52 @@ ui <- tagList(
       )
     ),
     
+    # Second tab - Hazard Ratios
     tabPanel(
       "Hazard Ratios",
       fluidPage(
         sidebarLayout(
           sidebarPanel(
             selectInput(
-              inputId = "diagnosis_hr",  # New separate input for HR tab
+              inputId = "diagnosis_hr",
               label = "Select Diagnosis:",
               choices = c("All", unique(atlasDataClean$diagnosis)),
               selected = "All"
             ),
             selectInput(
-              inputId = "histology_hr",  # New separate input for HR tab
+              inputId = "histology_hr",
               label = "Select Histology:",
               choices = c("All", unique(atlasDataClean$histologyOriginal)),
               selected = "All"
             ),
             selectInput(
-              inputId = "Strata_hr",  # New separate input for HR tab
+              inputId = "Strata_hr",
               label = "Select strata:",
               choices = allowed_vars,
               selected = allowed_vars[1]
             ),
-            checkboxInput("show_hr", "Display Hazard Ratios", value = TRUE),
+            checkboxInput("show_hr_table", "Display Hazard Ratio Table", value = FALSE),
             helpText("This tab displays the hazard ratios from a Cox proportional hazards model.")
           ),
-          mainPanel(  # Remove the nested mainPanel
+          mainPanel(
             fluidRow(
               column(12, 
-                     conditionalPanel(
-                       condition = "input.show_hr",
-                       gt_output("hazard_table")
-                     )
+                     plotlyOutput("hr_plot", height = "500px"),
+                     downloadButton("download_hr_plot", "Download Plot"),
+                     style = "margin-top: 10px"
               )
             ),
             fluidRow(
               column(12, 
                      conditionalPanel(
-                       condition = "input.show_hr",
-                       plotlyOutput("hr_plot", height = "500px"),
-                       downloadButton("download_hr_plot", "Download Plot"),
-                       style = "margin-top: 10px"
+                       condition = "input.show_hr_table == true",
+                       gt_output("hazard_table")
                      )
               )
             )
-          )  
-        )  
-      )  
-    )  
-  )  
-)
+          )
+        )
+      )
+    )  # Close second tabPanel
+  )  # Close navbarPage
+)  # Close tagList
