@@ -10,10 +10,8 @@
 
 
 server <- function(input, output, session) {
-  # Reactive filtered data based on the selected diagnosis
-  # Modify the filtered_dat reactive expression in server.R to include histology filtering
-  filtered_dat <- reactive({
-    # Start with the diagnosis filter
+  # Separate reactive filtered data for KM tab
+  filtered_dat_km <- reactive({
     data <- if (input$diagnosis == "All") {
       atlasDataClean
     } else {
@@ -21,7 +19,6 @@ server <- function(input, output, session) {
         dplyr::filter(diagnosis == input$diagnosis)
     }
     
-    # Then apply histology filter
     if (input$histology != "All") {
       data <- data %>%
         dplyr::filter(histologyOriginal == input$histology)
@@ -29,32 +26,44 @@ server <- function(input, output, session) {
     
     data
   })
+  
+  # Separate reactive filtered data for HR tab
+  filtered_dat_hr <- reactive({
+    data <- if (input$diagnosis_hr == "All") {
+      atlasDataClean
+    } else {
+      atlasDataClean %>%
+        dplyr::filter(diagnosis == input$diagnosis_hr)
+    }
+    
+    if (input$histology_hr != "All") {
+      data <- data %>%
+        dplyr::filter(histologyOriginal == input$histology_hr)
+    }
+    
+    data
+  })
+  
   output$kmplt <- renderPlotly({
-    data <- filtered_dat()
+    data <- filtered_dat_km()
     req(nrow(data) > 0)  # Ensure data is not empty
     
-    # If fewer than 30 observations, display a warning message
     if (nrow(data) < 30) {
       plot.new()
       text(0.5, 0.5, "Too few observations to display Kaplan-Meier curve.", cex = 0.9, col = "red")
       return()
     }
     
-    # Recode mortality: NA becomes 0 (censored), 1 remains as event
     data$event_status <- ifelse(is.na(data$mortality), 0, data$mortality)
     
-    # Create a clean factor for the strata variable with better labels
     strata_var <- input$Strata
     data$strata_factor <- factor(data[[strata_var]])
     
-    # Generate clean labels for legend
     clean_labels <- levels(data$strata_factor)
-    clean_labels <- gsub("strata_factor=", "", clean_labels)  # Remove unnecessary prefixes
+    clean_labels <- gsub("strata_factor=", "", clean_labels)
     
-    # Fit survival model using the clean factor
     fit <- survfit(Surv(survivalMonths, event_status) ~ strata_factor, data = data)
     
-    # Create the Kaplan-Meier plot
     p <- ggsurvfit(fit) +
       labs(
         x = "Time (Months)",
@@ -63,8 +72,8 @@ server <- function(input, output, session) {
       ) +
       scale_color_manual(
         name = strata_var, 
-        values = RColorBrewer::brewer.pal(length(clean_labels), "Set1"),  # Assign colors manually
-        labels = clean_labels  # Ensure legend labels are formatted correctly
+        values = RColorBrewer::brewer.pal(length(clean_labels), "Set1"),
+        labels = clean_labels
       ) +
       theme_minimal() +
       theme(
@@ -80,44 +89,31 @@ server <- function(input, output, session) {
         legend.title        = element_text(color = "black")
       )
     
-    # Conditionally add censoring marks if the checkbox is checked
     if (input$show_censoring) {
       p <- p + add_censor_mark(shape = 3, size = 3, color = "red")
     }
     
-    # Convert to plotly 
     plotly_obj <- ggplotly(p)
     
-    # Function to calculate number at risk at specific timepoints
     get_n_at_risk <- function(timepoints, strata_level, data) {
       sapply(timepoints, function(t) {
         sum(data$strata_factor == strata_level & data$survivalMonths >= t)
       })
     }
     
-    # Extract time points from the plot data
     all_data_points <- plotly_obj$x$data
     
-    # Update each trace with custom hover text including number at risk
     for (i in seq_along(clean_labels)) {
-      # Get the current trace data
       trace_data <- all_data_points[[i]]
       
-      # Skip if this isn't a line trace (e.g., risk table)
-      if (!("line" %in% names(trace_data)) || is.null(trace_data$x)) {
+      if (!(exists("line", where = trace_data) && !is.null(trace_data$x))) {
         next
       }
       
-      # Get time points for this curve
       time_points <- trace_data$x
-      
-      # Calculate number at risk at each time point
       n_at_risk <- get_n_at_risk(time_points, levels(data$strata_factor)[i], data)
-      
-      # Get survival probabilities
       survival_probs <- trace_data$y
       
-      # Create custom hover text
       hover_text <- mapply(
         function(t, s, n) {
           sprintf(
@@ -131,13 +127,12 @@ server <- function(input, output, session) {
         SIMPLIFY = TRUE
       )
       
-      # Update the trace with new hover text
       plotly_obj$x$data[[i]]$text <- hover_text
       plotly_obj$x$data[[i]]$hoverinfo <- "text"
       plotly_obj$x$data[[i]]$name <- clean_labels[i]
     }
     
-    plotly_obj <- plotly_obj %>%
+    plotly_obj %>%
       layout(
         legend = list(
           title = list(text = strata_var),
@@ -154,45 +149,43 @@ server <- function(input, output, session) {
         modeBarButtonsToAdd = c("zoom2d", "lasso2d", "toImage"),
         displaylogo = FALSE
       )
-    
-    plotly_obj  # Return fixed plotly object
   })
   
-  # Fit Cox Model ONCE
-  cox_model <- reactive({
-    data <- filtered_dat()
-    req(nrow(data) > 0)  # Ensure we have data
+  # Separate Cox Models for each tab
+  cox_model_km <- reactive({
+    data <- filtered_dat_km()
+    req(nrow(data) > 0)
     
-    # Ensure the strata variable is treated as a factor if not numeric
     if (!is.numeric(data[[input$Strata]])) {
       data[[input$Strata]] <- as.factor(data[[input$Strata]])
     }
     
-    # Fit Cox proportional hazards model
     coxph(as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata)), data = data)
   })
   
-  hr_data <- reactive({
-    broom::tidy(cox_model(), exponentiate = TRUE, conf.int = TRUE) %>% 
-      dplyr::mutate(term = gsub("_", " ", term))  # Clean term names
+  cox_model_hr <- reactive({
+    data <- filtered_dat_hr()
+    req(nrow(data) > 0)
+    
+    if (!is.numeric(data[[input$Strata_hr]])) {
+      data[[input$Strata_hr]] <- as.factor(data[[input$Strata_hr]])
+    }
+    
+    coxph(as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata_hr)), data = data)
   })
   
-  # Risk table output
   output$risk_table <- render_gt({
-    data <- filtered_dat()
+    data <- filtered_dat_km()
     req(nrow(data) > 0)
     req(input$show_risk_table)
     
-    # Clean the strata variable name for display
     strata_label <- switch(input$Strata,
                            "diagnosis" = "Diagnosis",
                            "histologyOriginal" = "Histology",
                            "gender" = "Gender",
                            "race" = "Race",
-                           input$Strata  # default fallback
-    )
+                           input$Strata)
     
-    # Create clean labels by removing "input$Strata="
     data[[input$Strata]] <- gsub("input\\$Strata=", "", data[[input$Strata]])
     
     fit <- survfit(Surv(survivalMonths, mortality) ~ get(input$Strata), data = data)
@@ -202,14 +195,12 @@ server <- function(input, output, session) {
       times = c(0, 12, 24, 36, 48, 60),
       label_header = "{time} Months"
     ) %>%
-      # Clean up the strata labels in the table
       modify_table_body(
         ~.x %>%
           dplyr::mutate(
             label = gsub("input\\$Strata=", "", label)
           )
       ) %>%
-      # Set the column header for the strata
       modify_header(label = strata_label)
     
     tbl %>% 
@@ -221,28 +212,25 @@ server <- function(input, output, session) {
         data_row.padding = gt::px(2)
       )
   })
-  # Render Hazard Ratios Table using gt
+  
   output$hazard_table <- render_gt({
-    req(input$show_hr)  # Only show if checkbox is checked
+    req(input$show_hr)
     
-    data <- filtered_dat()
+    data <- filtered_dat_hr()
     req(nrow(data) > 0)
     
-    cox_summary <- summary(cox_model())
+    cox_summary <- summary(cox_model_hr())
     
-    # Extract hazard ratios, confidence intervals, and p-values
     hr_vals <- exp(cox_summary$coefficients[, "coef"])
-    ci_vals <- exp(confint(cox_model()))
+    ci_vals <- exp(confint(cox_model_hr()))
     p_vals  <- cox_summary$coefficients[, "Pr(>|z|)"]
     
-    # Clean up row names for better display
-    clean_labels <- gsub("^get\\(input\\$Strata\\)", "", rownames(cox_summary$coefficients)) %>%
+    clean_labels <- gsub("^get\\(input\\$Strata_hr\\)", "", rownames(cox_summary$coefficients)) %>%
       gsub("([a-z])([A-Z])", "\\1 \\2", .) %>%
       gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>%
       gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>%
       tools::toTitleCase()
     
-    # Build Hazard Ratio Table
     hr_table <- data.frame(
       "Group"         = clean_labels,
       "Hazard Ratio"  = round(hr_vals, 2),
@@ -252,7 +240,6 @@ server <- function(input, output, session) {
       check.names     = FALSE
     )
     
-    # Render table
     gt(hr_table) %>%
       tab_header(
         title = md("**Hazard Ratios**"),
@@ -275,9 +262,11 @@ server <- function(input, output, session) {
       )
   })
   
-  # Render Hazard Ratios Plot using Plotly
   output$hr_plot <- renderPlotly({
-    p <- ggplot(hr_data(), aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
+    hr_data <- broom::tidy(cox_model_hr(), exponentiate = TRUE, conf.int = TRUE) %>% 
+      dplyr::mutate(term = gsub("_", " ", term))
+    
+    p <- ggplot(hr_data, aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
       geom_pointrange(color = "blue", size = 1) +  
       geom_hline(yintercept = 1, linetype = "dashed", color = "red") +  
       coord_flip() +  
@@ -297,18 +286,16 @@ server <- function(input, output, session) {
         displaylogo = FALSE
       )
   })
-  # Create log-rank test output
+  
   output$log_rank_results <- renderText({
-    data <- filtered_dat()
+    data <- filtered_dat_km()
     req(nrow(data) > 0)
     
-    # Perform log-rank test
     surv_diff <- survdiff(
       Surv(survivalMonths, mortality) ~ get(input$Strata), 
       data = data
     )
     
-    # Format results
     p_value <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
     
     paste0(
@@ -318,7 +305,6 @@ server <- function(input, output, session) {
       "P-value: ", format.pval(p_value, digits = 3)
     )
   })
-
 }
 
 

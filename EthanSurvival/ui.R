@@ -1,14 +1,3 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    https://shiny.posit.co/
-#
-
-# Update ui.R - Remove the checkbox and reorganize the tabs
-
 ui <- tagList(
   tags$head(
     tags$style(HTML("
@@ -32,7 +21,7 @@ ui <- tagList(
   navbarPage(
     title = "Atlas: Survival Analysis",
     
-    # First tab - Kaplan Meier Curves
+    # First tab - Kaplan Meier Curves (keeping original inputs)
     tabPanel(
       "Kaplan Meier Curves",
       fluidPage(
@@ -42,7 +31,7 @@ ui <- tagList(
             selectInput(
               inputId = "diagnosis",
               label = "Select Diagnosis:",
-              choices = c("All", unique_diagnosis),
+              choices = c("All", unique(atlasDataClean$diagnosis)),
               selected = "All"
             ),
             selectInput(
@@ -83,26 +72,26 @@ ui <- tagList(
       )
     ),
     
-    # Second tab - Hazard Ratios
+    # Second tab - Hazard Ratios (with new separate inputs)
     tabPanel(
       "Hazard Ratios",
       fluidPage(
         sidebarLayout(
           sidebarPanel(
             selectInput(
-              inputId = "diagnosis_hr",
+              inputId = "diagnosis_hr",  # New separate input for HR tab
               label = "Select Diagnosis:",
-              choices = c("All", unique_diagnosis),
+              choices = c("All", unique(atlasDataClean$diagnosis)),
               selected = "All"
             ),
             selectInput(
-              inputId = "histology_hr",
+              inputId = "histology_hr",  # New separate input for HR tab
               label = "Select Histology:",
               choices = c("All", unique(atlasDataClean$histologyOriginal)),
               selected = "All"
             ),
             selectInput(
-              inputId = "Strata_hr",
+              inputId = "Strata_hr",  # New separate input for HR tab
               label = "Select strata:",
               choices = allowed_vars,
               selected = allowed_vars[1]
@@ -123,7 +112,7 @@ ui <- tagList(
               column(12, 
                      conditionalPanel(
                        condition = "input.show_hr",
-                       plotlyOutput("hr_plot")
+                       plotlyOutput("hr_plot", height = "500px")
                      )
               )
             )
