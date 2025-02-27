@@ -145,8 +145,8 @@ server <- function(input, output, session) {
       config(
         modeBarButtonsToRemove = c("pan2d", "select2d", "autoscale", "resetScale2d", 
                                    "toggleSpikelines", "hoverClosestCartesian", 
-                                   "hoverCompareCartesian"),
-        modeBarButtonsToAdd = c("zoom2d", "lasso2d", "toImage"),
+                                   "hoverCompareCartesian","toImage"),
+        modeBarButtonsToAdd = c("zoom2d", "lasso2d"),
         displaylogo = FALSE
       )
   })
@@ -281,8 +281,8 @@ server <- function(input, output, session) {
       config(
         modeBarButtonsToRemove = c("pan2d", "select2d", "autoscale", "resetScale2d", 
                                    "toggleSpikelines", "hoverClosestCartesian", 
-                                   "hoverCompareCartesian"),
-        modeBarButtonsToAdd = c("zoom2d", "lasso2d", "toImage"),
+                                   "hoverCompareCartesian", "toImage"),
+        modeBarButtonsToAdd = c("zoom2d", "lasso2d"),
         displaylogo = FALSE
       )
   })
@@ -305,6 +305,59 @@ server <- function(input, output, session) {
       "P-value: ", format.pval(p_value, digits = 3)
     )
   })
+  # Add these at the end of your server function, before the final closing bracket
+  
+  output$download_km_plot <- downloadHandler(
+    filename = function() {
+      paste("kaplan_meier_plot_", Sys.Date(), ".png", sep="")
+    },
+    content = function(file) {
+      data <- filtered_dat_km()
+      
+      # Recreate the KM plot (without plotly conversion)
+      p <- ggsurvfit(
+        survfit(Surv(survivalMonths, mortality) ~ get(input$Strata), data = data)
+      ) +
+        labs(
+          x = "Time (Months)",
+          y = "Survival Probability",
+          title = "Kaplan-Meier Plot"
+        ) +
+        theme_minimal()
+      
+      if(input$show_censoring) {
+        p <- p + add_censor_mark(shape = 3, size = 3, color = "red")
+      }
+      
+      # Save the plot
+      ggsave(file, p, width = 10, height = 8)
+    }
+  )
+  
+  output$download_hr_plot <- downloadHandler(
+    filename = function() {
+      paste("hazard_ratio_plot_", Sys.Date(), ".png", sep="")
+    },
+    content = function(file) {
+      # Recreate the HR plot (without plotly conversion)
+      hr_data <- broom::tidy(cox_model_hr(), exponentiate = TRUE, conf.int = TRUE) %>% 
+        dplyr::mutate(term = gsub("_", " ", term))
+      
+      p <- ggplot(hr_data, aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
+        geom_pointrange(color = "blue", size = 1) +  
+        geom_hline(yintercept = 1, linetype = "dashed", color = "red") +  
+        coord_flip() +  
+        labs(
+          title = "Hazard Ratios from Cox Model",
+          x = "Covariates",
+          y = "Hazard Ratio (95% CI)"
+        ) +
+        theme_minimal()
+      
+      # Save the plot
+      ggsave(file, p, width = 10, height = 8)
+    }
+  )
 }
 
 
