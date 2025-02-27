@@ -213,12 +213,11 @@ server <- function(input, output, session) {
       )
   })
   
+  # Update the hazard table output to use the new input
   output$hazard_table <- render_gt({
-    req(input$show_hr)
+    req(input$show_hr_table)  # Only render when table is requested
     
     data <- filtered_dat_hr()
-    req(nrow(data) > 0)
-    
     cox_summary <- summary(cox_model_hr())
     
     hr_vals <- exp(cox_summary$coefficients[, "coef"])
@@ -262,6 +261,7 @@ server <- function(input, output, session) {
       )
   })
   
+ 
   output$hr_plot <- renderPlotly({
     hr_data <- broom::tidy(cox_model_hr(), exponentiate = TRUE, conf.int = TRUE) %>% 
       dplyr::mutate(term = gsub("_", " ", term))
