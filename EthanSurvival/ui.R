@@ -390,6 +390,18 @@ ui <- tagList(
         background-color: #4361ee !important;
         color: #ffffff !important;
       }
+      /* Log Rank Text Output Styling */
+      .shiny-text-output, .shiny-verbatim-text-output {
+      color: #ffffff !important;
+      background-color: #353b5e !important;
+      padding: 15px !important;
+      border-radius: 8px !important;
+      border: 1px solid #4d5785 !important;
+      font-family: 'Consolas', 'Monaco', monospace !important;
+      white-space: pre-wrap !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+    }
     "))
   ),
   
@@ -406,7 +418,7 @@ ui <- tagList(
             selectInput(
               inputId = "diagnosis",
               label = "Select Diagnosis:",
-              choices = c("All", unique(atlasDataClean$diagnosis)),
+              choices = c("All", unique_diagnosis),
               selected = "All"
             ),
             selectInput(
@@ -468,7 +480,7 @@ ui <- tagList(
             selectInput(
               inputId = "histology_hr",
               label = "Select Histology:",
-              choices = c("All", unique(atlasDataClean$histologyOriginal)),
+              choices = c("All", unique_histology),
               selected = "All"
             ),
             selectInput(
