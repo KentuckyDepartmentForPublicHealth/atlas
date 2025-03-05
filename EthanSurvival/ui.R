@@ -1,6 +1,7 @@
 ui <- tagList(
   tags$head(
     tags$style(HTML("
+  /* Modern Dark Mode Navbar */
   .navbar {
     background-color: #1e1e2e !important;
     border-bottom: 1px solid #4d4d69;
@@ -30,6 +31,84 @@ ui <- tagList(
   .navbar .navbar-toggler-icon {
     background-image: url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e\");
   }
+  
+  /* Matching Sidebar/Input Panel Styling */
+  .well, .panel, .shiny-input-panel, .sidebar {
+    background-color: #262636 !important;
+    border: 1px solid #4d4d69 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15) !important;
+    color: #c8c8d2 !important;
+    padding: 15px !important;
+    margin-bottom: 20px !important;
+  }
+  
+  /* Input Controls Styling */
+  .form-control, .selectize-input, .selectize-control.single .selectize-input {
+    background-color: #383852 !important;
+    color: #ffffff !important;
+    border: 1px solid #4d4d69 !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease;
+  }
+  
+  .form-control:focus, .selectize-input.focus {
+    border-color: #6272a4 !important;
+    box-shadow: 0 0 0 0.2rem rgba(98, 114, 164, 0.25) !important;
+  }
+  
+  /* Labels and Text */
+  label, .control-label {
+    color: #c8c8d2 !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Buttons */
+  .btn-default, .btn-primary {
+    background-color: #44475a !important;
+    color: #ffffff !important;
+    border: 1px solid #6272a4 !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-default:hover, .btn-primary:hover {
+    background-color: #6272a4 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+  }
+  
+  /* Sliders and Other Controls */
+  .js-irs-0 .irs-bar {
+    background-color: #6272a4 !important;
+    border-color: #6272a4 !important;
+  }
+  
+  .js-irs-0 .irs-handle {
+    background-color: #8be9fd !important;
+    border-color: #6272a4 !important;
+  }
+  
+  /* Tabs within sidebar if any */
+  .nav-tabs {
+    border-bottom: 1px solid #4d4d69 !important;
+  }
+  
+  .nav-tabs > li > a {
+    color: #c8c8d2 !important;
+    background-color: #262636 !important;
+    border: 1px solid #4d4d69 !important;
+  }
+  
+  .nav-tabs > li.active > a, 
+  .nav-tabs > li.active > a:focus, 
+  .nav-tabs > li.active > a:hover {
+    color: #ffffff !important;
+    background-color: #383852 !important;
+    border: 1px solid #6272a4 !important;
+    border-bottom-color: transparent !important;
+  }
+  
   /* For a more fluid experience on different screen sizes */
   @media (max-width: 991.98px) {
     .navbar .navbar-nav .nav-link {
