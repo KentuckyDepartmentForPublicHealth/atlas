@@ -401,6 +401,37 @@ ui <- tagList(
       white-space: pre-wrap !important;
       font-size: 14px !important;
       line-height: 1.5 !important;
+      }
+      /* Button styling */
+    .btn {
+      border-radius: 6px;
+      font-weight: 500;
+      padding: 0.5rem 1.25rem;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.85rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #4c6ef5, #63b3ed);
+      border: none;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(90deg, #5a78f2, #72c3f9);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Download button styling - fix for double icon */
+    .download-button-custom .fa {
+      display: none;  /* Hide the default FontAwesome icon */
+    }
+
+    .download-button-custom .glyphicon {
+      display: none;  /* Hide the default glyphicon */
     }
     "))
   ),
@@ -424,7 +455,7 @@ ui <- tagList(
             selectInput(
               inputId = "histology",
               label = "Select Histology:",
-              choices = c("All", unique(atlasDataClean$histologyOriginal)),
+              choices = c("All", unique_histology),
               selected = "All"
             ),
             selectInput(
@@ -474,7 +505,7 @@ ui <- tagList(
             selectInput(
               inputId = "diagnosis_hr",
               label = "Select Diagnosis:",
-              choices = c("All", unique(atlasDataClean$diagnosis)),
+              choices = c("All", unique_diagnosis),
               selected = "All"
             ),
             selectInput(
