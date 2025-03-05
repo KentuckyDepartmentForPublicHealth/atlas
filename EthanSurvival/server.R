@@ -266,6 +266,30 @@ server <- function(input, output, session) {
     hr_data <- broom::tidy(cox_model_hr(), exponentiate = TRUE, conf.int = TRUE) %>% 
       dplyr::mutate(term = gsub("_", " ", term))
     
+    # Create a reference level mapping
+    ref_levels <- list(
+      "ageGroup" = "40-60YRS",
+      "tumorType" = "1",
+      "grade" = "1", 
+      "sex" = "M"
+    )
+    
+    # Get human-readable names for strata variables
+    strata_names <- list(
+      "ageGroup" = "Age Group",
+      "tumorType" = "Tumor Type",
+      "grade" = "Grade",
+      "sex" = "Sex"
+    )
+    
+    # Create a reference levels text
+    ref_text <- paste(
+      sapply(names(ref_levels), function(var) {
+        paste0(strata_names[[var]], " = ", ref_levels[[var]])
+      }),
+      collapse = ", "
+    )
+    
     p <- ggplot(hr_data, aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
       geom_pointrange(color = "lightblue", size = 1) +  
       geom_hline(yintercept = 1, linetype = "dashed", color = "#D21F3C") +  
@@ -289,6 +313,28 @@ server <- function(input, output, session) {
       )
     
     ggplotly(p) %>%
+      layout(
+        annotations = list(
+          list(
+            x = 0.5,           # Shifted to the left (was 0.5)
+            y = -0.1,         # Keeping the same vertical position
+            xref = "paper",
+            yref = "paper",
+            text = paste("Reference levels:", ref_text),
+            showarrow = FALSE,
+            font = list(size = 10, color = "white"),
+            bgcolor = "rgba(50, 50, 50, 0.5)",
+            bordercolor = "rgba(0, 0, 0, 0)",
+            borderwidth = 0,
+            align = "left",    # Left alignment
+            width = 0.9,
+            borderpad = 4
+          )
+        ),
+        margin = list(b = 80),
+        paper_bgcolor = "rgba(0,0,0,0)",
+        plot_bgcolor = "rgba(0,0,0,0)"
+      ) %>%
       config(
         modeBarButtonsToRemove = c("pan2d", "select2d", "autoscale", "resetScale2d", 
                                    "toggleSpikelines", "hoverClosestCartesian", 
@@ -354,6 +400,31 @@ server <- function(input, output, session) {
       hr_data <- broom::tidy(cox_model_hr(), exponentiate = TRUE, conf.int = TRUE) %>% 
         dplyr::mutate(term = gsub("_", " ", term))
       
+      # Create a reference level mapping
+      ref_levels <- list(
+        "ageGroup" = "40-60YRS",
+        "tumorType" = "1",
+        "grade" = "1", 
+        "sex" = "M"
+      )
+      
+      # Get human-readable names for strata variables
+      strata_names <- list(
+        "ageGroup" = "Age Group",
+        "tumorType" = "Tumor Type",
+        "grade" = "Grade",
+        "sex" = "Sex"
+      )
+      
+      # Create a reference levels text
+      ref_text <- paste(
+        sapply(names(ref_levels), function(var) {
+          paste0(strata_names[[var]], " = ", ref_levels[[var]])
+        }),
+        collapse = ", "
+      )
+      
+      # Create the base plot with PLOTLY TITLE AND ANNOTATION
       p <- ggplot(hr_data, aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
         geom_pointrange(color = "blue", size = 1) +  
         geom_hline(yintercept = 1, linetype = "dashed", color = "red") +  
@@ -364,6 +435,9 @@ server <- function(input, output, session) {
           y = "Hazard Ratio (95% CI)"
         ) +
         theme_minimal()
+      
+      # For the downloadable ggplot version, add the reference as a caption
+      p <- p + labs(caption = paste("Reference levels:", ref_text))
       
       # Save the plot
       ggsave(file, p, width = 10, height = 8)
