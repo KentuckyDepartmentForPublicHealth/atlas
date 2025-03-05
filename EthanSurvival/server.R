@@ -267,15 +267,26 @@ server <- function(input, output, session) {
       dplyr::mutate(term = gsub("_", " ", term))
     
     p <- ggplot(hr_data, aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
-      geom_pointrange(color = "blue", size = 1) +  
-      geom_hline(yintercept = 1, linetype = "dashed", color = "red") +  
+      geom_pointrange(color = "lightblue", size = 1) +  
+      geom_hline(yintercept = 1, linetype = "dashed", color = "#D21F3C") +  
       coord_flip() +  
       labs(
         title = "Hazard Ratios from Cox Model",
         x = "Covariates",
         y = "Hazard Ratio (95% CI)"
       ) +
-      theme_minimal()
+      theme(
+        panel.background    = element_rect(fill = "white", color = NA),
+        plot.background     = element_rect(fill = "white", color = NA),
+        panel.grid.major    = element_line(color = "grey"),
+        panel.grid.minor    = element_line(color = "grey", linetype = "dotted"),
+        axis.text           = element_text(color = "white", size = 8),
+        axis.title          = element_text(color = "white"),
+        plot.title          = element_text(color = "black", face = "bold", size = 12),
+        legend.background   = element_rect(fill = "white", color = NA),
+        legend.text         = element_text(color = "white"),
+        legend.title        = element_text(color = "white")
+      )
     
     ggplotly(p) %>%
       config(
