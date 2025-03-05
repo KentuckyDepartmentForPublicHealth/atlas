@@ -1,21 +1,43 @@
 ui <- tagList(
   tags$head(
     tags$style(HTML("
-      .navbar {
-        background-color: #ADD8E6 !important;
-        border-bottom: 2px solid #33c4ff;
-      }
-      .navbar .navbar-brand {
-        color: #000000 !important;
-        font-weight: bold;
-      }
-      .navbar .navbar-nav .nav-link {
-        color: #000000 !important;
-      }
-      .navbar .navbar-nav .nav-link:hover {
-        color: #ff5733 !important;
-      }
-    "))
+  .navbar {
+    background-color: #1e1e2e !important;
+    border-bottom: 1px solid #4d4d69;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+  }
+  .navbar .navbar-brand {
+    color: #ffffff !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .navbar .navbar-nav .nav-link {
+    color: #c8c8d2 !important;
+    margin: 0 5px;
+    padding: 0.5rem 0.8rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  .navbar .navbar-nav .nav-link:hover {
+    color: #ffffff !important;
+    background-color: #2d2d3e;
+    transform: translateY(-2px);
+  }
+  .navbar .navbar-toggler {
+    border-color: rgba(255,255,255,0.3);
+  }
+  .navbar .navbar-toggler-icon {
+    background-image: url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e\");
+  }
+  /* For a more fluid experience on different screen sizes */
+  @media (max-width: 991.98px) {
+    .navbar .navbar-nav .nav-link {
+      padding: 0.7rem 1rem;
+      margin: 2px 0;
+    }
+  }
+"))
   ),
   
   navbarPage(
