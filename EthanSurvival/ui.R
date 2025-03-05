@@ -1,4 +1,3 @@
-
 ui <- tagList(
   tags$head(
     tags$style(HTML("
@@ -36,12 +35,31 @@ ui <- tagList(
         border-radius: 6px;
         transition: all 0.2s ease;
       }
+      /* For navbarPage tab headers */
+      .navbar-default .navbar-nav > li > a {
+        color: white !important;
+      }
       
       .navbar .navbar-nav .nav-link:hover {
         color: #ffffff !important;
         background-color: #4361ee;
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+      }
+      
+      /* Fix for active navbar tab background */
+      .navbar-default .navbar-nav > .active > a,
+      .navbar-default .navbar-nav > .active > a:focus,
+      .navbar-default .navbar-nav > .active > a:hover {
+        background: linear-gradient(90deg, #4c6ef5, #63b3ed) !important;
+        color: white !important;
+        border-radius: 6px !important;
+      }
+      
+      /* Style for inactive navbar tabs */
+      .navbar-default .navbar-nav > li > a {
+        background-color: transparent !important;
+        color: #e4e4e6 !important;
       }
       
       /* Clean Sidebar */
@@ -232,28 +250,25 @@ ui <- tagList(
         box-shadow: 0 2px 3px rgba(67, 97, 238, 0.2);
       }
       
-      /* Tabs with Clear Active State */
-      .nav-tabs {
-        border-bottom: 1px solid #313552 !important;
-      }
-      
-      .nav-tabs > li > a {
-        color: #e4e4e6 !important;
-        background-color: #252a41 !important;
-        border: 1px solid #313552 !important;
-        border-radius: 6px 6px 0 0 !important;
-        padding: 10px 20px !important;
-        transition: all 0.2s ease;
-      }
-      
-      .nav-tabs > li.active > a, 
-      .nav-tabs > li.active > a:focus, 
-      .nav-tabs > li.active > a:hover {
-        color: #ffffff !important;
-        background: linear-gradient(180deg, #2d3250, #252a41) !important;
-        border-bottom-color: #252a41 !important;
-        font-weight: 600 !important;
-      }
+   /* For active tab - use the blue color from your buttons/navbar */
+    .nav-tabs > li.active > a, 
+    .nav-tabs > li.active > a:focus, 
+    .nav-tabs > li.active > a:hover {
+     color: white !important;
+     background: linear-gradient(135deg, #4361ee, #3a56d4) !important;
+     border-color: #4361ee !important;
+     border-bottom-color: transparent !important;
+    }
+    
+    /* For hover effects on tabs */
+  .nav-tabs > li > a:hover {
+  background-color: rgba(67, 97, 238, 0.7) !important; /* Semi-transparent version of #4361ee */
+  border-color: rgba(67, 97, 238, 0.7) !important;
+  }
+    /* Tab container bottom border */
+    .nav-tabs {
+    border-bottom: 1px solid #4361ee !important;
+  }
       
       /* Sliders with Better Visibility */
       .js-irs-0 .irs-bar, .irs-bar {
@@ -327,23 +342,7 @@ ui <- tagList(
         color: #e4e4e6 !important;
         background-color: #171723 !important;
       }
-      
-      /* Date input calendar popup */
-      .datepicker {
-        background-color: #252a41 !important;
-        border: 1px solid #3b4168 !important;
-        border-radius: 6px !important;
-        color: #e4e4e6 !important;
-      }
-      
-      .datepicker table tr td.active {
-        background-color: #4361ee !important;
-        background-image: none !important;
-      }
-      
-      .datepicker table tr td.day:hover {
-        background-color: #353b5e !important;
-      }
+    
       
       /* Add custom class for brighter plots if needed */
       .brighter-plot {
@@ -400,7 +399,7 @@ ui <- tagList(
       font-family: 'Consolas', 'Monaco', monospace !important;
       white-space: pre-wrap !important;
       font-size: 14px !important;
-      line-height: 1.5 !important;
+      line-height: 1.5 !important;F
       }
       /* Button styling */
     .btn {
@@ -432,6 +431,25 @@ ui <- tagList(
 
     .download-button-custom .glyphicon {
       display: none;  /* Hide the default glyphicon */
+    }
+    
+    /* Update tab styling */
+    .tabbable > .nav > li > a {
+      background-color: #252a41 !important;
+      color: #e4e4e6 !important;
+      border: 1px solid #313552 !important;
+      margin-right: 4px;
+    }
+    
+    .tabbable > .nav > li[class=active] > a {
+      background: linear-gradient(90deg, #4c6ef5, #63b3ed) !important;
+      color: white !important;
+      border-color: #4c6ef5 !important;
+    }
+    
+    .tabbable > .nav > li > a:hover {
+      background: rgba(76, 110, 245, 0.5) !important;
+      color: white !important;
     }
     "))
   ),
