@@ -14,10 +14,10 @@ library(cardx)
 
 #data
 #windows load
-#load("~/atlas/dat/atlasDataClean.RData")
+load("~/atlas/dat/atlasDataClean.RData")
 
 #mac load
-load("~/Desktop/Atlas/Survival/atlas/dat/atlasDataClean.RData")
+#load("~/Desktop/Atlas/Survival/atlas/dat/atlasDataClean.RData")
 
 
 atlasDataClean <- subset(atlasDataClean,atlasDataClean$survivalMonths != "NA")
@@ -38,8 +38,8 @@ atlasDataClean$grade <- relevel(factor(atlasDataClean$grade), ref = "1")
 atlasDataClean$sex <- relevel(factor(atlasDataClean$sex), ref = "M")
 
 
-unique_diagnosis <- c("All", "DIFFUSE GLIOMA", "IDH MUTANT","PFA","MB-GP4","NEUROBLASTOMA","MENINGIOMA")
-unique_histology <- c("All","GBM","OD","OA","A","EPN","MB","NB","MEN")
+unique_diagnosis <- c( "DIFFUSE GLIOMA", "IDH MUTANT","PFA","MB-GP4","NEUROBLASTOMA","MENINGIOMA")
+unique_histology <- c("GBM","OD","OA","A","EPN","MB","NB","MEN")
 #Option below simply filters out diagnoses with less than 30 patients, one possible approach
 #valid_diagnoses <- names(table(atlasDataClean$diagnosisFinal)[table(atlasDataClean$diagnosisFinal) > 30])
 #unique_diagnosis <- c("All", valid_diagnoses)
