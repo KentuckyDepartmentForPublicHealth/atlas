@@ -126,7 +126,7 @@ ui <- tagList(
     tabPanel(
       "Kaplan Meier Curves",
       fluidPage(
-        titlePanel("Kaplan Meier Curves with Simulated Dataset"),
+        titlePanel("Survival Analysis of Nervous System Tumors"),
         sidebarLayout(
           sidebarPanel(
             selectInput(
