@@ -81,12 +81,12 @@ server <- function(input, output, session) {
         plot.background     = element_rect(fill = "white", color = NA),
         panel.grid.major    = element_line(color = "grey"),
         panel.grid.minor    = element_line(color = "grey", linetype = "dotted"),
-        axis.text           = element_text(color = "black", size = 14),
-        axis.title          = element_text(color = "black"),
+        axis.text           = element_text(color = "white", size = 14),
+        axis.title          = element_text(color = "white"),
         plot.title          = element_text(color = "black", face = "bold", size = 16, hjust = 0.5),
         legend.background   = element_rect(fill = "white", color = NA),
-        legend.text         = element_text(color = "black"),
-        legend.title        = element_text(color = "black")
+        legend.text         = element_text(color = "white"),
+        legend.title        = element_text(color = "white")
       )
     
     if (input$show_censoring) {
