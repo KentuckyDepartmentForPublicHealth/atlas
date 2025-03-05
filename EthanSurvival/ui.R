@@ -461,8 +461,8 @@ ui <- tagList(
             selectInput(
               inputId = "Strata",
               label = "Select strata:",
-              choices = allowed_vars,
-              selected = allowed_vars[1]
+              choices = strata_labels,
+              selected = strata_labels[1]
             ),
             checkboxInput("show_risk_table", "Show Risk Table", value = FALSE),
             checkboxInput("show_censoring", "Show Censoring Marks", value = FALSE)
@@ -517,8 +517,8 @@ ui <- tagList(
             selectInput(
               inputId = "Strata_hr",
               label = "Select strata:",
-              choices = allowed_vars,
-              selected = allowed_vars[1]
+              choices = strata_labels,
+              selected = strata_labels[1]
             ),
             checkboxInput("show_hr_table", "Display Hazard Ratio Table", value = FALSE),
             helpText("This tab displays the hazard ratios from a Cox proportional hazards model.")
