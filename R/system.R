@@ -405,6 +405,69 @@ listFuns <- function(pkg) {
 lsf <- function(pkg) {
   listFuns(pkg)
 }
+
+
+# history maker -----
+h <- function(n = 5) {
+  # Read the history file
+  hist_file <- "~/.radian_history"
+  if (!file.exists(hist_file)) {
+    hist_file <- "~/.local/share/radian/history"
+  }
+
+  hist_lines <- readLines(hist_file)
+
+  # Initialize variables to collect commands
+  commands <- list()
+  current_command <- NULL
+  timestamp <- NULL
+
+  # Process the history lines
+  for (line in hist_lines) {
+    if (grepl("^# time:", line)) {
+      # If we have a command in progress, save it
+      if (!is.null(current_command)) {
+        commands <- c(commands, list(list(
+          time = timestamp,
+          code = paste(current_command, collapse = "\n")
+        )))
+      }
+
+      # Start a new command
+      timestamp <- gsub("^# time: (.*) UTC", "\\1", line)
+      current_command <- NULL
+    } else if (grepl("^# mode:", line)) {
+      # Skip mode lines
+      next
+    } else if (!is.null(timestamp)) {
+      # Add to current command, removing leading '+' if present
+      line <- gsub("^\\+", "", line)
+      current_command <- c(current_command, line)
+    }
+  }
+
+  # Add the last command if there is one
+  if (!is.null(current_command)) {
+    commands <- c(commands, list(list(
+      time = timestamp,
+      code = paste(current_command, collapse = "\n")
+    )))
+  }
+
+  # Get the last n commands
+  last_commands <- tail(commands, n)
+
+  # Display them nicely
+  cat("\n")
+  for (i in seq_along(last_commands)) {
+    cmd <- last_commands[[i]]
+    cat("─────────────────────────────────────────\n")
+    cat("Command", i, "at", cmd$time, "\n")
+    cat("─────────────────────────────────────────\n")
+    cat(cmd$code, "\n\n")
+  }
+}
+
 # stopper -----------------------------------------------------------------
 
 
