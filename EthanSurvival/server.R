@@ -97,7 +97,7 @@ server <- function(input, output, session) {
     
     get_n_at_risk <- function(timepoints, strata_level, data) {
       sapply(timepoints, function(t) {
-        sum(data$strata_factor == strata_level & data$survivalMonths >= t)
+        sum(data$strata_factor == strata_level & data$survivalMonths >= t, na.rm = TRUE)
       })
     }
     
