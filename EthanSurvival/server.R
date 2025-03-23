@@ -164,16 +164,23 @@ server <- function(input, output, session) {
   })
   
   cox_model_hr <- reactive({
-    data <- filtered_dat_hr()
+    data <- filtered_dat_km()
     req(nrow(data) > 0)
     
-    if (!is.numeric(data[[input$Strata_hr]])) {
-      data[[input$Strata_hr]] <- as.factor(data[[input$Strata_hr]])
+    # Ensure we have valid data for analysis
+    if (length(unique(data[[input$Strata]])) < 2) {
+      return(NULL)
     }
     
-    coxph(as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata_hr)), data = data)
+    tryCatch({
+      # Create formula for cox model
+      formula <- as.formula(paste("Surv(survivalMonths, mortality) ~", input$Strata))
+      coxph(formula, data = data)
+    }, error = function(e) {
+      return(NULL)
+    })
   })
-  
+
   output$risk_table <- render_gt({
     data <- filtered_dat_km()
     req(nrow(data) > 0)
@@ -263,85 +270,105 @@ server <- function(input, output, session) {
   
  
   output$hr_plot <- renderPlotly({
-    hr_data <- broom::tidy(cox_model_hr(), exponentiate = TRUE, conf.int = TRUE) %>% 
-      dplyr::mutate(term = gsub("_", " ", term))
+    req(filtered_dat_km())
+    model <- cox_model_hr()
     
-    # Create a reference level mapping
-    ref_levels <- list(
-      "ageGroup" = "40-60YRS",
-      "tumorType" = "1",
-      "grade" = "1", 
-      "sex" = "M"
-    )
-    
-    # Get human-readable names for strata variables
-    strata_names <- list(
-      "ageGroup" = "Age Group",
-      "tumorType" = "Tumor Type",
-      "grade" = "Grade",
-      "sex" = "Sex"
-    )
-    
-    # Create a reference levels text
-    ref_text <- paste(
-      sapply(names(ref_levels), function(var) {
-        paste0(strata_names[[var]], " = ", ref_levels[[var]])
-      }),
-      collapse = ", "
-    )
-    
-    p <- ggplot(hr_data, aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
-      geom_pointrange(color = "lightblue", size = 1) +  
-      geom_hline(yintercept = 1, linetype = "dashed", color = "#D21F3C") +  
-      coord_flip() +  
-      labs(
-        title = "Hazard Ratios from Cox Model",
-        x = "Covariates",
-        y = "Hazard Ratio (95% CI)"
-      ) +
-      theme(
-        panel.background    = element_rect(fill = "white", color = NA),
-        plot.background     = element_rect(fill = "white", color = NA),
-        panel.grid.major    = element_line(color = "grey"),
-        panel.grid.minor    = element_line(color = "grey", linetype = "dotted"),
-        axis.text           = element_text(color = "white", size = 8),
-        axis.title          = element_text(color = "white"),
-        plot.title          = element_text(color = "black", face = "bold", size = 12),
-        legend.background   = element_rect(fill = "white", color = NA),
-        legend.text         = element_text(color = "white"),
-        legend.title        = element_text(color = "white")
+    if (is.null(model)) {
+      # Return an empty plot with message
+      plot_ly() %>%
+        add_annotations(
+          text = "Insufficient data for hazard ratio analysis.\nPlease ensure you have at least two groups for comparison.",
+          showarrow = FALSE,
+          font = list(color = '#ffffff', size = 14)
+        ) %>%
+        layout(
+          plot_bgcolor = '#353b5e',
+          paper_bgcolor = '#353b5e',
+          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
+        )
+    } else {
+      # Process model results
+      hr_data <- broom::tidy(model, exponentiate = TRUE, conf.int = TRUE) %>%
+        dplyr::mutate(term = gsub("_", " ", term))
+      
+      # Create a reference level mapping
+      ref_levels <- list(
+        "ageGroup" = "40-60YRS",
+        "tumorType" = "1",
+        "grade" = "1", 
+        "sex" = "M"
       )
-    
-    ggplotly(p) %>%
-      layout(
-        annotations = list(
-          list(
-            x = 0.5,           # Shifted to the left (was 0.5)
-            y = -0.1,         # Keeping the same vertical position
-            xref = "paper",
-            yref = "paper",
-            text = paste("Reference levels:", ref_text),
-            showarrow = FALSE,
-            font = list(size = 10, color = "white"),
-            bgcolor = "rgba(50, 50, 50, 0.5)",
-            bordercolor = "rgba(0, 0, 0, 0)",
-            borderwidth = 0,
-            align = "left",    # Left alignment
-            width = 0.9,
-            borderpad = 4
-          )
-        ),
-        margin = list(b = 80),
-        paper_bgcolor = "rgba(0,0,0,0)",
-        plot_bgcolor = "rgba(0,0,0,0)"
-      ) %>%
-      config(
-        modeBarButtonsToRemove = c("pan2d", "select2d", "autoscale", "resetScale2d", 
-                                   "toggleSpikelines", "hoverClosestCartesian", 
-                                   "hoverCompareCartesian", "toImage"),
-        modeBarButtonsToAdd = c("zoom2d", "lasso2d"),
-        displaylogo = FALSE
+      
+      # Get human-readable names for strata variables
+      strata_names <- list(
+        "ageGroup" = "Age Group",
+        "tumorType" = "Tumor Type",
+        "grade" = "Grade",
+        "sex" = "Sex"
       )
+      
+      # Create a reference levels text
+      ref_text <- paste(
+        sapply(names(ref_levels), function(var) {
+          paste0(strata_names[[var]], " = ", ref_levels[[var]])
+        }),
+        collapse = ", "
+      )
+      
+      p <- ggplot(hr_data, aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
+        geom_pointrange(color = "lightblue", size = 1) +  
+        geom_hline(yintercept = 1, linetype = "dashed", color = "#D21F3C") +  
+        coord_flip() +  
+        labs(
+          title = "Hazard Ratios from Cox Model",
+          x = "Covariates",
+          y = "Hazard Ratio (95% CI)"
+        ) +
+        theme(
+          panel.background    = element_rect(fill = "white", color = NA),
+          plot.background     = element_rect(fill = "white", color = NA),
+          panel.grid.major    = element_line(color = "grey"),
+          panel.grid.minor    = element_line(color = "grey", linetype = "dotted"),
+          axis.text           = element_text(color = "white", size = 8),
+          axis.title          = element_text(color = "white"),
+          plot.title          = element_text(color = "black", face = "bold", size = 12),
+          legend.background   = element_rect(fill = "white", color = NA),
+          legend.text         = element_text(color = "white"),
+          legend.title        = element_text(color = "white")
+        )
+      
+      ggplotly(p) %>%
+        layout(
+          annotations = list(
+            list(
+              x = 0.5,           # Shifted to the left (was 0.5)
+              y = -0.1,         # Keeping the same vertical position
+              xref = "paper",
+              yref = "paper",
+              text = paste("Reference levels:", ref_text),
+              showarrow = FALSE,
+              font = list(size = 10, color = "white"),
+              bgcolor = "rgba(50, 50, 50, 0.5)",
+              bordercolor = "rgba(0, 0, 0, 0)",
+              borderwidth = 0,
+              align = "left",    # Left alignment
+              width = 0.9,
+              borderpad = 4
+            )
+          ),
+          margin = list(b = 80),
+          paper_bgcolor = "rgba(0,0,0,0)",
+          plot_bgcolor = "rgba(0,0,0,0)"
+        ) %>%
+        config(
+          modeBarButtonsToRemove = c("pan2d", "select2d", "autoscale", "resetScale2d", 
+                                     "toggleSpikelines", "hoverClosestCartesian", 
+                                     "hoverCompareCartesian", "toImage"),
+          modeBarButtonsToAdd = c("zoom2d", "lasso2d"),
+          displaylogo = FALSE
+        )
+    }
   })
   
   output$log_rank_results <- renderText({
