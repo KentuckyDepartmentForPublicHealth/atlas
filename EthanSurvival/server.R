@@ -405,37 +405,49 @@ server <- function(input, output, session) {
         if (n_pairs > 0) {
           result <- paste0(result, "\n\nPairwise Log-rank Test Results:\n")
           
-          # Calculate all pairwise comparisons
+          # Store all p-values first for BH adjustment
+          all_p_values <- numeric(n_pairs)
+          pair_results <- list()
+          
+          # Calculate all raw p-values first
           for(i in 1:n_pairs) {
             pair_data <- data[strata_factor %in% pairs[,i], ]
             pair_surv <- survdiff(
               Surv(survivalMonths, mortality) ~ get(input$Strata),
               data = pair_data
             )
-            pair_p <- 1 - pchisq(pair_surv$chisq, df = 1)
-            # Apply Bonferroni correction
-            adj_p <- min(1, pair_p * n_pairs)
-            
+            all_p_values[i] <- 1 - pchisq(pair_surv$chisq, df = 1)
+            pair_results[[i]] <- list(
+              group1 = pairs[1,i],
+              group2 = pairs[2,i]
+            )
+          }
+          
+          # Apply Benjamini-Hochberg correction
+          adj_p_values <- p.adjust(all_p_values, method = "BH")
+          
+          # Format and display results
+          for(i in 1:n_pairs) {
             # Add significance stars
             stars <- ""
-            if (adj_p < 0.001) stars <- " ***"
-            else if (adj_p < 0.01) stars <- " **"
-            else if (adj_p < 0.05) stars <- " *"
+            if (adj_p_values[i] < 0.001) stars <- " ***"
+            else if (adj_p_values[i] < 0.01) stars <- " **"
+            else if (adj_p_values[i] < 0.05) stars <- " *"
             
             result <- paste0(
               result,
               sprintf("\n%s vs %s: p = %s%s", 
-                      pairs[1,i], 
-                      pairs[2,i], 
-                      format.pval(adj_p, digits = 3),
+                      pair_results[[i]]$group1, 
+                      pair_results[[i]]$group2, 
+                      format.pval(adj_p_values[i], digits = 3),
                       stars)
             )
           }
           
-          # Add significance level legend
+          # Update legend to reflect BH method
           result <- paste0(
             result,
-            "\n\nSignificance levels (Bonferroni-adjusted):",
+            "\n\nSignificance levels (Benjamini-Hochberg adjusted):",
             "\n* p < 0.05",
             "\n** p < 0.01",
             "\n*** p < 0.001"
