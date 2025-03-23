@@ -451,115 +451,98 @@ ui <- tagList(
       background: rgba(76, 110, 245, 0.5) !important;
       color: white !important;
     }
+    
+      /* Log Rank Results Styling */
+      #log_rank_results, #pairwise_logrank {
+        color: #ffffff !important;
+        background-color: #353b5e !important;
+        padding: 15px !important;
+        border-radius: 8px !important;
+        border: 1px solid #4d5785 !important;
+        font-family: 'Consolas', 'Monaco', monospace !important;
+        white-space: pre-wrap !important;
+        font-size: 14px !important;
+        line-height: 1.5 !important;
+        margin: 10px 0 !important;
+        width: 100% !important;
+        display: block !important;
+      }
     "))
   ),
   
-  navbarPage(
-    title = "Atlas: Survival Analysis",
+fluidPage(
+    titlePanel("Atlas: Survival Analysis"),
     
-    # First tab - Kaplan Meier Curves (keeping original inputs)
-    tabPanel(
-      "Kaplan Meier Curves",
-      fluidPage(
-        titlePanel("Survival Analysis of Nervous System Tumors"),
-        sidebarLayout(
-          sidebarPanel(
-            selectInput(
-              inputId = "diagnosis",
-              label = "Select Diagnosis:",
-              choices = c("All", unique_diagnosis),
-              selected = "All"
-            ),
-            selectInput(
-              inputId = "histology",
-              label = "Select Histology:",
-              choices = c("All", unique_histology),
-              selected = "All"
-            ),
-            selectInput(
-              inputId = "Strata",
-              label = "Select strata:",
-              choices = strata_labels,
-              selected = strata_labels[1]
-            ),
-            checkboxInput("show_risk_table", "Show Risk Table", value = FALSE),
-            checkboxInput("show_censoring", "Show Censoring Marks", value = FALSE)
+    fluidRow(
+      # Left column for all controls
+      column(3,
+        wellPanel(
+          style = "position: sticky; top: 20px;",  # Makes sidebar sticky
+          selectInput(
+            inputId = "diagnosis",
+            label = "Select Diagnosis:",
+            choices = c("All", unique_diagnosis),
+            selected = "All"
           ),
-          mainPanel(
-            fluidRow(
-              column(12, plotlyOutput("kmplt", width = "100%", height = "500px"))
-            ),
-            fluidRow(
-              column(12, 
-                     downloadButton("download_km_plot", "Download Plot"),
-                     style = "margin-top: 10px; margin-bottom: 10px;"
-              )
-            ),
-            fluidRow(
-              column(12,
-                     verbatimTextOutput("log_rank_results"),
-                     style = "margin-top: 20px; margin-bottom: 20px;"
-              )
-            ),
-            fluidRow(
-              column(12, 
-                     conditionalPanel(
-                       condition = "input.show_risk_table == true",
-                       gt_output("risk_table")
-                     )
-              )
+          selectInput(
+            inputId = "histology",
+            label = "Select Histology:",
+            choices = c("All", unique_histology),
+            selected = "All"
+          ),
+          selectInput(
+            inputId = "Strata",
+            label = "Select strata:",
+            choices = strata_labels,
+            selected = strata_labels[1]
+          ),
+          checkboxInput("show_risk_table", "Show Risk Table", value = FALSE),
+          checkboxInput("show_censoring", "Show Censoring Marks", value = FALSE),
+          checkboxInput("show_pairwise", "Show Pairwise Comparisons", value = FALSE)
+        )
+      ),
+      
+      # Right column for all visualizations
+      column(9,
+        # Kaplan-Meier section
+        div(
+          style = "margin-bottom: 40px;",
+          h3("Kaplan-Meier Analysis", 
+             style = "color: #ffffff; margin-bottom: 20px;"),
+          plotlyOutput("kmplt", height = "500px"),
+          div(
+            style = "margin: 15px 0;",
+            downloadButton("download_km_plot", "Download KM Plot")
+          ),
+          verbatimTextOutput("log_rank_results"),
+          conditionalPanel(
+            condition = "input.show_risk_table == true",
+            div(
+              style = "margin-top: 20px;",
+              gt_output("risk_table")
+            )
+          )
+        ),
+        
+        # Hazard Ratio section
+        div(
+          style = "margin-top: 40px; padding-top: 20px; border-top: 1px solid #4d5785;",
+          h3("Hazard Ratio Analysis", 
+             style = "color: #ffffff; margin-bottom: 20px;"),
+          plotlyOutput("hr_plot", height = "500px"),
+          div(
+            style = "margin: 15px 0;",
+            downloadButton("download_hr_plot", "Download HR Plot")
+          ),
+          conditionalPanel(
+            condition = "input.show_hr_table == true",
+            div(
+              style = "margin-top: 20px;",
+              gt_output("hazard_table")
             )
           )
         )
       )
-    ),
-    
-    # Second tab - Hazard Ratios
-    tabPanel(
-      "Hazard Ratios",
-      fluidPage(
-        sidebarLayout(
-          sidebarPanel(
-            selectInput(
-              inputId = "diagnosis_hr",
-              label = "Select Diagnosis:",
-              choices = c("All", unique_diagnosis),
-              selected = "All"
-            ),
-            selectInput(
-              inputId = "histology_hr",
-              label = "Select Histology:",
-              choices = c("All", unique_histology),
-              selected = "All"
-            ),
-            selectInput(
-              inputId = "Strata_hr",
-              label = "Select strata:",
-              choices = strata_labels,
-              selected = strata_labels[1]
-            ),
-            checkboxInput("show_hr_table", "Display Hazard Ratio Table", value = FALSE),
-            helpText("This tab displays the hazard ratios from a Cox proportional hazards model.")
-          ),
-          mainPanel(
-            fluidRow(
-              column(12, 
-                     plotlyOutput("hr_plot", height = "500px"),
-                     downloadButton("download_hr_plot", "Download Plot"),
-                     style = "margin-top: 10px"
-              )
-            ),
-            fluidRow(
-              column(12, 
-                     conditionalPanel(
-                       condition = "input.show_hr_table == true",
-                       gt_output("hazard_table")
-                     )
-              )
-            )
-          )
-        )
-      )
-    )  # Close second tabPanel
-  )  # Close navbarPage
-)  # Close tagList
+    )
+  )
+)
