@@ -203,17 +203,17 @@ server <- function(input, output, session) {
       label_header = "{time} Months"
     ) %>%
       modify_table_body(
-        ~.x %>%
+        ~.x %>% 
           dplyr::mutate(
             label = gsub("input\\$Strata=", "", label)
           )
-      ) %>%
+      ) %>% 
       modify_header(label = strata_label)
     
     tbl %>% 
-      gtsummary::as_gt() %>%
-      gt::tab_header(title = "Risk Table") %>%
-      gt::opt_row_striping() %>%
+      gtsummary::as_gt() %>% 
+      gt::tab_header(title = "Risk Table") %>% 
+      gt::opt_row_striping() %>% 
       gt::tab_options(
         table.font.size = "small",
         data_row.padding = gt::px(2)
@@ -231,10 +231,10 @@ server <- function(input, output, session) {
     ci_vals <- exp(confint(cox_model_hr()))
     p_vals  <- cox_summary$coefficients[, "Pr(>|z|)"]
     
-    clean_labels <- gsub("^get\\(input\\$Strata_hr\\)", "", rownames(cox_summary$coefficients)) %>%
-      gsub("([a-z])([A-Z])", "\\1 \\2", .) %>%
-      gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>%
-      gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>%
+    clean_labels <- gsub("^get\\(input\\$Strata_hr\\)", "", rownames(cox_summary$coefficients)) %>% 
+      gsub("([a-z])([A-Z])", "\\1 \\2", .) %>% 
+      gsub("([0-9])([A-Za-z])", "\\1 \\2", .) %>% 
+      gsub("([A-Za-z])([0-9])", "\\1 \\2", .) %>% 
       tools::toTitleCase()
     
     hr_table <- data.frame(
@@ -246,22 +246,22 @@ server <- function(input, output, session) {
       check.names     = FALSE
     )
     
-    gt(hr_table) %>%
+    gt(hr_table) %>% 
       tab_header(
         title = md("**Hazard Ratios**"),
         subtitle = "Estimated from Cox Proportional Hazards Model"
-      ) %>%
+      ) %>% 
       fmt_number(
         columns = c("Hazard Ratio", "95% CI Lower", "95% CI Upper"),
         decimals = 2
-      ) %>%
+      ) %>% 
       cols_label(
         Group = "Strata Group",
         "Hazard Ratio" = "HR",
         "95% CI Lower" = "Lower CI",
         "95% CI Upper" = "Upper CI",
         "P-Value" = "P-Value"
-      ) %>%
+      ) %>% 
       tab_options(
         table.font.size = "14px",
         column_labels.font.weight = "bold"
@@ -275,12 +275,12 @@ server <- function(input, output, session) {
     
     if (is.null(model)) {
       # Return an empty plot with message
-      plot_ly() %>%
+      plot_ly() %>% 
         add_annotations(
           text = "Insufficient data for hazard ratio analysis.\nPlease ensure you have at least two groups for comparison.",
           showarrow = FALSE,
           font = list(color = '#ffffff', size = 14)
-        ) %>%
+        ) %>% 
         layout(
           plot_bgcolor = '#353b5e',
           paper_bgcolor = '#353b5e',
@@ -289,7 +289,7 @@ server <- function(input, output, session) {
         )
     } else {
       # Process model results
-      hr_data <- broom::tidy(model, exponentiate = TRUE, conf.int = TRUE) %>%
+      hr_data <- broom::tidy(model, exponentiate = TRUE, conf.int = TRUE) %>% 
         dplyr::mutate(term = gsub("_", " ", term))
       
       # Create a reference level mapping
@@ -338,7 +338,7 @@ server <- function(input, output, session) {
           legend.title        = element_text(color = "white")
         )
       
-      ggplotly(p) %>%
+      ggplotly(p) %>% 
         layout(
           annotations = list(
             list(
@@ -360,7 +360,7 @@ server <- function(input, output, session) {
           margin = list(b = 80),
           paper_bgcolor = "rgba(0,0,0,0)",
           plot_bgcolor = "rgba(0,0,0,0)"
-        ) %>%
+        ) %>% 
         config(
           modeBarButtonsToRemove = c("pan2d", "select2d", "autoscale", "resetScale2d", 
                                      "toggleSpikelines", "hoverClosestCartesian", 
@@ -375,6 +375,7 @@ server <- function(input, output, session) {
     data <- filtered_dat_km()
     req(nrow(data) > 0)
     
+    # Basic log-rank test
     surv_diff <- survdiff(
       Surv(survivalMonths, mortality) ~ get(input$Strata), 
       data = data
@@ -382,12 +383,70 @@ server <- function(input, output, session) {
     
     p_value <- 1 - pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
     
-    paste0(
+    # Start with basic log-rank results
+    result <- paste0(
       "Log-rank test results:\n",
       "Chi-square statistic: ", round(surv_diff$chisq, 2), "\n",
       "Degrees of freedom: ", length(surv_diff$n) - 1, "\n",
       "P-value: ", format.pval(p_value, digits = 3)
     )
+    
+    # Add pairwise comparisons if toggled
+    if (input$show_pairwise) {
+      tryCatch({
+        # Create survival object once
+        surv_obj <- Surv(data$survivalMonths, data$mortality)
+        strata_factor <- factor(data[[input$Strata]])
+        
+        # Perform pairwise comparisons
+        pairs <- combn(levels(strata_factor), 2)
+        n_pairs <- ncol(pairs)
+        
+        if (n_pairs > 0) {
+          result <- paste0(result, "\n\nPairwise Log-rank Test Results:\n")
+          
+          # Calculate all pairwise comparisons
+          for(i in 1:n_pairs) {
+            pair_data <- data[strata_factor %in% pairs[,i], ]
+            pair_surv <- survdiff(
+              Surv(survivalMonths, mortality) ~ get(input$Strata),
+              data = pair_data
+            )
+            pair_p <- 1 - pchisq(pair_surv$chisq, df = 1)
+            # Apply Bonferroni correction
+            adj_p <- min(1, pair_p * n_pairs)
+            
+            # Add significance stars
+            stars <- ""
+            if (adj_p < 0.001) stars <- " ***"
+            else if (adj_p < 0.01) stars <- " **"
+            else if (adj_p < 0.05) stars <- " *"
+            
+            result <- paste0(
+              result,
+              sprintf("\n%s vs %s: p = %s%s", 
+                      pairs[1,i], 
+                      pairs[2,i], 
+                      format.pval(adj_p, digits = 3),
+                      stars)
+            )
+          }
+          
+          # Add significance level legend
+          result <- paste0(
+            result,
+            "\n\nSignificance levels (Bonferroni-adjusted):",
+            "\n* p < 0.05",
+            "\n** p < 0.01",
+            "\n*** p < 0.001"
+          )
+        }
+      }, error = function(e) {
+        result <- paste0(result, "\n\nError in pairwise comparison: ", e$message)
+      })
+    }
+    
+    result
   })
   # Add these at the end of your server function, before the final closing bracket
   
