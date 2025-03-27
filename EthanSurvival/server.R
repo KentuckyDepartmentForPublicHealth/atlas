@@ -10,6 +10,10 @@
 
 
 server <- function(input, output, session) {
+# package import
+
+
+
   # Separate reactive filtered data for KM tab
   filtered_dat_km <- reactive({
     data <- if (input$diagnosis == "All") {

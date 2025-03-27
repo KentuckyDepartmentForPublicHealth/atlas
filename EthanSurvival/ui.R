@@ -1,3 +1,83 @@
+library(survival)
+library(survminer)
+library(ggplot2)
+library(dplyr)
+library(shiny)
+library(gt)
+library(ggsurvfit)
+library(plotly)
+library(broom)
+library(gtsummary)
+library(cardx)
+
+message("inside global.R")
+# data
+# ajb load
+load("/home/adam/Sandbox/Shiny/atlas/dat/atlasDataClean.RData")
+
+# windows load
+# load("~/atlas/dat/atlasDataClean.RData")
+
+# mac load
+# load("~/Desktop/Atlas/Survival/atlas/dat/atlasDataClean.RData")
+
+
+atlasDataClean <- subset(atlasDataClean, atlasDataClean$survivalMonths != "NA")
+
+# fixing NAs so that they are properly reflected as censored observations
+atlasDataClean$mortality <- ifelse(is.na(atlasDataClean$mortality), 0, atlasDataClean$mortality)
+
+atlasDataClean$survivalMonths <- as.numeric(atlasDataClean$survivalMonths)
+
+
+########### strata
+allowed_vars <- c("ageGroup", "tumorType", "grade", "sex")
+
+# Create a named vector for mapping strata variables to display names
+strata_labels <- c(
+  "Age Group" = "ageGroup",
+  "Tumor Type" = "tumorType",
+  "Sex" = "sex",
+  "Grade" = "grade"
+)
+
+
+# ## setting ref level for each strata
+# atlasDataClean$ageGroup <- relevel(factor(atlasDataClean$ageGroup), ref = "40-60YRS")
+# atlasDataClean$tumorType <- relevel(factor(atlasDataClean$tumorType), ref = "1")
+# atlasDataClean$grade <- relevel(factor(atlasDataClean$grade), ref = "1")
+# atlasDataClean$sex <- relevel(factor(atlasDataClean$sex), ref = "M")
+
+
+# new
+## setting ref level for each strata
+# Create a helper function to safely relevel factors
+safe_relevel <- function(x, ref) {
+  x_factor <- factor(x)
+  if (ref %in% levels(x_factor)) {
+    return(relevel(x_factor, ref = ref))
+  } else {
+    warning(paste(
+      "Reference level", ref, "not found in factor. Available levels:",
+      paste(levels(x_factor), collapse = ", ")
+    ))
+    return(x_factor)
+  }
+}
+
+# Setting ref level for each strata with error handling - FIXED REFERENCE LEVELS
+atlasDataClean$ageGroup <- safe_relevel(atlasDataClean$ageGroup, "40-60YRS")
+atlasDataClean$tumorType <- safe_relevel(atlasDataClean$tumorType, "PRIMARY") # Changed from "1" to "PRIMARY"
+atlasDataClean$grade <- safe_relevel(atlasDataClean$grade, "GRADE 1") # Changed from "1" to "GRADE 1"
+atlasDataClean$sex <- safe_relevel(atlasDataClean$sex, "MALE") # Changed from "M" to "MALE"
+
+
+unique_diagnosis <- c("DIFFUSE GLIOMA", "IDH MUTANT", "PFA", "MB-GP4", "NEUROBLASTOMA", "MENINGIOMA")
+unique_histology <- c("GBM", "OD", "OA", "A", "EPN", "MB", "NB", "MEN")
+# Option below simply filters out diagnoses with less than 30 patients, one possible approach
+# valid_diagnoses <- names(table(atlasDataClean$diagnosisFinal)[table(atlasDataClean$diagnosisFinal) > 30])
+# unique_diagnosis <- c("All", valid_diagnoses)
+
 ui <- tagList(
   tags$head(
     tags$style(HTML("
