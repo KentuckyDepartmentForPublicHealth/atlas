@@ -1,4 +1,111 @@
 
+
+# survival analysis
+```{r}
+
+freq(is.na(atlasDataClean$survivalMonths))
+
+myView(subset(atlasDataClean, !is.na(survivalMonths)))
+
+
+myView(subset(atlasData, !is.na("Overall survival (months)")))
+
+
+sink('togrok'); freq(atlasData$`Overall survival (months)`); sink()
+
+# Filter Overall survival (months) to only include values with special characters 
+# (excluding decimal points)
+special_char_values <- atlasData[grepl("[^a-zA-Z0-9 \\.]", atlasData$`Overall survival (months)`), "Overall survival (months)"]
+
+# Display the filtered values
+special_char_values
+
+# Filter rows where Overall survival (months) contains special characters (excluding decimal points)
+special_char_rows <- atlasData[grepl("[^a-zA-Z0-9 \\.]", atlasData$`Overall survival (months)`), ]
+
+# Display the filtered rows
+special_char_rows
+
+special_char_values <- atlasData[grepl("[-<>]", atlasData$`Overall survival (months)`), "Overall survival (months)"]
+special_char_values
+
+special_char_values <- atlasData[grepl("[^0-9]", atlasData$`Overall survival (months)`), "Overall survival (months)"]
+special_char_values
+
+
+names(atlasDataClean)
+subgroup, country
+
+```
+
+
+```{r}
+atlasDataCleanSurvival <- atlasDataClean %>%
+  filter(!is.na(survivalMonths))
+
+
+```
+
+
+```{r}
+# Function to count occurrences for each variable, one at a time
+count_by_variables <- function(data, group_vars) {
+  results_list <- list()
+  
+  for (var in group_vars) {
+    cat("Counting by:", var, "\n") # Optional: print progress
+    
+    results_list[[var]] <- data %>%
+      filter(!is.na(survivalMonths)) %>%
+      group_by(across(all_of(var))) %>%
+      count(sort = TRUE)
+  }
+  
+  return(results_list)
+}
+
+# Define your list of variables to group by
+# group_vars <- c("cancer_type", "gender", "age_group", "stage", "treatment_type", 
+#                 "smoking_status", "tumor_site", "histology") # Add all 40 variables
+
+exclude_vars <- c("filename", "dataID", "sampleID", 
+                  "classifierLightGBM", "classifierRandomForest", 
+                  "classifierEuclidean", "classifierTSNE",
+                  "tsne1", "tsne2", "age", "survivalMonths")
+
+# group_vars <- names(atlasDataClean)
+
+group_vars <- setdiff(names(atlasDataClean), exclude_vars)
+
+# Run the function
+count_results <- count_by_variables(atlasDataClean, group_vars)
+
+# To view results for a specific variable:
+count_results[["cancer_type"]]
+
+sink("variable_counts.txt")
+
+# To print all results:
+for (var in group_vars) {
+  cat("\n\n===", var, "===\n")
+  print(count_results[[var]])
+}
+
+sink()
+# Alternatively, if you want to apply a function to each variable and return the results directly:
+# map_results <- group_vars %>%
+#   purrr::map(~{
+#     atlasDataClean %>%
+#       filter(!is.na(survivalMonths)) %>%
+#       group_by(across(all_of(.x))) %>%
+#       count(sort = TRUE)
+#   })
+
+# # Name the results with their respective variable names
+# names(map_results) <- group_vars
+```
+
+
 ```{r}
 freq(atlasDataClean$diagnosisClass)
 

@@ -196,20 +196,56 @@ delete_column <- function(df, i) {
 
 # provide stats about vector ----------------------------------------------
 
+# windows
+# vecStats <- function() {
+#   x <- readClipboard()
+#   x_len <- length(x)
+#   if (x_len < 10) {
+#     x_char <- nchar(x)
+#   } else {
+#     x_char <- "Should not compute"
+#   }
+#   x_distinct <- n_distinct(x)
+#   x_sum <- suppressWarnings(sum(as.numeric(x)))
+
+#   if (is.na(x_sum)) {
+#     x_sum <- "Unable to compute"
+#   }
+#   cat(
+#     "\n Length = ", x_len, "\n",
+#     "Characters = ", x_char, "\n",
+#     "Distinct = ", x_distinct, "\n",
+#     "Sum = ", x_sum, "\n"
+#   )
+# }
+
+# unix
 vecStats <- function() {
-  x <- readClipboard()
+  # Get clipboard content using xclip on Linux
+  x <- system("xclip -o -selection clipboard", intern = TRUE)
+
+  # Get the length of the clipboard content
   x_len <- length(x)
+
+  # Check if the length is less than 10 to compute the character count
   if (x_len < 10) {
     x_char <- nchar(x)
   } else {
     x_char <- "Should not compute"
   }
-  x_distinct <- n_distinct(x)
+
+  # Get the number of distinct elements
+  x_distinct <- length(unique(x))
+
+  # Try to compute the sum of the numeric values
   x_sum <- suppressWarnings(sum(as.numeric(x)))
 
+  # Handle NA values in sum
   if (is.na(x_sum)) {
     x_sum <- "Unable to compute"
   }
+
+  # Print the results
   cat(
     "\n Length = ", x_len, "\n",
     "Characters = ", x_char, "\n",
@@ -217,8 +253,6 @@ vecStats <- function() {
     "Sum = ", x_sum, "\n"
   )
 }
-
-
 # rename all columns; preserve old names ----------------------------------
 
 rename_all_columns <- function(df) {
