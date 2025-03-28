@@ -244,20 +244,21 @@ sum(is.na(result$SYMBOL))  # Should be less than 96 if matches exist
 
 # gene groupings
 
-Summary
-To find gene groupings:
+# Summary
+# To find gene groupings:
 
-Use predefined databases (MSigDB, GO, KEGG, Reactome).
-Analyze your data for statistical groupings (e.g., variability, DEGs).
-Map genes to functional categories with Bioconductor tools.
-Create custom groupings based on literature or expert input.
-Organize these groupings into a structure suitable for Shiny selectors (lists or data frames).
+# Use predefined databases (MSigDB, GO, KEGG, Reactome).
+# Analyze your data for statistical groupings (e.g., variability, DEGs).
+# Map genes to functional categories with Bioconductor tools.
+# Create custom groupings based on literature or expert input.
+# Organize these groupings into a structure suitable for Shiny selectors (lists or data frames).
 
 # org.Hs.eg.db
 
+```
+
+
 ```{r}
-
-
 # BiocManager::install("org.Hs.eg.db")
 
 library(org.Hs.eg.db)
@@ -794,6 +795,7 @@ ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
 
 # Save the plot if you want
 # ggsave("tsne_plot_all_labels.png", width = 15, height = 10, dpi = 300)
+
 ```
 
 ```{r}
