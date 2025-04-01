@@ -17,7 +17,6 @@ library(rlang)
 load("../../../dat/atlasDataClean.RData")
 load("../../../dat/geneExpressionData.RData")
 load("../../../dat/annotations.RData")
-# Assume geneExpressionData, gene_annotations, and go_to_genes_list are also loaded
 
 # Define tumor colors for t-SNE plot
 tumor_colors <- c(
@@ -31,12 +30,13 @@ tumor_colors <- c(
     "#ffa5ca"
 )
 
-# Define UI using bslib's page_navbar and remove debug tab.
+# Define UI using bslib's page_navbar
 ui <- page_navbar(
     id = "navBar",
     theme = bs_theme(
-        version = 5, bootswatch = "default",
-        primary = "#6a0033", # using one of your tumor colors
+        version = 5,
+        bootswatch = "default",
+        primary = "#6a0033",
         secondary = "#ff757c",
         success = "#377EB8",
         info = "#17a2b8",
@@ -44,62 +44,16 @@ ui <- page_navbar(
         danger = "#dc3545",
         base_font = c("Montserrat", "Helvetica", "sans-serif"),
         code_font = c("Source Code Pro", "monospace"),
-        heading_font = c("Impact", "Arial", "sans-serif")
+        heading_font = c("Impact", "Arial", "sans-serif"),
+        # Ensure text color adapts to light/dark mode
+        "body-color" = "var(--bs-body-color)",
+        "bg" = "var(--bs-body-bg)"
     ),
     title = div(
         img(src = "icons8-brain-tumor-100.png", width = "100px", height = "100px"),
         "Atlas of Nervous System Tumors",
-        style = "display: inline-block; vertical-align: middle;"
+        style = "display: inline-block; vertical-align: middle; color: var(--bs-body-color);"
     ),
-      sidebar = NULL,
-  header = NULL,
-  footer = NULL,
-      nav_spacer(),
-    # Home
-      nav_panel(
-    title = 'Home', icon = icon('house'),
-    tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
-      tags$link(rel = "shortcut icon", href = "favicon.ico")
-    ),
-    span(img(src = "main-banner-bigger.png"), style = 'text-align: center; width = "15%";'),
-    # span(img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "30%"), style = 'text-align: center;'),
-    h2('This is a heading'),
-    tags$blockquote("This study introduces a comprehensive atlas that integrates gene expression and clinical data from thousands of nervous system samples, both neoplastic (tumorous) and non-neoplastic. It addresses the current gap in resources for studying a wide range of nervous system tumors, especially rare types across various regions and age groups. The atlas allows for in-depth comparative analysis of gene expression and reveals that patterns in DNA methylation also extend to gene expression differences across tumor types. Additionally, it identifies specific brain tumors, like certain gliomas, that need further diagnostic clarification, and the methods used can be applied to other rare diseases."),
-    h3('The following text will be deleted'),
-    "27 ABSTRACT
-28 Background: While DNA methylation signatures are distinct across various nervous system
-29 neoplasms, it has not been comprehensively demonstrated whether transcriptomic signatures
-30 exhibit similar uniqueness. Additionally, no single, large-scale dataset is available for
-31 comparative gene expression analyses of these neoplasms. This study aims to address these
-32 knowledge and resource gaps.
-33 Methods: Raw transcriptomic and any associated clinical data for nervous system neoplasms
-34 (5,402 samples) and non-neoplastic entities (1,973 samples) were obtained from publicly
-35 available sources. These data were generated using the Applied BiosystemsTM (previously
-36 Affymetrix®) GeneChipTM Human Genome U133 Plus 2.0 Array and reprocessed
-37 simultaneously for a harmonized integration. Machine learning tools were used to visualize all
-38 the samples and evaluate cluster formation. Of them, 2,127 samples did not belong to a cluster
-39 or lacked a diagnosis according to current classifications. They were reclassified by training
-40 machine learning classifiers with 5,248 samples with a known diagnosis.
-41 Results: We created a large-scale, clinically annotated transcriptomic dataset from public
-42 domain sources by reprocessing, integrating, and reclassifying samples with uncertain
-43 diagnoses. Visualization using machine learning tools revealed clustering primarily based on
-44 diagnosis.
-45 Conclusions: We demonstrate that the diagnostic distinctiveness of bulk DNA methylation
-46 signatures also extends to gene expression across the diagnostic spectrum of nervous system
-47 neoplasms. Our dataset’s broad coverage of diagnoses, including rarely studied entities, spans
-48 all ages and includes individuals from diverse geographical regions, enhancing its utility for
-49 comprehensive and robust comparative gene expression analyses.",
-    
-    span(tagList(
-      img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "50%"), 
-      br()
-    #   paste0('Last updated: ', currentDate),
-    #   br()
-      ),
-      style = 'font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 5em 1em 5em;'),
-    br()
-  ),
     # Survival Analysis Tab
     nav_panel(
         title = "Survival Analysis", icon = icon("heartbeat"),
@@ -107,13 +61,20 @@ ui <- page_navbar(
             sidebarPanel(
                 useShinyjs(),
                 width = 3,
-                # Set the card text color to use the dynamic variable so it displays well in both modes.
-
-    h4("Survival Analysis", style = "margin-top: 0;"),
-    p("Analyze survival outcomes for nervous system tumors using Kaplan-Meier curves."),
+                # Dynamic text and background color for readability
+                div(
+                    style = "padding: 10px; background-color: var(--bs-light);
+                             border-left: 5px solid #17a2b8; margin-bottom: 15px;
+                             border-radius: 3px; color: var(--bs-body-color);",
+                    h4("About This Tool", style = "margin-top: 0; color: var(--bs-body-color);"),
+                    p("Analyze survival outcomes for nervous system tumors using Kaplan-Meier curves.",
+                        style = "color: var(--bs-body-color);"
+                    )
+                ),
                 radioButtons("analysis_type", "Analysis Type:",
                     choices = c("Single Variable" = "single", "Multi-Variable Grid" = "grid"),
-                    selected = "grid"
+                    selected = "grid",
+                    label_style = "color: var(--bs-body-color);"
                 ),
                 conditionalPanel(
                     condition = "input.analysis_type == 'single'",
@@ -198,9 +159,9 @@ ui <- page_navbar(
                     ),
                     tabPanel(
                         "Summary",
-                        h4("Group Statistics"),
+                        h4("Group Statistics", style = "color: var(--bs-body-color);"),
                         tableOutput("group_stats"),
-                        h4("Median Survival Estimates"),
+                        h4("Median Survival Estimates", style = "color: var(--bs-body-color);"),
                         tableOutput("median_survival")
                     ),
                     tabPanel("Data", DTOutput("survival_data"))
@@ -225,7 +186,8 @@ ui <- page_navbar(
                 radioButtons(
                     "search_mode", "Search Mode:",
                     choices = c("Select GO Term", "Select All Genes"),
-                    selected = character(0)
+                    selected = character(0),
+                    label_style = "color: var(--bs-body-color);"
                 ),
                 conditionalPanel(
                     condition = "input.search_mode === 'Select GO Term'",
@@ -284,23 +246,22 @@ ui <- page_navbar(
                 width = 9,
                 conditionalPanel(
                     condition = "input.search_mode === null || input.search_mode === ''",
-                    h3("Please select a search mode to proceed.")
+                    h3("Please select a search mode to proceed.", style = "color: var(--bs-body-color);")
                 ),
                 plotOutput("boxplot"),
                 tableOutput("gene_info")
             )
         )
     ),
-    # Remove the Debug tab here.
-    # Dark mode toggle in the navbar (placed as a nav_item)
+    # Dark mode toggle in the navbar
     nav_item(
         input_dark_mode(id = "mode_toggle", mode = "light")
     )
 )
 
-# Server logic remains unchanged, same as before
+# Server logic remains unchanged
 server <- function(input, output, session) {
-    # Survival Analysis functions and logic *************************************
+    # Survival Analysis functions and logic
     prepare_data <- function(data) {
         data <- data %>%
             mutate(MB_subtypes = case_when(
@@ -419,7 +380,9 @@ server <- function(input, output, session) {
             ylab = "Survival Probability",
             main = title,
             mark.time = TRUE,
-            xlim = xlim
+            xlim = xlim,
+            col.lab = "var(--bs-body-color)", # Dynamic label color
+            col.main = "var(--bs-body-color)" # Dynamic title color
         )
         if (show_ci) {
             for (i in seq_along(levels)) {
@@ -448,14 +411,15 @@ server <- function(input, output, session) {
             lty = 1,
             lwd = 2,
             cex = 0.7,
-            bty = "n"
+            bty = "n",
+            text.col = "var(--bs-body-color)" # Dynamic legend text color
         )
         if (show_pvalue && length(levels) > 1) {
             log_rank <- survdiff(surv_obj ~ plot_group, data = data)
             p_val <- 1 - pchisq(log_rank$chisq, length(levels) - 1)
             p_text <- if (p_val < 0.001) "p < 0.001" else paste("p =", format(round(p_val, 3), nsmall = 3))
             text_x <- if (!is.null(xlim)) xlim[2] * 0.7 else max(data$survivalMonths, na.rm = TRUE) * 0.7
-            text(text_x, 0.1, p_text, cex = 0.8)
+            text(text_x, 0.1, p_text, cex = 0.8, col = "var(--bs-body-color)")
         }
     }
 
@@ -464,7 +428,7 @@ server <- function(input, output, session) {
         data <- strat_data()
         if (is.null(data) || nrow(data) == 0) {
             plot.new()
-            text(0.5, 0.5, "No data available for the selected criteria.", cex = 1.5)
+            text(0.5, 0.5, "No data available for the selected criteria.", cex = 1.5, col = "var(--bs-body-color)")
             return()
         }
         create_survival_plot(
@@ -478,13 +442,15 @@ server <- function(input, output, session) {
         data <- filtered_data()
         if (nrow(data) == 0 || length(input$grid_variables) == 0) {
             plot.new()
-            text(0.5, 0.5, if (nrow(data) == 0) "No data available for the selected criteria." else "Please select at least one variable for the grid.", cex = 1.5)
+            text(0.5, 0.5, if (nrow(data) == 0) "No data available for the selected criteria." else "Please select at least one variable for the grid.",
+                cex = 1.5, col = "var(--bs-body-color)"
+            )
             return()
         }
         n_plots <- length(input$grid_variables)
         n_cols <- if (n_plots <= 3) n_plots else 3
         n_rows <- if (n_plots <= 3) 1 else ceiling(n_plots / 3)
-        par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 3, 1))
+        par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 3, 1), bg = "var(--bs-body-bg)")
         for (var in input$grid_variables) {
             title <- switch(var,
                 "mutationIDH1/2" = "IDH Mutation",
@@ -617,7 +583,9 @@ server <- function(input, output, session) {
             return(NULL)
         }
         datatable(data %>% select(survivalMonths, mortality, diagnosisFinal, diagnosisClass, sex, ageGroup, grade),
-            options = list(pageLength = 10, scrollX = TRUE), rownames = FALSE
+            options = list(pageLength = 10, scrollX = TRUE),
+            rownames = FALSE,
+            style = "bootstrap5" # Ensure DT adapts to theme
         )
     })
 
@@ -669,7 +637,7 @@ server <- function(input, output, session) {
         }
     )
 
-    # t-SNE Dimensionality Reduction Logic ***************************************
+    # t-SNE Dimensionality Reduction Logic
     if (!"key" %in% names(atlasDataClean)) {
         atlasDataClean$key <- seq_len(nrow(atlasDataClean))
     }
@@ -725,11 +693,11 @@ server <- function(input, output, session) {
         }
         p <- layout(p,
             title = "t-SNE Dimensionality Reduction",
-            xaxis = list(title = "t-SNE 1", color = "black"),
-            yaxis = list(title = "t-SNE 2", color = "black"),
-            plot_bgcolor = "white",
-            paper_bgcolor = "white",
-            font = list(color = "black"),
+            xaxis = list(title = "t-SNE 1", color = "var(--bs-body-color)"),
+            yaxis = list(title = "t-SNE 2", color = "var(--bs-body-color)"),
+            plot_bgcolor = "var(--bs-body-bg)",
+            paper_bgcolor = "var(--bs-body-bg)",
+            font = list(color = "var(--bs-body-color)"),
             dragmode = "select",
             legend = list(itemclick = "toggleothers", itemdoubleclick = FALSE),
             annotations = lapply(1:nrow(centroids), function(i) {
@@ -737,7 +705,7 @@ server <- function(input, output, session) {
                     x = centroids$tsne1[i],
                     y = centroids$tsne2[i],
                     text = centroids$diagnosisFinal[i],
-                    showarrow = FALSE, font = list(size = 10, color = "gray10")
+                    showarrow = FALSE, font = list(size = 10, color = "var(--bs-body-color)")
                 )
             })
         )
@@ -753,10 +721,10 @@ server <- function(input, output, session) {
         point_keys <- as.numeric(select_data$key)
         selected_data <- atlasDataClean[atlasDataClean$key %in% point_keys, ]
         validate(need(nrow(selected_data) > 0, "No valid points selected."))
-        DT::datatable(selected_data)
+        DT::datatable(selected_data, style = "bootstrap5")
     })
 
-    # mRNA Expression Boxplots Logic **********************************************
+    # mRNA Expression Boxplots Logic
     validate(
         need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
         need(exists("geneExpressionData"), "Error: `geneExpressionData` is not loaded."),
@@ -898,15 +866,16 @@ server <- function(input, output, session) {
         if (plot_cleared()) {
             ggplot() +
                 geom_text(aes(x = 0.5, y = 0.5, label = "Plot data has been cleared. Make a new selection"),
-                    size = 6, hjust = 0.5, vjust = 0.5
+                    size = 6, hjust = 0.5, vjust = 0.5, color = "var(--bs-body-color)"
                 ) +
                 theme_void() +
-                coord_cartesian(xlim = c(0, 1), ylim = c(0, 1))
+                coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+                theme(plot.background = element_rect(fill = "var(--bs-body-bg)", color = NA))
         } else {
             all_stuff <- final_data()
             if (is.null(all_stuff) || nrow(all_stuff$df) == 0) {
                 plot.new()
-                text(0.5, 0.5, "No data to display", cex = 1.2)
+                text(0.5, 0.5, "No data to display", cex = 1.2, col = "var(--bs-body-color)")
                 return()
             }
             data <- all_stuff$df
@@ -916,11 +885,20 @@ server <- function(input, output, session) {
                 geom_boxplot() +
                 geom_jitter(width = 0.2, alpha = 0.5) +
                 labs(
-                    title = "Expression of Selected Genes", subtitle = paste0("Total values: n=", nrow(data)),
-                    x = "Gene Symbol", y = "Expression Level"
+                    title = "Expression of Selected Genes",
+                    subtitle = paste0("Total values: n=", nrow(data)),
+                    x = "Gene Symbol",
+                    y = "Expression Level"
                 ) +
                 theme_minimal() +
-                theme(axis.text.x = element_text(angle = 45, hjust = 1))
+                theme(
+                    axis.text.x = element_text(angle = 45, hjust = 1, color = "var(--bs-body-color)"),
+                    axis.text.y = element_text(color = "var(--bs-body-color)"),
+                    plot.title = element_text(color = "var(--bs-body-color)"),
+                    plot.subtitle = element_text(color = "var(--bs-body-color)"),
+                    axis.title = element_text(color = "var(--bs-body-color)"),
+                    plot.background = element_rect(fill = "var(--bs-body-bg)", color = NA)
+                )
             if (gflag && !is.null(gvar) && gvar != "") {
                 facet_counts <- data %>%
                     group_by(SYMBOL, .data[[gvar]]) %>%
@@ -928,7 +906,7 @@ server <- function(input, output, session) {
                 p <- p + facet_wrap(as.formula(paste("~", gvar)), scales = "free") +
                     geom_text(
                         data = facet_counts, aes(label = paste0("n=", n), y = Inf),
-                        vjust = 1.5, size = 3, fontface = "bold", color = "gray20"
+                        vjust = 1.5, size = 3, fontface = "bold", color = "var(--bs-body-color)"
                     )
             } else {
                 symbol_counts <- data %>%
@@ -936,7 +914,7 @@ server <- function(input, output, session) {
                     summarise(n = n(), .groups = "drop")
                 p <- p + geom_text(
                     data = symbol_counts, aes(label = paste0("n=", n), y = Inf),
-                    vjust = 1.5, size = 3, fontface = "bold", color = "gray20"
+                    vjust = 1.5, size = 3, fontface = "bold", color = "var(--bs-body-color)"
                 )
             }
             p
@@ -1004,8 +982,10 @@ server <- function(input, output, session) {
                         geom_boxplot() +
                         geom_jitter(width = 0.2, alpha = 0.5) +
                         labs(
-                            title = "Expression of Selected Genes", subtitle = paste0("Total values: n=", nrow(data)),
-                            x = "Gene Symbol", y = "Expression Level"
+                            title = "Expression of Selected Genes",
+                            subtitle = paste0("Total values: n=", nrow(data)),
+                            x = "Gene Symbol",
+                            y = "Expression Level"
                         ) +
                         theme_minimal() +
                         theme(axis.text.x = element_text(angle = 45, hjust = 1))
