@@ -43,7 +43,11 @@ subgroup, country
 atlasDataCleanSurvival <- atlasDataClean %>%
   filter(!is.na(survivalMonths))
 
+atlasDataClean %>%
+  filter(!is.na(survivalMonths)) %>% 
+  nrow()
 
+glimpse(atlasDataClean)
 ```
 
 
