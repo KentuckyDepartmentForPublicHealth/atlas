@@ -15,9 +15,12 @@ library(rlang)
 library(forcats)
 
 # Load the data (assuming it's available in the environment)
-load("../../../dat/atlasDataClean.RData")
-load("../../../dat/geneExpressionData.RData")
-load("../../../dat/annotations.RData")
+# load("../../../dat/atlasDataClean.RData")
+# load("../../../dat/geneExpressionData.RData")
+# load("../../../dat/annotations.RData")
+load("dat/atlasDataClean.RData")
+load("dat/geneExpressionData.RData")
+load("dat/annotations.RData")
 # Assume geneExpressionData, gene_annotations, and go_to_genes_list are also loaded
 
 # Define tumor colors for t-SNE plot
@@ -68,6 +71,67 @@ nav_panel(
     tags$blockquote(
         "Explore a pioneering resource in neuro-oncology with the Transcriptomic Atlas of Nervous System Tumors. Developed by Le et al., this project aims to bridge critical gaps in understanding the molecular landscape of nervous system tumors by creating a comprehensive, publicly accessible dataset of gene expression profiles. This atlas integrates thousands of samples from diverse sources, offering a powerful tool for researchers, clinicians, and students to investigate tumor biology, refine diagnostics, and uncover new therapeutic insights. Whether you're analyzing survival trends, visualizing tumor heterogeneity, or comparing gene expression patterns, this app provides an interactive gateway to cutting-edge neuro-oncology research."
     ),
+h3(icon('chart-line'), ' What This App Offers'),
+
+p("This app brings the atlas to life with three interactive tools tailored to neuro-oncology exploration:"),
+
+# Create a responsive row with three columns for the tools
+fluidRow(
+    # Survival Analysis Column
+    column(4,
+           div(
+               # Clickable Image
+               actionLink(
+                   inputId = "goto_survival",
+                   label = tags$img(
+                       src = "survival_analysis_banner.png",
+                       alt = "Survival Analysis",
+                       style = "width:100%; cursor:pointer; margin-bottom: 20px;"
+                   )
+               ),
+               tags$b("Survival Analysis:"),
+               p("Use Kaplan-Meier curves to examine survival trends across tumor types, genetic mutations (e.g., IDH, MGMT), or demographic factors (e.g., age, sex). Filter by diagnosis or age group, and generate single-variable or multi-variable grids to compare outcomes."),
+           )
+    ),
+    
+    # t-SNE Dimensionality Reduction Column
+    column(4,
+           div(
+               # Clickable Image
+               actionLink(
+                   inputId = "goto_tsne",
+                   label = tags$img(
+                       src = "tsne_banner.png",
+                       alt = "t-SNE Dimensionality Reduction",
+                       style = "width:100%; cursor:pointer; margin-bottom: 20px;"
+                   )
+               ),
+               tags$b("t-SNE Dimensionality Reduction:"),
+               p("Visualize how 7,375 samples cluster based on their transcriptomic profiles in a 2D plot. Select points to explore sample details, revealing patterns of similarity and difference across diagnoses."),
+           )
+    ),
+    
+    # mRNA Expression Boxplots Column
+    column(4,
+           div(
+               # Clickable Image
+               actionLink(
+                   inputId = "goto_mrna",
+                   label = tags$img(
+                       src = "mrna_expression_banner.png",
+                       alt = "mRNA Expression Boxplots",
+                       style = "width:100%; cursor:pointer; margin-bottom: 20px;"
+                   )
+               ),
+               tags$b("mRNA Expression Boxplots:"),
+               p("Compare gene expression levels across tumors or groups. Search by Gene Ontology terms (e.g., cell cycle, apoptosis) or specific genes, and group results by variables like diagnosis, grade, or sex to uncover molecular insights."),
+           )
+    )
+),
+
+p("Each tool is designed for ease of use—select options, generate plots, and download results to fuel your research or education."),
+
+
     h3(icon('bullseye'), ' Purpose of the Study'),
     p(
         "The primary goal of this study was to compile a large-scale, clinically annotated transcriptomic atlas that captures the gene expression signatures of nervous system tumors and non-tumor tissues. Unlike previous efforts that focused narrowly on specific tumor types or relied heavily on DNA methylation, this project sought to harmonize a broad spectrum of transcriptomic data from public repositories. By doing so, it addresses the scarcity of resources for studying rare tumor types, pediatric and adult cases, and samples from varied geographic regions. The atlas aims to empower comparative gene expression analyses, support diagnostic refinement, and lay the groundwork for integrating genomic data with clinical outcomes—ultimately advancing personalized medicine in neuro-oncology."
@@ -91,25 +155,29 @@ nav_panel(
         ),
         "These variables enable you to investigate how molecular signatures correlate with clinical outcomes, tumor heterogeneity, and potential therapeutic targets."
     ),
-    h3(icon('chart-line'), ' What This App Offers'),
-    p(
-        "This app brings the atlas to life with three interactive tools tailored to neuro-oncology exploration:",
-        tags$ul(
-            tags$li(
-                tags$b("Survival Analysis:"),
-                " Use Kaplan-Meier curves to examine survival trends across tumor types, genetic mutations (e.g., IDH, MGMT), or demographic factors (e.g., age, sex). Filter by diagnosis or age group, and generate single-variable or multi-variable grids to compare outcomes."
-            ),
-            tags$li(
-                tags$b("t-SNE Dimensionality Reduction:"),
-                " Visualize how 7,375 samples cluster based on their transcriptomic profiles in a 2D plot. Select points to explore sample details, revealing patterns of similarity and difference across diagnoses."
-            ),
-            tags$li(
-                tags$b("mRNA Expression Boxplots:"),
-                " Compare gene expression levels across tumors or groups. Search by Gene Ontology terms (e.g., cell cycle, apoptosis) or specific genes, and group results by variables like diagnosis, grade, or sex to uncover molecular insights."
-            )
-        ),
-        "Each tool is designed for ease of use—select options, generate plots, and download results to fuel your research or education."
-    ),
+
+    # h3(icon('chart-line'), ' What This App Offers'),
+    # p(
+    #     "This app brings the atlas to life with three interactive tools tailored to neuro-oncology exploration:",
+    #     tags$ul(
+    #         tags$li(
+    #             tags$b("Survival Analysis:"),
+    #             " Use Kaplan-Meier curves to examine survival trends across tumor types, genetic mutations (e.g., IDH, MGMT), or demographic factors (e.g., age, sex). Filter by diagnosis or age group, and generate single-variable or multi-variable grids to compare outcomes.",
+    #             span(img(src = "survival_analysis_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
+    #         ),
+    #         tags$li(
+    #             tags$b("t-SNE Dimensionality Reduction:"),
+    #             " Visualize how 7,375 samples cluster based on their transcriptomic profiles in a 2D plot. Select points to explore sample details, revealing patterns of similarity and difference across diagnoses.",
+    #             span(img(src = "tsne_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
+    #         ),
+    #         tags$li(
+    #             tags$b("mRNA Expression Boxplots:"),
+    #             " Compare gene expression levels across tumors or groups. Search by Gene Ontology terms (e.g., cell cycle, apoptosis) or specific genes, and group results by variables like diagnosis, grade, or sex to uncover molecular insights.",
+    #             span(img(src = "mrna_expression_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
+    #         )
+    #     ),
+    #     "Each tool is designed for ease of use—select options, generate plots, and download results to fuel your research or education."
+    # ),
     h3(icon('rocket'), ' Get Started'),
     p(
         "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data. Questions or suggestions? Contact us at ",
@@ -118,19 +186,21 @@ nav_panel(
     span(tagList(
         br(),
         img(src = "KY Pediatric Cancer Research - Final.png", style = "width:25%; object-fit: contain;"),
-        img(src = "DPH and PHAB logo.png", style = "width:25%; object-fit: contain;"),
+        img(src = "DPH and PHAB logo.png", style = "width:35%; object-fit: contain;"),
+        img(src = "u_of_l.jpg", style = "width:20%; object-fit: contain;"),
         br(),
+        paste0('Last updated: ', currentDate),
         p(
-            "Data processed as of April 01, 2025, and available at ",
-            tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", "GitHub"), 
-            ". Funded by the Kentucky Pediatric Cancer Research Trust Fund and Vanderbilt Institute for Clinical and Translational Research."
+            tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", "Download Source Data"), 
+            tags$a(href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas", "Download App Code"), 
+            "Study funded by the Kentucky Pediatric Cancer Research Trust Fund. ShinyApp Powered by the Kentucky Department for Public Health."
         )
     ), style = 'display: block; width: 100%; font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;'),
     br()
 ),
 # Survival Analysis Tab -----
     nav_panel(
-        title = "Survival Analysis", icon = icon("heartbeat"),
+        title = "Survival Analysis", icon = icon("heartbeat"), id = "goto_survival",
         sidebarLayout(
             sidebarPanel(
                 useShinyjs(),
@@ -328,6 +398,22 @@ nav_panel(
 
 # Server logic remains unchanged, same as before
 server <- function(input, output, session) {
+
+    # Observe clicks on Survival Analysis image and switch to the corresponding tab
+    observeEvent(input$goto_survival, {
+        updateNavbarPage(session, "navBar", selected = "Survival Analysis")
+    })
+
+    # Observe clicks on t-SNE Dimensionality Reduction image and switch to the corresponding tab
+    observeEvent(input$goto_tsne, {
+        updateNavbarPage(session, "navBar", selected = "t-SNE Dimensionality Reduction")
+    })
+
+    # Observe clicks on mRNA Expression Boxplots image and switch to the corresponding tab
+    observeEvent(input$goto_mrna, {
+        updateNavbarPage(session, "navBar", selected = "mRNA Expression Boxplots")
+    })
+
     # Survival Analysis functions and logic *************************************
     prepare_data <- function(data) {
         data <- data %>%
