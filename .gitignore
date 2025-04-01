@@ -6,3 +6,4 @@ dat/geneExpressionData.RData
 .vscode/*
 dat/image-latest.RData
 **/chat_history.json
+R/adam-test-apps/all-three-features/dat/
