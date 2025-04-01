@@ -12,6 +12,7 @@ library(plotly)
 library(tidyr)
 library(shinyalert)
 library(rlang)
+library(forcats)
 
 # Load the data (assuming it's available in the environment)
 load("../../../dat/atlasDataClean.RData")
@@ -53,55 +54,81 @@ ui <- page_navbar(
     ),
       sidebar = NULL,
   header = NULL,
-  footer = NULL,
+    footer = NULL,
       nav_spacer(),
-    # Home
-      nav_panel(
+# Home -----
+nav_panel(
     title = 'Home', icon = icon('house'),
     tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
+      #tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
       tags$link(rel = "shortcut icon", href = "favicon.ico")
     ),
     span(img(src = "/canva/2.png"), style = 'text-align: center; width = "15%";'),
-    # span(img(src = "main-banner-bigger.png"), style = 'text-align: center; width = "15%";'),
-    # span(img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "30%"), style = 'text-align: center;'),
-    h2('This is a heading'),
-    tags$blockquote("This study introduces a comprehensive atlas that integrates gene expression and clinical data from thousands of nervous system samples, both neoplastic (tumorous) and non-neoplastic. It addresses the current gap in resources for studying a wide range of nervous system tumors, especially rare types across various regions and age groups. The atlas allows for in-depth comparative analysis of gene expression and reveals that patterns in DNA methylation also extend to gene expression differences across tumor types. Additionally, it identifies specific brain tumors, like certain gliomas, that need further diagnostic clarification, and the methods used can be applied to other rare diseases."),
-    h3('The following text will be deleted'),
-    "27 ABSTRACT
-28 Background: While DNA methylation signatures are distinct across various nervous system
-29 neoplasms, it has not been comprehensively demonstrated whether transcriptomic signatures
-30 exhibit similar uniqueness. Additionally, no single, large-scale dataset is available for
-31 comparative gene expression analyses of these neoplasms. This study aims to address these
-32 knowledge and resource gaps.
-33 Methods: Raw transcriptomic and any associated clinical data for nervous system neoplasms
-34 (5,402 samples) and non-neoplastic entities (1,973 samples) were obtained from publicly
-35 available sources. These data were generated using the Applied BiosystemsTM (previously
-36 Affymetrix®) GeneChipTM Human Genome U133 Plus 2.0 Array and reprocessed
-37 simultaneously for a harmonized integration. Machine learning tools were used to visualize all
-38 the samples and evaluate cluster formation. Of them, 2,127 samples did not belong to a cluster
-39 or lacked a diagnosis according to current classifications. They were reclassified by training
-40 machine learning classifiers with 5,248 samples with a known diagnosis.
-41 Results: We created a large-scale, clinically annotated transcriptomic dataset from public
-42 domain sources by reprocessing, integrating, and reclassifying samples with uncertain
-43 diagnoses. Visualization using machine learning tools revealed clustering primarily based on
-44 diagnosis.
-45 Conclusions: We demonstrate that the diagnostic distinctiveness of bulk DNA methylation
-46 signatures also extends to gene expression across the diagnostic spectrum of nervous system
-47 neoplasms. Our dataset’s broad coverage of diagnoses, including rarely studied entities, spans
-48 all ages and includes individuals from diverse geographical regions, enhancing its utility for
-49 comprehensive and robust comparative gene expression analyses.",
-    
+    h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
+    tags$blockquote(
+        "Explore a pioneering resource in neuro-oncology with the Transcriptomic Atlas of Nervous System Tumors. Developed by Le et al., this project aims to bridge critical gaps in understanding the molecular landscape of nervous system tumors by creating a comprehensive, publicly accessible dataset of gene expression profiles. This atlas integrates thousands of samples from diverse sources, offering a powerful tool for researchers, clinicians, and students to investigate tumor biology, refine diagnostics, and uncover new therapeutic insights. Whether you're analyzing survival trends, visualizing tumor heterogeneity, or comparing gene expression patterns, this app provides an interactive gateway to cutting-edge neuro-oncology research."
+    ),
+    h3(icon('bullseye'), ' Purpose of the Study'),
+    p(
+        "The primary goal of this study was to compile a large-scale, clinically annotated transcriptomic atlas that captures the gene expression signatures of nervous system tumors and non-tumor tissues. Unlike previous efforts that focused narrowly on specific tumor types or relied heavily on DNA methylation, this project sought to harmonize a broad spectrum of transcriptomic data from public repositories. By doing so, it addresses the scarcity of resources for studying rare tumor types, pediatric and adult cases, and samples from varied geographic regions. The atlas aims to empower comparative gene expression analyses, support diagnostic refinement, and lay the groundwork for integrating genomic data with clinical outcomes—ultimately advancing personalized medicine in neuro-oncology."
+    ),
+    h3(icon('tools'), ' How It Was Conducted'),
+    p(
+        "To build this atlas, the team meticulously gathered raw transcriptomic data from thousands of nervous system samples—both neoplastic (tumorous) and non-neoplastic—available in public databases like the Gene Expression Omnibus and ArrayExpress. They standardized the data by using a single platform, the Applied Biosystems™ GeneChip™ Human Genome U133 Plus 2.0 Array, which offers extensive coverage of the human genome. This raw data, spanning years of collection (2003–2018), was reprocessed simultaneously using advanced computational tools in R, including background correction, normalization, and summarization techniques. Machine learning algorithms, such as t-SNE for visualization and classifiers like random forests and gradient boosting, were employed to organize samples into biologically meaningful clusters and refine diagnoses where historical classifications were outdated or unclear. Clinical metadata—age, sex, tumor location, genetic mutations, and survival data—were manually curated to enrich the dataset, ensuring its utility for multifaceted analyses."
+    ),
+    h3(icon('seedling'), ' A Growing Resource'),
+    p(
+        "This atlas is just the beginning. The methodology developed here—harmonizing diverse transcriptomic data into a unified framework—is designed to be scalable. As new raw data become available in public domains or through collaborations, we plan to expand the atlas to include additional samples, tumor types, and molecular profiles. Future updates will incorporate emerging genomic platforms and integrate other omics data (e.g., proteomics, epigenomics), enhancing the depth and breadth of this resource. Stay tuned for a continually evolving tool that adapts to the latest advancements in neuro-oncology research."
+    ),
+    h3(icon('brain'), ' Scientific and Biological Context'),
+    p(
+        "Nervous system tumors, including gliomas, medulloblastomas, meningiomas, and rare entities like gangliogliomas, arise from complex interactions between genetic, epigenetic, and environmental factors. Gene expression—the process by which DNA instructions are converted into functional proteins—offers a window into these tumors’ biological behavior, from growth and invasion to treatment response. This app leverages transcriptomic data (mRNA levels across 20,360 genes) alongside clinical variables to explore these dynamics. Key data types include:",
+        tags$ul(
+            tags$li("Diagnosis: Tumor types and subtypes (e.g., diffuse gliomas, embryonal tumors), reflecting current classifications."),
+            tags$li("Clinical Metadata: Age groups (fetus to 106 years), sex, tumor location (e.g., supratentorial, posterior fossa), and survival outcomes (months lived, mortality status)."),
+            tags$li("Genetic Features: Mutations (e.g., IDH, H3F3A), amplifications (e.g., MYCN), and methylation status (e.g., MGMT promoter), critical for tumor subclassification."),
+            tags$li("Expression Profiles: mRNA levels for thousands of genes, linked to biological processes via Gene Ontology (GO) terms.")
+        ),
+        "These variables enable you to investigate how molecular signatures correlate with clinical outcomes, tumor heterogeneity, and potential therapeutic targets."
+    ),
+    h3(icon('chart-line'), ' What This App Offers'),
+    p(
+        "This app brings the atlas to life with three interactive tools tailored to neuro-oncology exploration:",
+        tags$ul(
+            tags$li(
+                tags$b("Survival Analysis:"),
+                " Use Kaplan-Meier curves to examine survival trends across tumor types, genetic mutations (e.g., IDH, MGMT), or demographic factors (e.g., age, sex). Filter by diagnosis or age group, and generate single-variable or multi-variable grids to compare outcomes."
+            ),
+            tags$li(
+                tags$b("t-SNE Dimensionality Reduction:"),
+                " Visualize how 7,375 samples cluster based on their transcriptomic profiles in a 2D plot. Select points to explore sample details, revealing patterns of similarity and difference across diagnoses."
+            ),
+            tags$li(
+                tags$b("mRNA Expression Boxplots:"),
+                " Compare gene expression levels across tumors or groups. Search by Gene Ontology terms (e.g., cell cycle, apoptosis) or specific genes, and group results by variables like diagnosis, grade, or sex to uncover molecular insights."
+            )
+        ),
+        "Each tool is designed for ease of use—select options, generate plots, and download results to fuel your research or education."
+    ),
+    h3(icon('rocket'), ' Get Started'),
+    p(
+        "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data. Questions or suggestions? Contact us at ",
+        tags$a(href = "mailto:axitamm@gmail.com", "axitamm@gmail.com"), "."
+    ),
     span(tagList(
-      img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "50%"), 
-      img(src = "KY Pediatric Cancer Research - Final.png", width = "20%")
-    #   paste0('Last updated: ', currentDate),
-    #   br()
-      ),
-      style = 'font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 5em 1em 5em;'),
+        br(),
+        img(src = "KY Pediatric Cancer Research - Final.png", style = "width:25%; object-fit: contain;"),
+        img(src = "DPH and PHAB logo.png", style = "width:25%; object-fit: contain;"),
+        br(),
+        p(
+            "Data processed as of April 01, 2025, and available at ",
+            tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", "GitHub"), 
+            ". Funded by the Kentucky Pediatric Cancer Research Trust Fund and Vanderbilt Institute for Clinical and Translational Research."
+        )
+    ), style = 'display: block; width: 100%; font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;'),
     br()
-  ),
-    # Survival Analysis Tab
+),
+# Survival Analysis Tab -----
     nav_panel(
         title = "Survival Analysis", icon = icon("heartbeat"),
         sidebarLayout(
@@ -338,42 +365,54 @@ server <- function(input, output, session) {
         return(data)
     }
 
-    filtered_data <- reactive({
-        req(input$generate)
-        data <- atlasDataClean %>%
-            filter(!is.na(survivalMonths), !is.na(mortality)) %>%
-            prepare_data()
-        if (input$diagnosis_filter != "All") {
-            data <- data %>% filter(diagnosisClass == input$diagnosis_filter)
-        }
-        if (input$age_filter != "All") {
-            data <- data %>% filter(ageGroup == input$age_filter)
-        }
-        return(data)
-    })
+filtered_data <- reactive({
+    req(input$generate)
+    data <- atlasDataClean %>%
+        filter(!is.na(survivalMonths), !is.na(mortality)) %>%
+        prepare_data()
+    if (input$diagnosis_filter != "All") {
+        data <- data %>% filter(diagnosisClass == input$diagnosis_filter)
+    }
+    if (input$age_filter != "All") {
+        data <- data %>% filter(ageGroup == input$age_filter)
+    }
+    
+    # Validate necessary columns exist
+    required_columns <- c("diagnosisFinal", "diagnosisClass", "sex", "ageGroup", "grade",
+                          "mutationIDH1/2", "mutationH3", "1p/19q-codel",
+                          "methylationMGMTpromoter", "amplificationMCYN")
+    missing_columns <- setdiff(required_columns, names(data))
+    if (length(missing_columns) > 0) {
+        showNotification(paste("Warning: Missing columns after filtering:", paste(missing_columns, collapse = ", ")), type = "error")
+    }
+    
+    return(data)
+})
+# Replace the existing strat_data reactive expression with this:
+strat_data <- reactive({
+    req(input$generate, input$analysis_type == "single")
+    data <- filtered_data()
+    if (nrow(data) == 0) {
+        return(NULL)
+    }
 
-    strat_data <- reactive({
-        req(input$generate, input$analysis_type == "single")
-        data <- filtered_data()
-        if (nrow(data) == 0) {
-            return(NULL)
+    # Convert 'strat_group' to a factor and explicitly handle NA values as "Unknown"
+    data$strat_group <- fct_na_value_to_level(factor(data[[input$strat_var]]), "Unknown")
+
+    if (input$collapse_rare) {
+        group_counts <- table(data$strat_group)
+        large_groups <- names(group_counts[group_counts >= input$min_group_size])
+        if (length(large_groups) < length(group_counts)) {
+            data <- data %>%
+                mutate(strat_group = ifelse(strat_group %in% large_groups,
+                    as.character(strat_group),
+                    "Other (Small Groups)"
+                )) %>%
+                mutate(strat_group = factor(strat_group))
         }
-        data$strat_group <- data[[input$strat_var]]
-        data$strat_group[is.na(data$strat_group)] <- "Unknown"
-        if (input$collapse_rare) {
-            group_counts <- table(data$strat_group)
-            large_groups <- names(group_counts[group_counts >= input$min_group_size])
-            if (length(large_groups) < length(group_counts)) {
-                data <- data %>%
-                    mutate(strat_group = ifelse(strat_group %in% large_groups,
-                        as.character(strat_group),
-                        "Other (Small Groups)"
-                    ))
-            }
-        }
-        data$strat_group <- factor(data$strat_group)
-        return(data)
-    })
+    }
+    return(data)
+})
 
     create_survival_plot <- function(data, strat_var, title = NULL, show_pvalue = TRUE, show_ci = FALSE, max_time = NULL) {
         if (is.null(data) || nrow(data) == 0 || !strat_var %in% names(data)) {
@@ -553,64 +592,97 @@ server <- function(input, output, session) {
         bordered = TRUE
     )
 
-    output$median_survival <- renderTable(
-        {
-            req(input$generate)
-            data <- if (input$analysis_type == "single") strat_data() else filtered_data()
-            if (is.null(data) || nrow(data) == 0) {
-                return(data.frame(Variable = "N/A", Group = "No data available", `Median Survival` = NA))
-            }
-            if (input$analysis_type == "single") {
-                group_var <- sym("strat_group")
-                data %>%
-                    filter(!is.na(!!group_var)) %>%
-                    group_by(!!group_var) %>%
-                    summarise(
-                        n = n(),
-                        events = sum(mortality),
-                        `Median Survival` = if (sum(mortality) >= n() / 2) {
-                            round(quantile(survivalMonths[mortality == 1], probs = 0.5, na.rm = TRUE), 1)
-                        } else {
-                            NA
-                        }
-                    ) %>%
-                    mutate(`Median Status` = ifelse(is.na(`Median Survival`), "Not reached", paste0(`Median Survival`, " months"))) %>%
-                    select(!!group_var, n, events, `Median Status`) %>%
-                    rename(Group = !!group_var, N = n, Events = events) %>%
-                    mutate(Variable = input$strat_var) %>%
-                    select(Variable, Group, N, Events, `Median Status`)
-            } else {
-                median_list <- lapply(input$grid_variables, function(var) {
-                    group_var <- sym(var)
-                    data %>%
-                        filter(!is.na(!!group_var)) %>%
-                        group_by(!!group_var) %>%
-                        summarise(
-                            n = n(),
-                            events = sum(mortality),
-                            `Median Survival` = if (sum(mortality) >= n() / 2) {
-                                round(quantile(survivalMonths[mortality == 1], probs = 0.5, na.rm = TRUE), 1)
-                            } else {
-                                NA
-                            }
-                        ) %>%
-                        mutate(`Median Status` = ifelse(is.na(`Median Survival`), "Not reached", paste0(`Median Survival`, " months"))) %>%
-                        select(!!group_var, n, events, `Median Status`) %>%
-                        rename(Group = !!group_var, N = n, Events = events) %>%
-                        mutate(Variable = var)
-                })
-                if (length(median_list) == 0) {
-                    return(data.frame(Variable = "N/A", Group = "No variables selected", `Median Survival` = NA))
-                }
-                bind_rows(median_list) %>%
-                    select(Variable, Group, N, Events, `Median Status`)
-            }
-        },
-        striped = TRUE,
-        hover = TRUE,
-        bordered = TRUE
-    )
+# Replace the existing output$median_survival renderTable with this:
 
+output$median_survival <- renderTable(
+    {
+        req(input$generate)
+        data <- if (input$analysis_type == "single") strat_data() else filtered_data()
+
+        if (is.null(data) || nrow(data) == 0) {
+            return(data.frame(Variable = "N/A", Group = "No data available", `Median Survival` = NA_character_))
+        }
+
+        if (input$analysis_type == "single") {
+            group_var <- "strat_group"
+            summary_table <- data %>%
+                group_by(!!sym(group_var)) %>%
+                summarise(
+                    Count = n(),
+                    `Mean Survival (months)` = round(mean(survivalMonths, na.rm = TRUE), 1),
+                    `Events (Deaths)` = sum(mortality),
+                    `Mortality Rate (%)` = round(mean(mortality, na.rm = TRUE) * 100, 1),
+                    `Median Survival` = if_else(
+                        sum(mortality) >= n() / 2,
+                        round(median(survivalMonths[mortality == 1], na.rm = TRUE), 1),
+                        NA_real_
+                    )
+                ) %>%
+                mutate(
+                    `Median Status` = if_else(
+                        is.na(`Median Survival`),
+                        "Not reached",
+                        paste0(`Median Survival`, " months")
+                    )
+                ) %>%
+                arrange(desc(Count)) %>%
+                rename(Group = !!sym(group_var)) %>%
+                mutate(Variable = input$strat_var) %>%
+                select(Variable, Group, Count, `Mean Survival (months)`, `Events (Deaths)`, `Mortality Rate (%)`, `Median Status`)
+
+            return(summary_table)
+        } else {
+            # For 'grid' analysis
+            stats_list <- lapply(input$grid_variables, function(var) {
+                group_var <- sym(var)
+                if (!(var %in% names(data))) {
+                    # Handle missing columns gracefully
+                    showNotification(paste("Warning: Column", var, "does not exist in the data. Skipping."), type = "warning")
+                    return(NULL)
+                }
+                data %>%
+                    group_by(!!sym(var)) %>%
+                    summarise(
+                        Count = n(),
+                        `Mean Survival (months)` = round(mean(survivalMonths, na.rm = TRUE), 1),
+                        `Events (Deaths)` = sum(mortality),
+                        `Mortality Rate (%)` = round(mean(mortality, na.rm = TRUE) * 100, 1),
+                        `Median Survival` = if_else(
+                            sum(mortality) >= n() / 2,
+                            round(median(survivalMonths[mortality == 1], na.rm = TRUE), 1),
+                            NA_real_
+                        )
+                    ) %>%
+                    mutate(
+                        `Median Status` = if_else(
+                            is.na(`Median Survival`),
+                            "Not reached",
+                            paste0(`Median Survival`, " months")
+                        )
+                    ) %>%
+                    arrange(desc(Count)) %>%
+                    rename(Group = !!sym(var)) %>%
+                    mutate(Variable = var) %>%
+                    select(Variable, Group, Count, `Mean Survival (months)`, `Events (Deaths)`, `Mortality Rate (%)`, `Median Status`)
+            })
+
+            # Remove NULL elements resulting from missing columns
+            stats_list <- stats_list[!sapply(stats_list, is.null)]
+
+            if (length(stats_list) == 0) {
+                return(data.frame(Variable = "N/A", Group = "No variables selected or available", `Median Survival` = NA_character_))
+            }
+
+            # Bind the rows, ensuring consistent column types
+            summary_table <- bind_rows(stats_list)
+
+            return(summary_table)
+        }
+    },
+    striped = TRUE,
+    hover = TRUE,
+    bordered = TRUE
+)
     output$survival_data <- renderDT({
         req(input$generate)
         data <- if (input$analysis_type == "single") strat_data() else filtered_data()
