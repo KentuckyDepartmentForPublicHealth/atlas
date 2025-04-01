@@ -62,7 +62,8 @@ ui <- page_navbar(
       tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
       tags$link(rel = "shortcut icon", href = "favicon.ico")
     ),
-    span(img(src = "main-banner-bigger.png"), style = 'text-align: center; width = "15%";'),
+    span(img(src = "/canva/2.png"), style = 'text-align: center; width = "15%";'),
+    # span(img(src = "main-banner-bigger.png"), style = 'text-align: center; width = "15%";'),
     # span(img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "30%"), style = 'text-align: center;'),
     h2('This is a heading'),
     tags$blockquote("This study introduces a comprehensive atlas that integrates gene expression and clinical data from thousands of nervous system samples, both neoplastic (tumorous) and non-neoplastic. It addresses the current gap in resources for studying a wide range of nervous system tumors, especially rare types across various regions and age groups. The atlas allows for in-depth comparative analysis of gene expression and reveals that patterns in DNA methylation also extend to gene expression differences across tumor types. Additionally, it identifies specific brain tumors, like certain gliomas, that need further diagnostic clarification, and the methods used can be applied to other rare diseases."),
@@ -93,7 +94,7 @@ ui <- page_navbar(
     
     span(tagList(
       img(src = "DPH_and_PHAB_logo-removebg-preview.png", width = "50%"), 
-      br()
+      img(src = "KY Pediatric Cancer Research - Final.png", width = "20%")
     #   paste0('Last updated: ', currentDate),
     #   br()
       ),
@@ -294,7 +295,7 @@ ui <- page_navbar(
     # Remove the Debug tab here.
     # Dark mode toggle in the navbar (placed as a nav_item)
     nav_item(
-        input_dark_mode(id = "mode_toggle", mode = "light")
+        input_dark_mode(id = "mode_toggle", mode = "dark")
     )
 )
 
