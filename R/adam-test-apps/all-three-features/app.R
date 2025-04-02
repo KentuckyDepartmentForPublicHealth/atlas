@@ -14,6 +14,12 @@ library(shinyalert)
 library(rlang)
 library(forcats)
 
+# Create a reactive value to track if gene expression data is loaded
+gene_data_loaded <- reactiveVal(FALSE)
+
+# Create a placeholder for the gene expression data
+geneExpressionData <- NULL
+
 # Load the data (assuming it's available in the environment)
 # load("../../../dat/atlasDataClean.RData")
 # load("../../../dat/geneExpressionData.RData")
@@ -66,7 +72,7 @@ nav_panel(
       #tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
       tags$link(rel = "shortcut icon", href = "favicon.ico")
     ),
-    span(img(src = "/canva/2.png"), style = 'text-align: center; width = "15%";'),
+    span(img(src = "./canva/2.png"), style = 'text-align: center; width = "15%";'),
     h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
     tags$blockquote(
         "Explore a pioneering resource in neuro-oncology with the Transcriptomic Atlas of Nervous System Tumors. Developed by Le et al., this project aims to bridge critical gaps in understanding the molecular landscape of nervous system tumors by creating a comprehensive, publicly accessible dataset of gene expression profiles. This atlas integrates thousands of samples from diverse sources, offering a powerful tool for researchers, clinicians, and students to investigate tumor biology, refine diagnostics, and uncover new therapeutic insights. Whether you're analyzing survival trends, visualizing tumor heterogeneity, or comparing gene expression patterns, this app provides an interactive gateway to cutting-edge neuro-oncology research."
@@ -306,7 +312,8 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
             )
         )
     ),
-    # t-SNE Dimensionality Reduction Tab
+# t-SNE Dimensionality Reduction Tab -----
+
     nav_panel(
         title = "t-SNE Dimensionality Reduction", icon = icon("th"),
         fluidPage(
@@ -314,7 +321,7 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
             DT::dataTableOutput("dataTable")
         )
     ),
-    # mRNA Expression Boxplots Tab
+# mRNA Expression Boxplots Tab -----
     nav_panel(
         title = "mRNA Expression Boxplots", icon = icon("vial"),
         sidebarLayout(
@@ -398,6 +405,31 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
 
 # Server logic remains unchanged, same as before
 server <- function(input, output, session) {
+
+    observeEvent(input$navBar, {
+        # Check if user selected the mRNA Expression tab and data not yet loaded
+        if (input$navBar == "mRNA Expression Boxplots" && !gene_data_loaded()) {
+            # Show a loading message
+            showNotification("Loading gene expression data...",
+                type = "message",
+                duration = NULL,
+                id = "loading_notification"
+            )
+
+            # Load the large dataset only when needed
+            load("dat/geneExpressionData.RData", envir = .GlobalEnv)
+
+            # Mark data as loaded
+            gene_data_loaded(TRUE)
+
+            # Remove loading notification
+            removeNotification(id = "loading_notification")
+            showNotification("Gene expression data loaded successfully!",
+                type = "message",
+                duration = 3
+            )
+        }
+    })
 
     # Observe clicks on Survival Analysis image and switch to the corresponding tab
     observeEvent(input$goto_survival, {
@@ -918,16 +950,17 @@ output$median_survival <- renderTable(
     # mRNA Expression Boxplots Logic **********************************************
     validate(
         need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
-        need(exists("geneExpressionData"), "Error: `geneExpressionData` is not loaded."),
+        # need(exists("geneExpressionData"), "Error: `geneExpressionData` is not loaded."),
         need(exists("atlasDataClean"), "Error: `atlasDataClean` is not loaded."),
         need(exists("go_to_genes_list"), "Error: `go_to_genes_list` is not loaded.")
     )
+    
     gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
-    all_valid_genes <- gene_annotations %>%
-        filter(ENTREZID %in% rownames(geneExpressionData)) %>%
-        pull(SYMBOL) %>%
-        unique() %>%
-        sort()
+    # all_valid_genes <- gene_annotations %>%
+    #     filter(ENTREZID %in% rownames(geneExpressionData)) %>%
+    #     pull(SYMBOL) %>%
+    #     unique() %>%
+    #     sort()
     shinyjs::hide("use_group_by")
     observeEvent(input$reload, {
         shinyjs::refresh()
