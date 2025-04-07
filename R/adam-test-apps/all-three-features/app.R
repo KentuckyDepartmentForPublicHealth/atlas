@@ -45,7 +45,7 @@ tumor_colors <- c(
 ui <- page_navbar(
     id = "navBar",
     theme = bs_theme(
-        version = 5, bootswatch = "pulse",
+        version = 5, bootswatch = "cosmo",
         primary = "#6a0033", # using one of your tumor colors
         secondary = "#ff757c",
         success = "#377EB8",
@@ -72,7 +72,7 @@ nav_panel(
     #   tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
       tags$link(rel = "shortcut icon", href = "favicon.ico")
     ),
-    span(img(src = "main-banner-bigger.png"), style = 'text-align: center; width = "15%";'),
+    span(img(src = "main-banner-1400x400.png"), style = 'text-align: center; width = "15%";'),
     # h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
     tags$blockquote(
         "Explore a pioneering resource in neuro-oncology with the Transcriptomic Atlas of Nervous System Tumors. This project aims to bridge critical gaps in understanding the molecular landscape of nervous system tumors by creating a comprehensive, publicly accessible dataset of gene expression profiles. This atlas integrates thousands of samples from diverse sources, offering a powerful tool for researchers, clinicians, and students to investigate tumor biology, refine diagnostics, and uncover new therapeutic insights. Whether you're analyzing survival trends, visualizing tumor heterogeneity, or comparing gene expression patterns, this app provides an interactive gateway to cutting-edge neuro-oncology research."
