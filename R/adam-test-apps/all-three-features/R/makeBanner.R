@@ -45,6 +45,8 @@ ggplot(df, aes(x = tsne1, y = tsne2, color = group)) +
   theme_void() +
   theme(
     plot.background = element_rect(fill = "white"),
+        panel.background = element_rect(fill = "#f5f5f5"),
+
     text = element_text(family = "Montserrat", color = "#6a0033", size = 20),
     plot.title = element_text(hjust = 0.5, face = "bold"),
     legend.position = "none"
