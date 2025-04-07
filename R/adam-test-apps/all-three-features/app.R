@@ -45,7 +45,7 @@ tumor_colors <- c(
 ui <- page_navbar(
     id = "navBar",
     theme = bs_theme(
-        version = 5, bootswatch = "default",
+        version = 5, bootswatch = "pulse",
         primary = "#6a0033", # using one of your tumor colors
         secondary = "#ff757c",
         success = "#377EB8",
@@ -69,13 +69,13 @@ ui <- page_navbar(
 nav_panel(
     title = 'Home', icon = icon('house'),
     tags$head(
-      #tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
+    #   tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
       tags$link(rel = "shortcut icon", href = "favicon.ico")
     ),
-    span(img(src = "./canva/2.png"), style = 'text-align: center; width = "15%";'),
-    h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
+    span(img(src = "main-banner-bigger.png"), style = 'text-align: center; width = "15%";'),
+    # h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
     tags$blockquote(
-        "Explore a pioneering resource in neuro-oncology with the Transcriptomic Atlas of Nervous System Tumors. Developed by Le et al., this project aims to bridge critical gaps in understanding the molecular landscape of nervous system tumors by creating a comprehensive, publicly accessible dataset of gene expression profiles. This atlas integrates thousands of samples from diverse sources, offering a powerful tool for researchers, clinicians, and students to investigate tumor biology, refine diagnostics, and uncover new therapeutic insights. Whether you're analyzing survival trends, visualizing tumor heterogeneity, or comparing gene expression patterns, this app provides an interactive gateway to cutting-edge neuro-oncology research."
+        "Explore a pioneering resource in neuro-oncology with the Transcriptomic Atlas of Nervous System Tumors. This project aims to bridge critical gaps in understanding the molecular landscape of nervous system tumors by creating a comprehensive, publicly accessible dataset of gene expression profiles. This atlas integrates thousands of samples from diverse sources, offering a powerful tool for researchers, clinicians, and students to investigate tumor biology, refine diagnostics, and uncover new therapeutic insights. Whether you're analyzing survival trends, visualizing tumor heterogeneity, or comparing gene expression patterns, this app provides an interactive gateway to cutting-edge neuro-oncology research."
     ),
 h3(icon('chart-line'), ' What This App Offers'),
 
@@ -186,8 +186,8 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
     # ),
     h3(icon('rocket'), ' Get Started'),
     p(
-        "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data. Questions or suggestions? Contact us at ",
-        tags$a(href = "mailto:axitamm@gmail.com", "axitamm@gmail.com"), "."
+        "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data."
+        # tags$a(href = "mailto:axitamm@gmail.com", "axitamm@gmail.com"), "."
     ),
     span(tagList(
         br(),
@@ -195,11 +195,12 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
         img(src = "DPH and PHAB logo.png", style = "width:35%; object-fit: contain;"),
         img(src = "u_of_l.jpg", style = "width:20%; object-fit: contain;"),
         br(),
-        paste0('Last updated: ', currentDate),
-        p(
-            tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", "Download Source Data"), 
-            tags$a(href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas", "Download App Code"), 
-            "Study funded by the Kentucky Pediatric Cancer Research Trust Fund. ShinyApp Powered by the Kentucky Department for Public Health."
+        paste0('Last updated: ', currentDate),br(),
+        p('Download',
+            tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", "source data"), 
+            'and',
+            tags$a(href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas", "application code"), br(),
+            "This project was funded by the Kentucky Pediatric Cancer Research Trust Fund",br(), "ShinyApp powered by the Kentucky Department for Public Health"
         )
     ), style = 'display: block; width: 100%; font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;'),
     br()
