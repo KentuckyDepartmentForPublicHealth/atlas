@@ -189,22 +189,23 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
         "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data."
         # tags$a(href = "mailto:axitamm@gmail.com", "axitamm@gmail.com"), "."
     ),
-    span(tagList(
-        br(),
-        img(src = "KY Pediatric Cancer Research - Final.png", style = "width:25%; object-fit: contain;"),
-        img(src = "DPH and PHAB logo.png", style = "width:35%; object-fit: contain;"),
-        img(src = "u_of_l.jpg", style = "width:20%; object-fit: contain;"),
-        br(),
-        paste0('Last updated: ', currentDate),br(),
-        p('Download',
-            tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", "source data"), 
-            'and',
-            tags$a(href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas", "application code"), br(),
-            "This project was funded by the Kentucky Pediatric Cancer Research Trust Fund",br(), "ShinyApp powered by the Kentucky Department for Public Health"
-        )
-    ), style = 'display: block; width: 100%; font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;'),
-    br()
-),
+        span(tagList(
+            br(),
+            img(src = "KY Pediatric Cancer Research - Final.png", style = "width:25%; object-fit: contain;"),
+            img(src = "DPH and PHAB logo.png", style = "width:35%; object-fit: contain;"),
+            img(src = "u_of_l.jpg", style = "width:20%; object-fit: contain;"),
+            br(),
+            paste0('Last updated: ', currentDate),br(),
+            p('Download',
+                tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", target = "_blank", "source data"), 
+                'and',
+                tags$a(href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas", target = "_blank","application code"), br(),
+                "Project funded by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/dpqi/cdpb/Pages/pcrtf.aspx", target = "_blank", "Kentucky Pediatric Cancer Research Trust Fund"),br(), 
+                "ShinyApp powered by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/Pages/default.aspx", target = "_blank", "Kentucky Department for Public Health")
+            )
+        ), style = 'display: block; width: 100%; font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;'),
+        br()
+    ),
 # Survival Analysis Tab -----
     nav_panel(
         title = "Survival Analysis", icon = icon("heartbeat"), id = "goto_survival",
