@@ -72,6 +72,14 @@ nav_panel(
     #   tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
       tags$link(rel = "shortcut icon", href = "favicon.ico")
     ),
+    tags$h2(
+      "APP IN BETA MODE",
+      style = "font-weight:bold; color:red; text-shadow: 0 0 5px red; display:inline-block;"
+    ),
+    tags$h6(
+      "Expect frequent and unpredictable updates",
+      style = "color:red; font-weight:bold;"
+    ),    
     span(img(src = "main-banner-1400x400.png"), style = 'text-align: center; width = "15%";'),
     # h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
     tags$blockquote(
@@ -393,7 +401,7 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
                     condition = "input.search_mode === null || input.search_mode === ''",
                     h3("Please select a search mode to proceed.")
                 ),
-                plotOutput("boxplot"),
+                plotOutput("boxplot", width = "100%", height = "1000px"),
                 tableOutput("gene_info")
             )
         )
@@ -1052,7 +1060,7 @@ output$median_survival <- renderTable(
                 choices = sort(c(
                     "isCancerous", "grade", "ageGroup", "tumorType", "sex",
                     "compartment", "fullName", "country", "diagnosisFinal",
-                    "histologyOriginal", "diagnosisClass"
+                    "histologyOriginal", "diagnosisClass", "diagnosis"
                 )),
                 selected = "sex"
             )
