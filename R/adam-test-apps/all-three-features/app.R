@@ -61,160 +61,180 @@ ui <- page_navbar(
         "Atlas of Nervous System Tumors",
         style = "display: inline-block; vertical-align: middle;"
     ),
-      sidebar = NULL,
-  header = NULL,
+    sidebar = NULL,
+    header = NULL,
     footer = NULL,
-      nav_spacer(),
-# Home -----
-nav_panel(
-    title = 'Home', icon = icon('house'),
-    tags$head(
-    #   tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
-      tags$link(rel = "shortcut icon", href = "favicon.ico")
+    nav_spacer(),
+        nav_item(
+        tags$span(
+        icon("exclamation-triangle", class = "text-danger"),
+            "APP IN BETA MODE",
+            style = "font-weight: bold; color: red; text-shadow: 0 0 5px red;"
+        )
     ),
-    tags$h2(
-      "APP IN BETA MODE",
-      style = "font-weight:bold; color:red; text-shadow: 0 0 5px red; display:inline-block;"
-    ),
-    tags$h6(
-      "Expect frequent and unpredictable updates",
-      style = "color:red; font-weight:bold;"
-    ),    
-    span(img(src = "main-banner-1400x400.png"), style = 'text-align: center; width = "15%";'),
-    # h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
-    tags$blockquote(
-        "Explore a pioneering resource in neuro-oncology with the Transcriptomic Atlas of Nervous System Tumors. This project aims to bridge critical gaps in understanding the molecular landscape of nervous system tumors by creating a comprehensive, publicly accessible dataset of gene expression profiles. This atlas integrates thousands of samples from diverse sources, offering a powerful tool for researchers, clinicians, and students to investigate tumor biology, refine diagnostics, and uncover new therapeutic insights. Whether you're analyzing survival trends, visualizing tumor heterogeneity, or comparing gene expression patterns, this app provides an interactive gateway to cutting-edge neuro-oncology research."
-    ),
-h3(icon('chart-line'), ' What This App Offers'),
-
-p("This app brings the atlas to life with three interactive tools tailored to neuro-oncology exploration:"),
-
-# Create a responsive row with three columns for the tools
-fluidRow(
-    # Survival Analysis Column
-    column(4,
-           div(
-               # Clickable Image
-               actionLink(
-                   inputId = "goto_survival",
-                   label = tags$img(
-                       src = "survival_analysis_banner.png",
-                       alt = "Survival Analysis",
-                       style = "width:100%; cursor:pointer; margin-bottom: 20px;"
-                   )
-               ),
-               tags$b("Survival Analysis:"),
-               p("Use Kaplan-Meier curves to examine survival trends across tumor types, genetic mutations (e.g., IDH, MGMT), or demographic factors (e.g., age, sex). Filter by diagnosis or age group, and generate single-variable or multi-variable grids to compare outcomes."),
-           )
-    ),
-    
-    # t-SNE Dimensionality Reduction Column
-    column(4,
-           div(
-               # Clickable Image
-               actionLink(
-                   inputId = "goto_tsne",
-                   label = tags$img(
-                       src = "tsne_banner.png",
-                       alt = "t-SNE Dimensionality Reduction",
-                       style = "width:100%; cursor:pointer; margin-bottom: 20px;"
-                   )
-               ),
-               tags$b("t-SNE Dimensionality Reduction:"),
-               p("Visualize how 7,375 samples cluster based on their transcriptomic profiles in a 2D plot. Select points to explore sample details, revealing patterns of similarity and difference across diagnoses."),
-           )
-    ),
-    
-    # mRNA Expression Boxplots Column
-    column(4,
-           div(
-               # Clickable Image
-               actionLink(
-                   inputId = "goto_mrna",
-                   label = tags$img(
-                       src = "mrna_expression_banner.png",
-                       alt = "mRNA Expression Boxplots",
-                       style = "width:100%; cursor:pointer; margin-bottom: 20px;"
-                   )
-               ),
-               tags$b("mRNA Expression Boxplots:"),
-               p("Compare gene expression levels across tumors or groups. Search by Gene Ontology terms (e.g., cell cycle, apoptosis) or specific genes, and group results by variables like diagnosis, grade, or sex to uncover molecular insights."),
-           )
-    )
-),
-
-p("Each tool is designed for ease of use—select options, generate plots, and download results to fuel your research or education."),
-
-
-    h3(icon('bullseye'), ' Purpose of the Study'),
-    p(
-        "The primary goal of this study was to compile a large-scale, clinically annotated transcriptomic atlas that captures the gene expression signatures of nervous system tumors and non-tumor tissues. Unlike previous efforts that focused narrowly on specific tumor types or relied heavily on DNA methylation, this project sought to harmonize a broad spectrum of transcriptomic data from public repositories. By doing so, it addresses the scarcity of resources for studying rare tumor types, pediatric and adult cases, and samples from varied geographic regions. The atlas aims to empower comparative gene expression analyses, support diagnostic refinement, and lay the groundwork for integrating genomic data with clinical outcomes—ultimately advancing personalized medicine in neuro-oncology."
-    ),
-    h3(icon('tools'), ' How It Was Conducted'),
-    p(
-        "To build this atlas, the team meticulously gathered raw transcriptomic data from thousands of nervous system samples—both neoplastic (tumorous) and non-neoplastic—available in public databases like the Gene Expression Omnibus and ArrayExpress. They standardized the data by using a single platform, the Applied Biosystems™ GeneChip™ Human Genome U133 Plus 2.0 Array, which offers extensive coverage of the human genome. This raw data, spanning years of collection (2003–2018), was reprocessed simultaneously using advanced computational tools in R, including background correction, normalization, and summarization techniques. Machine learning algorithms, such as t-SNE for visualization and classifiers like random forests and gradient boosting, were employed to organize samples into biologically meaningful clusters and refine diagnoses where historical classifications were outdated or unclear. Clinical metadata—age, sex, tumor location, genetic mutations, and survival data—were manually curated to enrich the dataset, ensuring its utility for multifaceted analyses."
-    ),
-    h3(icon('seedling'), ' A Growing Resource'),
-    p(
-        "This atlas is just the beginning. The methodology developed here—harmonizing diverse transcriptomic data into a unified framework—is designed to be scalable. As new raw data become available in public domains or through collaborations, we plan to expand the atlas to include additional samples, tumor types, and molecular profiles. Future updates will incorporate emerging genomic platforms and integrate other omics data (e.g., proteomics, epigenomics), enhancing the depth and breadth of this resource. Stay tuned for a continually evolving tool that adapts to the latest advancements in neuro-oncology research."
-    ),
-    h3(icon('brain'), ' Scientific and Biological Context'),
-    p(
-        "Nervous system tumors, including gliomas, medulloblastomas, meningiomas, and rare entities like gangliogliomas, arise from complex interactions between genetic, epigenetic, and environmental factors. Gene expression—the process by which DNA instructions are converted into functional proteins—offers a window into these tumors’ biological behavior, from growth and invasion to treatment response. This app leverages transcriptomic data (mRNA levels across 20,360 genes) alongside clinical variables to explore these dynamics. Key data types include:",
-        tags$ul(
-            tags$li("Diagnosis: Tumor types and subtypes (e.g., diffuse gliomas, embryonal tumors), reflecting current classifications."),
-            tags$li("Clinical Metadata: Age groups (fetus to 106 years), sex, tumor location (e.g., supratentorial, posterior fossa), and survival outcomes (months lived, mortality status)."),
-            tags$li("Genetic Features: Mutations (e.g., IDH, H3F3A), amplifications (e.g., MYCN), and methylation status (e.g., MGMT promoter), critical for tumor subclassification."),
-            tags$li("Expression Profiles: mRNA levels for thousands of genes, linked to biological processes via Gene Ontology (GO) terms.")
-        ),
-        "These variables enable you to investigate how molecular signatures correlate with clinical outcomes, tumor heterogeneity, and potential therapeutic targets."
-    ),
-
-    # h3(icon('chart-line'), ' What This App Offers'),
-    # p(
-    #     "This app brings the atlas to life with three interactive tools tailored to neuro-oncology exploration:",
-    #     tags$ul(
-    #         tags$li(
-    #             tags$b("Survival Analysis:"),
-    #             " Use Kaplan-Meier curves to examine survival trends across tumor types, genetic mutations (e.g., IDH, MGMT), or demographic factors (e.g., age, sex). Filter by diagnosis or age group, and generate single-variable or multi-variable grids to compare outcomes.",
-    #             span(img(src = "survival_analysis_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
-    #         ),
-    #         tags$li(
-    #             tags$b("t-SNE Dimensionality Reduction:"),
-    #             " Visualize how 7,375 samples cluster based on their transcriptomic profiles in a 2D plot. Select points to explore sample details, revealing patterns of similarity and difference across diagnoses.",
-    #             span(img(src = "tsne_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
-    #         ),
-    #         tags$li(
-    #             tags$b("mRNA Expression Boxplots:"),
-    #             " Compare gene expression levels across tumors or groups. Search by Gene Ontology terms (e.g., cell cycle, apoptosis) or specific genes, and group results by variables like diagnosis, grade, or sex to uncover molecular insights.",
-    #             span(img(src = "mrna_expression_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
-    #         )
-    #     ),
-    #     "Each tool is designed for ease of use—select options, generate plots, and download results to fuel your research or education."
+    # nav_item(
+    #     tags$span(
+    #         icon("wrench", class = "text-warning"),
+    #         "UNDER CONSTRUCTION",
+    #         style = "font-weight: bold; color: orange; text-shadow: 0 0 5px orange;"
+    #     )
     # ),
-    h3(icon('rocket'), ' Get Started'),
-    p(
-        "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data."
-        # tags$a(href = "mailto:axitamm@gmail.com", "axitamm@gmail.com"), "."
-    ),
+    #     nav_item(
+    #     tags$span(
+    #         icon("hourglass-half", class = "text-info"),
+    #         "IN DEVELOPMENT",
+    #         style = "font-weight: bold; color: blue; text-shadow: 0 0 5px blue;"
+    #     )
+    # ),
+    #     nav_item(
+    #     tags$span(
+    #         icon("flask", class = "text-primary"),
+    #         "EXPERIMENTAL",
+    #         style = "font-weight: bold; color: purple; text-shadow: 0 0 5px purple;"
+    #     )
+    # ),
+    # Home -----
+    nav_panel(
+        title = "Home", icon = icon("house"),
+        tags$head(
+            #   tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
+            tags$link(rel = "shortcut icon", href = "favicon.ico")
+        ),
+        span(img(src = "main-banner-1400x400.png"), style = 'text-align: center; width = "15%";'),
+        # h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
+        tags$blockquote(
+            "Explore a pioneering resource in neuro-oncology with the Transcriptomic Atlas of Nervous System Tumors. This project aims to bridge critical gaps in understanding the molecular landscape of nervous system tumors by creating a comprehensive, publicly accessible dataset of gene expression profiles. This atlas integrates thousands of samples from diverse sources, offering a powerful tool for researchers, clinicians, and students to investigate tumor biology, refine diagnostics, and uncover new therapeutic insights. Whether you're analyzing survival trends, visualizing tumor heterogeneity, or comparing gene expression patterns, this app provides an interactive gateway to cutting-edge neuro-oncology research."
+        ),
+        h3(icon("chart-line"), " What This App Offers"),
+        p("This app brings the atlas to life with three interactive tools tailored to neuro-oncology exploration:"),
+
+        # Create a responsive row with three columns for the tools
+        fluidRow(
+            # Survival Analysis Column
+            column(
+                4,
+                div(
+                    # Clickable Image
+                    actionLink(
+                        inputId = "goto_survival",
+                        label = tags$img(
+                            src = "survival_analysis_banner.png",
+                            alt = "Survival Analysis",
+                            style = "width:100%; cursor:pointer; margin-bottom: 20px;"
+                        )
+                    ),
+                    tags$b("Survival Analysis:"),
+                    p("Use Kaplan-Meier curves to examine survival trends across tumor types, genetic mutations (e.g., IDH, MGMT), or demographic factors (e.g., age, sex). Filter by diagnosis or age group, and generate single-variable or multi-variable grids to compare outcomes."),
+                )
+            ),
+
+            # t-SNE Dimensionality Reduction Column
+            column(
+                4,
+                div(
+                    # Clickable Image
+                    actionLink(
+                        inputId = "goto_tsne",
+                        label = tags$img(
+                            src = "tsne_banner.png",
+                            alt = "t-SNE Dimensionality Reduction",
+                            style = "width:100%; cursor:pointer; margin-bottom: 20px;"
+                        )
+                    ),
+                    tags$b("t-SNE Dimensionality Reduction:"),
+                    p("Visualize how 7,375 samples cluster based on their transcriptomic profiles in a 2D plot. Select points to explore sample details, revealing patterns of similarity and difference across diagnoses."),
+                )
+            ),
+
+            # mRNA Expression Boxplots Column
+            column(
+                4,
+                div(
+                    # Clickable Image
+                    actionLink(
+                        inputId = "goto_mrna",
+                        label = tags$img(
+                            src = "mrna_expression_banner.png",
+                            alt = "mRNA Expression Boxplots",
+                            style = "width:100%; cursor:pointer; margin-bottom: 20px;"
+                        )
+                    ),
+                    tags$b("mRNA Expression Boxplots:"),
+                    p("Compare gene expression levels across tumors or groups. Search by Gene Ontology terms (e.g., cell cycle, apoptosis) or specific genes, and group results by variables like diagnosis, grade, or sex to uncover molecular insights."),
+                )
+            )
+        ),
+        p("Each tool is designed for ease of use—select options, generate plots, and download results to fuel your research or education."),
+        h3(icon("bullseye"), " Purpose of the Study"),
+        p(
+            "The primary goal of this study was to compile a large-scale, clinically annotated transcriptomic atlas that captures the gene expression signatures of nervous system tumors and non-tumor tissues. Unlike previous efforts that focused narrowly on specific tumor types or relied heavily on DNA methylation, this project sought to harmonize a broad spectrum of transcriptomic data from public repositories. By doing so, it addresses the scarcity of resources for studying rare tumor types, pediatric and adult cases, and samples from varied geographic regions. The atlas aims to empower comparative gene expression analyses, support diagnostic refinement, and lay the groundwork for integrating genomic data with clinical outcomes—ultimately advancing personalized medicine in neuro-oncology."
+        ),
+        h3(icon("tools"), " How It Was Conducted"),
+        p(
+            "To build this atlas, the team meticulously gathered raw transcriptomic data from thousands of nervous system samples—both neoplastic (tumorous) and non-neoplastic—available in public databases like the Gene Expression Omnibus and ArrayExpress. They standardized the data by using a single platform, the Applied Biosystems™ GeneChip™ Human Genome U133 Plus 2.0 Array, which offers extensive coverage of the human genome. This raw data, spanning years of collection (2003–2018), was reprocessed simultaneously using advanced computational tools in R, including background correction, normalization, and summarization techniques. Machine learning algorithms, such as t-SNE for visualization and classifiers like random forests and gradient boosting, were employed to organize samples into biologically meaningful clusters and refine diagnoses where historical classifications were outdated or unclear. Clinical metadata—age, sex, tumor location, genetic mutations, and survival data—were manually curated to enrich the dataset, ensuring its utility for multifaceted analyses."
+        ),
+        h3(icon("seedling"), " A Growing Resource"),
+        p(
+            "This atlas is just the beginning. The methodology developed here—harmonizing diverse transcriptomic data into a unified framework—is designed to be scalable. As new raw data become available in public domains or through collaborations, we plan to expand the atlas to include additional samples, tumor types, and molecular profiles. Future updates will incorporate emerging genomic platforms and integrate other omics data (e.g., proteomics, epigenomics), enhancing the depth and breadth of this resource. Stay tuned for a continually evolving tool that adapts to the latest advancements in neuro-oncology research."
+        ),
+        h3(icon("brain"), " Scientific and Biological Context"),
+        p(
+            "Nervous system tumors, including gliomas, medulloblastomas, meningiomas, and rare entities like gangliogliomas, arise from complex interactions between genetic, epigenetic, and environmental factors. Gene expression—the process by which DNA instructions are converted into functional proteins—offers a window into these tumors’ biological behavior, from growth and invasion to treatment response. This app leverages transcriptomic data (mRNA levels across 20,360 genes) alongside clinical variables to explore these dynamics. Key data types include:",
+            tags$ul(
+                tags$li("Diagnosis: Tumor types and subtypes (e.g., diffuse gliomas, embryonal tumors), reflecting current classifications."),
+                tags$li("Clinical Metadata: Age groups (fetus to 106 years), sex, tumor location (e.g., supratentorial, posterior fossa), and survival outcomes (months lived, mortality status)."),
+                tags$li("Genetic Features: Mutations (e.g., IDH, H3F3A), amplifications (e.g., MYCN), and methylation status (e.g., MGMT promoter), critical for tumor subclassification."),
+                tags$li("Expression Profiles: mRNA levels for thousands of genes, linked to biological processes via Gene Ontology (GO) terms.")
+            ),
+            "These variables enable you to investigate how molecular signatures correlate with clinical outcomes, tumor heterogeneity, and potential therapeutic targets."
+        ),
+
+        # h3(icon('chart-line'), ' What This App Offers'),
+        # p(
+        #     "This app brings the atlas to life with three interactive tools tailored to neuro-oncology exploration:",
+        #     tags$ul(
+        #         tags$li(
+        #             tags$b("Survival Analysis:"),
+        #             " Use Kaplan-Meier curves to examine survival trends across tumor types, genetic mutations (e.g., IDH, MGMT), or demographic factors (e.g., age, sex). Filter by diagnosis or age group, and generate single-variable or multi-variable grids to compare outcomes.",
+        #             span(img(src = "survival_analysis_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
+        #         ),
+        #         tags$li(
+        #             tags$b("t-SNE Dimensionality Reduction:"),
+        #             " Visualize how 7,375 samples cluster based on their transcriptomic profiles in a 2D plot. Select points to explore sample details, revealing patterns of similarity and difference across diagnoses.",
+        #             span(img(src = "tsne_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
+        #         ),
+        #         tags$li(
+        #             tags$b("mRNA Expression Boxplots:"),
+        #             " Compare gene expression levels across tumors or groups. Search by Gene Ontology terms (e.g., cell cycle, apoptosis) or specific genes, and group results by variables like diagnosis, grade, or sex to uncover molecular insights.",
+        #             span(img(src = "mrna_expression_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
+        #         )
+        #     ),
+        #     "Each tool is designed for ease of use—select options, generate plots, and download results to fuel your research or education."
+        # ),
+        h3(icon("rocket"), " Get Started"),
+        p(
+            "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data."
+            # tags$a(href = "mailto:axitamm@gmail.com", "axitamm@gmail.com"), "."
+        ),
         span(tagList(
             br(),
             img(src = "KY Pediatric Cancer Research - Final.png", style = "width:25%; object-fit: contain;"),
             img(src = "DPH and PHAB logo.png", style = "width:35%; object-fit: contain;"),
             img(src = "u_of_l.jpg", style = "width:20%; object-fit: contain;"),
             br(),
-            paste0('Last updated: ', currentDate),br(),
-            p('Download',
-                tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", target = "_blank", "source data"), 
-                'and',
-                tags$a(href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas", target = "_blank","application code"), br(),
-                "Project funded by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/dpqi/cdpb/Pages/pcrtf.aspx", target = "_blank", "Kentucky Pediatric Cancer Research Trust Fund"),br(), 
+            paste0("Last updated: ", currentDate), br(),
+            p(
+                "Download",
+                tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", target = "_blank", "source data"),
+                "and",
+                tags$a(href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas", target = "_blank", "application code"), br(),
+                "Project funded by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/dpqi/cdpb/Pages/pcrtf.aspx", target = "_blank", "Kentucky Pediatric Cancer Research Trust Fund"), br(),
                 "ShinyApp powered by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/Pages/default.aspx", target = "_blank", "Kentucky Department for Public Health")
             )
-        ), style = 'display: block; width: 100%; font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;'),
+        ), style = "display: block; width: 100%; font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;"),
         br()
     ),
-# Survival Analysis Tab -----
+    # Survival Analysis Tab -----
     nav_panel(
         title = "Survival Analysis", icon = icon("heartbeat"), id = "goto_survival",
         sidebarLayout(
@@ -223,8 +243,8 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
                 width = 3,
                 # Set the card text color to use the dynamic variable so it displays well in both modes.
 
-    h4("Survival Analysis", style = "margin-top: 0;"),
-    p("Analyze survival outcomes for nervous system tumors using Kaplan-Meier curves."),
+                h4("Survival Analysis", style = "margin-top: 0;"),
+                p("Analyze survival outcomes for nervous system tumors using Kaplan-Meier curves."),
                 radioButtons("analysis_type", "Analysis Type:",
                     choices = c("Single Variable" = "single", "Multi-Variable Grid" = "grid"),
                     selected = "grid"
@@ -322,7 +342,7 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
             )
         )
     ),
-# t-SNE Dimensionality Reduction Tab -----
+    # t-SNE Dimensionality Reduction Tab -----
 
     nav_panel(
         title = "t-SNE Dimensionality Reduction", icon = icon("th"),
@@ -331,7 +351,7 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
             DT::dataTableOutput("dataTable")
         )
     ),
-# mRNA Expression Boxplots Tab -----
+    # mRNA Expression Boxplots Tab -----
     nav_panel(
         title = "mRNA Expression Boxplots", icon = icon("vial"),
         sidebarLayout(
@@ -415,7 +435,6 @@ p("Each tool is designed for ease of use—select options, generate plots, and d
 
 # Server logic remains unchanged, same as before
 server <- function(input, output, session) {
-
     observeEvent(input$navBar, {
         # Check if user selected the mRNA Expression tab and data not yet loaded
         if (input$navBar == "mRNA Expression Boxplots" && !gene_data_loaded()) {
@@ -493,54 +512,56 @@ server <- function(input, output, session) {
         return(data)
     }
 
-filtered_data <- reactive({
-    req(input$generate)
-    data <- atlasDataClean %>%
-        filter(!is.na(survivalMonths), !is.na(mortality)) %>%
-        prepare_data()
-    if (input$diagnosis_filter != "All") {
-        data <- data %>% filter(diagnosisClass == input$diagnosis_filter)
-    }
-    if (input$age_filter != "All") {
-        data <- data %>% filter(ageGroup == input$age_filter)
-    }
-    
-    # Validate necessary columns exist
-    required_columns <- c("diagnosisFinal", "diagnosisClass", "sex", "ageGroup", "grade",
-                          "mutationIDH1/2", "mutationH3", "1p/19q-codel",
-                          "methylationMGMTpromoter", "amplificationMCYN")
-    missing_columns <- setdiff(required_columns, names(data))
-    if (length(missing_columns) > 0) {
-        showNotification(paste("Warning: Missing columns after filtering:", paste(missing_columns, collapse = ", ")), type = "error")
-    }
-    
-    return(data)
-})
-# Replace the existing strat_data reactive expression with this:
-strat_data <- reactive({
-    req(input$generate, input$analysis_type == "single")
-    data <- filtered_data()
-    if (nrow(data) == 0) {
-        return(NULL)
-    }
-
-    # Convert 'strat_group' to a factor and explicitly handle NA values as "Unknown"
-    data$strat_group <- fct_na_value_to_level(factor(data[[input$strat_var]]), "Unknown")
-
-    if (input$collapse_rare) {
-        group_counts <- table(data$strat_group)
-        large_groups <- names(group_counts[group_counts >= input$min_group_size])
-        if (length(large_groups) < length(group_counts)) {
-            data <- data %>%
-                mutate(strat_group = ifelse(strat_group %in% large_groups,
-                    as.character(strat_group),
-                    "Other (Small Groups)"
-                )) %>%
-                mutate(strat_group = factor(strat_group))
+    filtered_data <- reactive({
+        req(input$generate)
+        data <- atlasDataClean %>%
+            filter(!is.na(survivalMonths), !is.na(mortality)) %>%
+            prepare_data()
+        if (input$diagnosis_filter != "All") {
+            data <- data %>% filter(diagnosisClass == input$diagnosis_filter)
         }
-    }
-    return(data)
-})
+        if (input$age_filter != "All") {
+            data <- data %>% filter(ageGroup == input$age_filter)
+        }
+
+        # Validate necessary columns exist
+        required_columns <- c(
+            "diagnosisFinal", "diagnosisClass", "sex", "ageGroup", "grade",
+            "mutationIDH1/2", "mutationH3", "1p/19q-codel",
+            "methylationMGMTpromoter", "amplificationMCYN"
+        )
+        missing_columns <- setdiff(required_columns, names(data))
+        if (length(missing_columns) > 0) {
+            showNotification(paste("Warning: Missing columns after filtering:", paste(missing_columns, collapse = ", ")), type = "error")
+        }
+
+        return(data)
+    })
+    # Replace the existing strat_data reactive expression with this:
+    strat_data <- reactive({
+        req(input$generate, input$analysis_type == "single")
+        data <- filtered_data()
+        if (nrow(data) == 0) {
+            return(NULL)
+        }
+
+        # Convert 'strat_group' to a factor and explicitly handle NA values as "Unknown"
+        data$strat_group <- fct_na_value_to_level(factor(data[[input$strat_var]]), "Unknown")
+
+        if (input$collapse_rare) {
+            group_counts <- table(data$strat_group)
+            large_groups <- names(group_counts[group_counts >= input$min_group_size])
+            if (length(large_groups) < length(group_counts)) {
+                data <- data %>%
+                    mutate(strat_group = ifelse(strat_group %in% large_groups,
+                        as.character(strat_group),
+                        "Other (Small Groups)"
+                    )) %>%
+                    mutate(strat_group = factor(strat_group))
+            }
+        }
+        return(data)
+    })
 
     create_survival_plot <- function(data, strat_var, title = NULL, show_pvalue = TRUE, show_ci = FALSE, max_time = NULL) {
         if (is.null(data) || nrow(data) == 0 || !strat_var %in% names(data)) {
@@ -720,56 +741,21 @@ strat_data <- reactive({
         bordered = TRUE
     )
 
-# Replace the existing output$median_survival renderTable with this:
+    # Replace the existing output$median_survival renderTable with this:
 
-output$median_survival <- renderTable(
-    {
-        req(input$generate)
-        data <- if (input$analysis_type == "single") strat_data() else filtered_data()
+    output$median_survival <- renderTable(
+        {
+            req(input$generate)
+            data <- if (input$analysis_type == "single") strat_data() else filtered_data()
 
-        if (is.null(data) || nrow(data) == 0) {
-            return(data.frame(Variable = "N/A", Group = "No data available", `Median Survival` = NA_character_))
-        }
+            if (is.null(data) || nrow(data) == 0) {
+                return(data.frame(Variable = "N/A", Group = "No data available", `Median Survival` = NA_character_))
+            }
 
-        if (input$analysis_type == "single") {
-            group_var <- "strat_group"
-            summary_table <- data %>%
-                group_by(!!sym(group_var)) %>%
-                summarise(
-                    Count = n(),
-                    `Mean Survival (months)` = round(mean(survivalMonths, na.rm = TRUE), 1),
-                    `Events (Deaths)` = sum(mortality),
-                    `Mortality Rate (%)` = round(mean(mortality, na.rm = TRUE) * 100, 1),
-                    `Median Survival` = if_else(
-                        sum(mortality) >= n() / 2,
-                        round(median(survivalMonths[mortality == 1], na.rm = TRUE), 1),
-                        NA_real_
-                    )
-                ) %>%
-                mutate(
-                    `Median Status` = if_else(
-                        is.na(`Median Survival`),
-                        "Not reached",
-                        paste0(`Median Survival`, " months")
-                    )
-                ) %>%
-                arrange(desc(Count)) %>%
-                rename(Group = !!sym(group_var)) %>%
-                mutate(Variable = input$strat_var) %>%
-                select(Variable, Group, Count, `Mean Survival (months)`, `Events (Deaths)`, `Mortality Rate (%)`, `Median Status`)
-
-            return(summary_table)
-        } else {
-            # For 'grid' analysis
-            stats_list <- lapply(input$grid_variables, function(var) {
-                group_var <- sym(var)
-                if (!(var %in% names(data))) {
-                    # Handle missing columns gracefully
-                    showNotification(paste("Warning: Column", var, "does not exist in the data. Skipping."), type = "warning")
-                    return(NULL)
-                }
-                data %>%
-                    group_by(!!sym(var)) %>%
+            if (input$analysis_type == "single") {
+                group_var <- "strat_group"
+                summary_table <- data %>%
+                    group_by(!!sym(group_var)) %>%
                     summarise(
                         Count = n(),
                         `Mean Survival (months)` = round(mean(survivalMonths, na.rm = TRUE), 1),
@@ -789,28 +775,63 @@ output$median_survival <- renderTable(
                         )
                     ) %>%
                     arrange(desc(Count)) %>%
-                    rename(Group = !!sym(var)) %>%
-                    mutate(Variable = var) %>%
+                    rename(Group = !!sym(group_var)) %>%
+                    mutate(Variable = input$strat_var) %>%
                     select(Variable, Group, Count, `Mean Survival (months)`, `Events (Deaths)`, `Mortality Rate (%)`, `Median Status`)
-            })
 
-            # Remove NULL elements resulting from missing columns
-            stats_list <- stats_list[!sapply(stats_list, is.null)]
+                return(summary_table)
+            } else {
+                # For 'grid' analysis
+                stats_list <- lapply(input$grid_variables, function(var) {
+                    group_var <- sym(var)
+                    if (!(var %in% names(data))) {
+                        # Handle missing columns gracefully
+                        showNotification(paste("Warning: Column", var, "does not exist in the data. Skipping."), type = "warning")
+                        return(NULL)
+                    }
+                    data %>%
+                        group_by(!!sym(var)) %>%
+                        summarise(
+                            Count = n(),
+                            `Mean Survival (months)` = round(mean(survivalMonths, na.rm = TRUE), 1),
+                            `Events (Deaths)` = sum(mortality),
+                            `Mortality Rate (%)` = round(mean(mortality, na.rm = TRUE) * 100, 1),
+                            `Median Survival` = if_else(
+                                sum(mortality) >= n() / 2,
+                                round(median(survivalMonths[mortality == 1], na.rm = TRUE), 1),
+                                NA_real_
+                            )
+                        ) %>%
+                        mutate(
+                            `Median Status` = if_else(
+                                is.na(`Median Survival`),
+                                "Not reached",
+                                paste0(`Median Survival`, " months")
+                            )
+                        ) %>%
+                        arrange(desc(Count)) %>%
+                        rename(Group = !!sym(var)) %>%
+                        mutate(Variable = var) %>%
+                        select(Variable, Group, Count, `Mean Survival (months)`, `Events (Deaths)`, `Mortality Rate (%)`, `Median Status`)
+                })
 
-            if (length(stats_list) == 0) {
-                return(data.frame(Variable = "N/A", Group = "No variables selected or available", `Median Survival` = NA_character_))
+                # Remove NULL elements resulting from missing columns
+                stats_list <- stats_list[!sapply(stats_list, is.null)]
+
+                if (length(stats_list) == 0) {
+                    return(data.frame(Variable = "N/A", Group = "No variables selected or available", `Median Survival` = NA_character_))
+                }
+
+                # Bind the rows, ensuring consistent column types
+                summary_table <- bind_rows(stats_list)
+
+                return(summary_table)
             }
-
-            # Bind the rows, ensuring consistent column types
-            summary_table <- bind_rows(stats_list)
-
-            return(summary_table)
-        }
-    },
-    striped = TRUE,
-    hover = TRUE,
-    bordered = TRUE
-)
+        },
+        striped = TRUE,
+        hover = TRUE,
+        bordered = TRUE
+    )
     output$survival_data <- renderDT({
         req(input$generate)
         data <- if (input$analysis_type == "single") strat_data() else filtered_data()
@@ -964,7 +985,7 @@ output$median_survival <- renderTable(
         need(exists("atlasDataClean"), "Error: `atlasDataClean` is not loaded."),
         need(exists("go_to_genes_list"), "Error: `go_to_genes_list` is not loaded.")
     )
-    
+
     gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
     # all_valid_genes <- gene_annotations %>%
     #     filter(ENTREZID %in% rownames(geneExpressionData)) %>%
