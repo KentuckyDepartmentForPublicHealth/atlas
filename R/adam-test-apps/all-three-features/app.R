@@ -67,9 +67,9 @@ ui <- page_navbar(
     nav_spacer(),
         nav_item(
         tags$span(
-        icon("exclamation-triangle", class = "text-danger"),
-            "APP IN BETA MODE",
-            style = "font-weight: bold; color: red; text-shadow: 0 0 5px red;"
+        # icon("wrench", class = "text-warning"),
+            "BETA VERSION",
+            style = "font-weight: bold; color: #B85042; font-size: .75em;"
         )
     ),
     # nav_item(
@@ -88,8 +88,8 @@ ui <- page_navbar(
     # ),
     #     nav_item(
     #     tags$span(
-    #         icon("flask", class = "text-primary"),
-    #         "EXPERIMENTAL",
+    #         # icon("flask", class = "text-primary"),
+    #         "BETA MODE",
     #         style = "font-weight: bold; color: purple; text-shadow: 0 0 5px purple;"
     #     )
     # ),
