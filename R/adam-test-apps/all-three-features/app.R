@@ -15,7 +15,7 @@ library(rlang)
 library(forcats)
 
 # Create a reactive value to track if gene expression data is loaded
-gene_data_loaded <- reactiveVal(FALSE)
+# gene_data_loaded <- reactiveVal(FALSE)
 
 # Create a placeholder for the gene expression data
 geneExpressionData <- NULL
@@ -440,22 +440,34 @@ ui <- page_navbar(
 
 # Server logic remains unchanged, same as before
 server <- function(input, output, session) {
-    observeEvent(input$navBar, {
-        # Check if user selected the mRNA Expression tab and data not yet loaded
-        if (input$navBar == "mRNA Expression Boxplots" && !gene_data_loaded()) {
-            # Show a loading message
-            showNotification("Loading gene expression data...",
-                type = "message",
-                duration = NULL,
-                id = "loading_notification"
+
+# Create a reactive value to store gene expression data
+gene_expression_store <- reactiveVal(NULL)
+
+# In your server function, add this observeEvent
+observeEvent(input$navBar, {
+    # Check if user selected the mRNA Expression tab and data not yet loaded
+    if (input$navBar == "mRNA Expression Boxplots" && is.null(gene_expression_store())) {
+        # Show a loading message
+        showNotification("Loading gene expression data...",
+            type = "message",
+            duration = NULL,
+            id = "loading_notification"
+        )
+
+        # Load the data
+        load_result <- try({
+            temp_env <- new.env()
+            load("dat/geneExpressionData.RData", envir = temp_env)
+            gene_expression_store(temp_env$geneExpressionData)
+        })
+
+        if (inherits(load_result, "try-error")) {
+            showNotification("Error loading gene expression data",
+                type = "error",
+                duration = 5
             )
-
-            # Load the large dataset only when needed
-            load("dat/geneExpressionData.RData", envir = .GlobalEnv)
-
-            # Mark data as loaded
-            gene_data_loaded(TRUE)
-
+        } else {
             # Remove loading notification
             removeNotification(id = "loading_notification")
             showNotification("Gene expression data loaded successfully!",
@@ -463,7 +475,8 @@ server <- function(input, output, session) {
                 duration = 3
             )
         }
-    })
+    }
+})
 
     # Observe clicks on Survival Analysis image and switch to the corresponding tab
     observeEvent(input$goto_survival, {
@@ -1092,35 +1105,53 @@ server <- function(input, output, session) {
             )
         }
     })
-    final_data <- eventReactive(input$run, {
-        chosen_genes <- selected_genes_now()
-        if (length(chosen_genes) == 0) {
-            shinyalert("Oops!", "You must select at least one gene to run the plot.",
-                type = "error",
-                confirmButtonCol = "#0B3B60", size = "m"
-            )
-            return(NULL)
+final_data <- eventReactive(input$run, {
+    chosen_genes <- selected_genes_now()
+    if (length(chosen_genes) == 0) {
+        shinyalert("Oops!", "You must select at least one gene to run the plot.",
+            type = "error",
+            confirmButtonCol = "#0B3B60", size = "m"
+        )
+        return(NULL)
+    }
+
+    # Get the gene expression data from our reactive store
+    geneExpressionData <- gene_expression_store()
+
+    # Check if data is available
+    if (is.null(geneExpressionData)) {
+        shinyalert("Data Not Loaded", "The gene expression data is not yet loaded. Please wait or try reloading the page.",
+            type = "warning",
+            confirmButtonCol = "#0B3B60", size = "m"
+        )
+        return(NULL)
+    }
+
+    isolate({
+        entrez_ids <- gene_annotations %>%
+            filter(SYMBOL %in% chosen_genes) %>%
+            pull(ENTREZID)
+
+        if (length(entrez_ids) == 0) {
+            return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
         }
-        isolate({
-            entrez_ids <- gene_annotations %>%
-                filter(SYMBOL %in% chosen_genes) %>%
-                pull(ENTREZID)
-            if (length(entrez_ids) == 0) {
-                return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
-            }
-            gene_data <- geneExpressionData[rownames(geneExpressionData) %in% entrez_ids, ]
-            if (nrow(gene_data) == 0) {
-                return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
-            }
-            gene_data <- gene_data %>%
-                as.data.frame() %>%
-                mutate(ENTREZID = rownames(.)) %>%
-                pivot_longer(cols = -ENTREZID, names_to = "filename", values_to = "expression") %>%
-                left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
-                left_join(atlasDataClean, by = "filename")
-            list(df = gene_data, doGroup = input$use_group_by, grpVar = input$group_by)
-        })
+
+        gene_data <- geneExpressionData[rownames(geneExpressionData) %in% entrez_ids, ]
+
+        if (nrow(gene_data) == 0) {
+            return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
+        }
+
+        gene_data <- gene_data %>%
+            as.data.frame() %>%
+            mutate(ENTREZID = rownames(.)) %>%
+            pivot_longer(cols = -ENTREZID, names_to = "filename", values_to = "expression") %>%
+            left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
+            left_join(atlasDataClean, by = "filename")
+
+        list(df = gene_data, doGroup = input$use_group_by, grpVar = input$group_by)
     })
+})
     plot_cleared <- reactiveVal(FALSE)
     output$boxplot <- renderPlot({
         if (plot_cleared()) {
