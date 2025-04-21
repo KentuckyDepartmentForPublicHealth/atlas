@@ -69,7 +69,10 @@ ui <- page_navbar(
           span(#bsicons::bs_icon("wrench"),
             "BETA VERSION",
                # "Beta Version",
-               class = "badge bg-warning ms-2"
+               class = "badge bg-warning ms-2",
+            title = "This app is in beta. Expect frequent updates and improvements as we continue development. Some features may be under construction.",
+            `data-bs-toggle` = "tooltip",
+            `data-bs-placement` = "bottom"
           ),
         # tags$span(
         #     "BETA VERSION",
