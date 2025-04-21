@@ -13,6 +13,7 @@ library(tidyr)
 library(shinyalert)
 library(rlang)
 library(forcats)
+library(httr)
 
 # Create a reactive value to track if gene expression data is loaded
 # gene_data_loaded <- reactiveVal(FALSE)
@@ -434,6 +435,52 @@ ui <- page_navbar(
             )
         )
     ),
+
+    # Contact Tab -----
+
+
+nav_panel(
+    title = "Contact", icon = icon("envelope"),
+    fluidPage(
+        # h2("Contact Information"),
+        # p("This section will contain contact information and ways to get in touch with the project team."),
+        
+        # Layout without styling
+        fluidRow(
+            column(
+                8,
+                wellPanel(
+                    h3("Enter Your Information"),
+                    textInput("name", "Name:", ""),
+                    textInput("email", "Email:", ""),
+                    textAreaInput("message", "Message:", "", 
+                                 rows = 6,            # Increased height
+                                 resize = "vertical", # Allow vertical resizing
+                                 width = "100%"),     # Full width of container
+                    div(
+                        style = "display: flex; justify-content: space-between; margin-top: 15px;",
+                        actionButton("submit", "Submit",
+                            class = "btn-primary",
+                            icon = icon("right-to-bracket")
+                        ),
+                        actionButton("clear_form", "Clear",
+                            class = "btn-warning",
+                            icon = icon("eraser")
+                        )
+                    )
+                )
+            ),
+            column(
+                4,
+                wellPanel(
+                    h3("Submission Status:"),
+                    uiOutput("status")
+                    # icon("paper-plane", style = "font-size: 80px; opacity: 0.2;")
+                )
+            )
+        )
+    )
+),  
     # Remove the Debug tab here.
     # Dark mode toggle in the navbar (placed as a nav_item)
     nav_item(
@@ -1294,7 +1341,145 @@ final_data <- eventReactive(input$run, {
             }
         }
     )
-}
+
+# Contact form logic -----
+# Initialize status
+status_type <- reactiveVal("ready")
+status_message <- reactiveVal("Ready to submit")
+
+# Render the status message with advanced styling
+output$status <- renderUI({
+    div(
+        class = "status-message",
+        style = paste0(
+            "padding: 15px; border-radius: 8px; ",
+            "border-left: 5px solid ", if (grepl("Error", status_message())) "#f44336" else "#4caf50", "; ",
+            "margin-top: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1);"
+        ),
+        tags$div(
+            style = "display: flex; align-items: center;",
+            tags$i(
+                class = if (grepl("Error", status_message())) "fa fa-exclamation-circle" else "fa fa-check-circle",
+                style = paste0(
+                    "margin-right: 10px; font-size: 24px; color: ",
+                    if (grepl("Error", status_message())) "#f44336" else "#4caf50"
+                )
+            ),
+            h3(style = "margin: 0; font-weight: 500;", status_message())
+        )
+    )
+})
+
+observeEvent(input$submit, {
+    # Validate form fields
+    if (input$name == "" || input$email == "" || input$message == "") {
+        # Show notification for missing fields with default colors
+        showNotification(
+            ui = div(
+                tags$b("Error:"),
+                "Please fill in all required fields."
+            ),
+            type = "error",
+            duration = 5
+        )
+
+        # Update status
+        status_type("error")
+        status_message("Error: All fields are required!")
+
+        return() # Stop execution
+    }
+
+    # Update status while processing
+    status_type("ready")
+    status_message("Processing submission...")
+
+    # Monday.com API details
+    api_token <- Sys.getenv("api_token")
+    board_id <- Sys.getenv("board_id")
+
+    # Get current system date
+    current_date <- format(Sys.Date(), "%Y-%m-%d")
+
+    # Using the exact column IDs from your board
+    column_values <- paste0(
+        "{",
+        '"text_mkq6vaar": "', current_date, '",',
+        '"text_mkq6awc2": "', gsub('"', '\\\\"', input$message), '",',
+        '"text_mkq6cbxg": "', input$email, '"',
+        "}"
+    )
+
+    # Create the GraphQL mutation
+    query <- paste0("mutation {
+    create_item (
+      board_id: ", board_id, ',
+      item_name: "', input$name, '",
+      column_values: "', gsub('"', '\\\\"', column_values), '"
+    ) {
+      id
+    }
+  }')
+
+    # Print the query for debugging
+    print(query)
+
+    # Make API call to Monday.com
+    response <- POST(
+        url = "https://api.monday.com/v2",
+        add_headers("Authorization" = api_token, "Content-Type" = "application/json"),
+        body = list(query = query),
+        encode = "json"
+    )
+
+    # Print the response for debugging
+    print(content(response, "text"))
+
+    # Check response status and update UI
+    if (status_code(response) == 200) {
+        # Show success notification with default colors
+        showNotification(
+            ui = div(
+                tags$b("Success!"),
+                "Your message has been submitted."
+            ),
+            type = "message",
+            duration = 5
+        )
+
+        # Clear the form fields after successful submission
+        updateTextInput(session, "message", value = "")
+        updateTextInput(session, "name", value = "")
+        updateTextInput(session, "email", value = "")
+
+        # Update status
+        status_type("success")
+        status_message("Successfully submitted!")
+    } else {
+        # Show error notification with default colors
+        showNotification(
+            ui = div(
+                tags$b("Error!"),
+                paste("Status code:", status_code(response))
+            ),
+            type = "error",
+            duration = 5
+        )
+
+        # Update status with error
+        status_type("error")
+        status_message(paste("Error submitting. Status code:", status_code(response)))
+    }
+})
+
+observeEvent(input$clear_form, {
+    # Clear the form fields after successful submission
+    updateTextInput(session, "message", value = "")
+    updateTextInput(session, "name", value = "")
+    updateTextInput(session, "email", value = "")
+})
+
+} # end of server function
 
 # Run the application
 shinyApp(ui = ui, server = server)
