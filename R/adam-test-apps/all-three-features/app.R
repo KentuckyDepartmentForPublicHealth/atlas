@@ -25,7 +25,7 @@ geneExpressionData <- NULL
 # load("../../../dat/geneExpressionData.RData")
 # load("../../../dat/annotations.RData")
 load("dat/atlasDataClean.RData")
-load("dat/geneExpressionData.RData")
+# load("dat/geneExpressionData.RData")
 load("dat/annotations.RData")
 # Assume geneExpressionData, gene_annotations, and go_to_genes_list are also loaded
 
@@ -45,7 +45,7 @@ tumor_colors <- c(
 ui <- page_navbar(
     id = "navBar",
     theme = bs_theme(
-        version = 5, bootswatch = "cosmo",
+        version = 5, #bootswatch = "default",
         primary = "#6a0033", # using one of your tumor colors
         secondary = "#ff757c",
         success = "#377EB8",
@@ -66,11 +66,16 @@ ui <- page_navbar(
     footer = NULL,
     nav_spacer(),
         nav_item(
-        tags$span(
-        # icon("wrench", class = "text-warning"),
+          span(#bsicons::bs_icon("wrench"),
             "BETA VERSION",
-            style = "font-weight: bold; color: #B85042; font-size: .75em;"
-        )
+               # "Beta Version",
+               class = "badge bg-warning ms-2"
+          ),
+        # tags$span(
+        #     "BETA VERSION",
+        # # icon("wrench", class = "text-warning"),
+        #     style = "font-weight: bold; color: #B85042; font-size: .75em;"
+        # )
     ),
     # nav_item(
     #     tags$span(
