@@ -969,7 +969,7 @@ server <- function(input, output, session) {
     })
     output$tsnePlot <- renderPlotly({
         data <- filteredData()
-        validate(need(nrow(data) > 0, "No data available to plot."))
+        # validate(need(nrow(data) > 0, "No data available to plot."))
         data$diagnosisClass <- factor(data$diagnosisClass)
         data$diagnosisFinal <- factor(data$diagnosisFinal)
         non_tumor_data <- data[data$diagnosisClass == "NON-TUMOR", ]
