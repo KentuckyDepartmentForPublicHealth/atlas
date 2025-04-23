@@ -1037,15 +1037,42 @@ observeEvent(input$navBar, {
     selected_points <- reactive({
         event_data("plotly_selected", source = "A")
     })
-    output$dataTable <- DT::renderDataTable({
-        select_data <- selected_points()
-        validate(need(!is.null(select_data) && nrow(select_data) > 0, "Must select at least one data point."))
-        point_keys <- as.numeric(select_data$key)
-        selected_data <- atlasDataClean[atlasDataClean$key %in% point_keys, ]
-        validate(need(nrow(selected_data) > 0, "No valid points selected."))
-        DT::datatable(selected_data)
-    })
+output$dataTable <- DT::renderDataTable({
+    select_data <- selected_points()
 
+    if (is.null(select_data) || !is.data.frame(select_data) || nrow(select_data) == 0) {
+        DT::datatable(
+            data.frame(Message = "Please select at least one data point in the t-SNE plot."),
+            options = list(pageLength = 5, scrollX = TRUE),
+            rownames = FALSE
+        )
+    } else {
+        if (!"key" %in% names(select_data)) {
+            validate(need(FALSE, "Key column missing in selected data."))
+        }
+
+        point_keys <- as.numeric(select_data$key)
+        if (all(is.na(point_keys))) {
+            validate(need(FALSE, "No valid keys in selected data."))
+        }
+
+        selected_data <- atlasDataClean[atlasDataClean$key %in% point_keys, ]
+
+        if (nrow(selected_data) == 0) {
+            DT::datatable(
+                data.frame(Message = "No valid points selected."),
+                options = list(pageLength = 5, scrollX = TRUE),
+                rownames = FALSE
+            )
+        } else {
+            DT::datatable(
+                selected_data,
+                options = list(pageLength = 5, scrollX = TRUE),
+                rownames = FALSE
+            )
+        }
+    }
+})
     # mRNA Expression Boxplots Logic **********************************************
     validate(
         need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
