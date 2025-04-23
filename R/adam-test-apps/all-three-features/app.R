@@ -14,6 +14,7 @@ library(shinyalert)
 library(rlang)
 library(forcats)
 library(httr)
+library(jsonlite)
 
 # Create a reactive value to track if gene expression data is loaded
 # gene_data_loaded <- reactiveVal(FALSE)
@@ -46,7 +47,7 @@ tumor_colors <- c(
 ui <- page_navbar(
     id = "navBar",
     theme = bs_theme(
-        version = 5, #bootswatch = "default",
+        version = 5, # bootswatch = "default",
         primary = "#6a0033", # using one of your tumor colors
         secondary = "#ff757c",
         success = "#377EB8",
@@ -66,15 +67,15 @@ ui <- page_navbar(
     header = NULL,
     footer = NULL,
     nav_spacer(),
-        nav_item(
-          span(#bsicons::bs_icon("wrench"),
+    nav_item(
+        span( # bsicons::bs_icon("wrench"),
             "BETA VERSION",
-               # "Beta Version",
-               class = "badge bg-warning ms-2",
+            # "Beta Version",
+            class = "badge bg-warning ms-2",
             title = "This app is in beta. Expect frequent updates and improvements as we continue development. Some features may be under construction.",
             `data-bs-toggle` = "tooltip",
             `data-bs-placement` = "bottom"
-          ),
+        ),
         # tags$span(
         #     "BETA VERSION",
         # # icon("wrench", class = "text-warning"),
@@ -439,48 +440,49 @@ ui <- page_navbar(
     # Contact Tab -----
 
 
-nav_panel(
-    title = "Contact", icon = icon("envelope"),
-    fluidPage(
-        # h2("Contact Information"),
-        # p("This section will contain contact information and ways to get in touch with the project team."),
-        
-        # Layout without styling
-        fluidRow(
-            column(
-                8,
-                wellPanel(
-                    h3("Enter Your Information"),
-                    textInput("name", "Name:", ""),
-                    textInput("email", "Email:", ""),
-                    textAreaInput("message", "Message:", "", 
-                                 rows = 6,            # Increased height
-                                 resize = "vertical", # Allow vertical resizing
-                                 width = "100%"),     # Full width of container
-                    div(
-                        style = "display: flex; justify-content: space-between; margin-top: 15px;",
-                        actionButton("submit", "Submit",
-                            class = "btn-primary",
-                            icon = icon("right-to-bracket")
-                        ),
-                        actionButton("clear_form", "Clear",
-                            class = "btn-warning",
-                            icon = icon("eraser")
+    nav_panel(
+        title = "Contact", icon = icon("envelope"),
+        fluidPage(
+            # h2("Contact Information"),
+            # p("This section will contain contact information and ways to get in touch with the project team."),
+
+            # Layout without styling
+            fluidRow(
+                column(
+                    8,
+                    wellPanel(
+                        h3("Enter Your Information"),
+                        textInput("name", "Name:", ""),
+                        textInput("email", "Email:", ""),
+                        textAreaInput("message", "Message:", "",
+                            rows = 6, # Increased height
+                            resize = "vertical", # Allow vertical resizing
+                            width = "100%"
+                        ), # Full width of container
+                        div(
+                            style = "display: flex; justify-content: space-between; margin-top: 15px;",
+                            actionButton("submit", "Submit",
+                                class = "btn-primary",
+                                icon = icon("right-to-bracket")
+                            ),
+                            actionButton("clear_form", "Clear",
+                                class = "btn-warning",
+                                icon = icon("eraser")
+                            )
                         )
                     )
-                )
-            ),
-            column(
-                4,
-                wellPanel(
-                    h3("Submission Status:"),
-                    uiOutput("status")
-                    # icon("paper-plane", style = "font-size: 80px; opacity: 0.2;")
+                ),
+                column(
+                    4,
+                    wellPanel(
+                        h3("Submission Status:"),
+                        uiOutput("status")
+                        # icon("paper-plane", style = "font-size: 80px; opacity: 0.2;")
+                    )
                 )
             )
         )
-    )
-),  
+    ),
     # Remove the Debug tab here.
     # Dark mode toggle in the navbar (placed as a nav_item)
     nav_item(
@@ -490,43 +492,42 @@ nav_panel(
 
 # Server logic remains unchanged, same as before
 server <- function(input, output, session) {
+    # Create a reactive value to store gene expression data
+    gene_expression_store <- reactiveVal(NULL)
 
-# Create a reactive value to store gene expression data
-gene_expression_store <- reactiveVal(NULL)
-
-# In your server function, add this observeEvent
-observeEvent(input$navBar, {
-    # Check if user selected the mRNA Expression tab and data not yet loaded
-    if (input$navBar == "mRNA Expression Boxplots" && is.null(gene_expression_store())) {
-        # Show a loading message
-        showNotification("Loading gene expression data...",
-            type = "message",
-            duration = NULL,
-            id = "loading_notification"
-        )
-
-        # Load the data
-        load_result <- try({
-            temp_env <- new.env()
-            load("dat/geneExpressionData.RData", envir = temp_env)
-            gene_expression_store(temp_env$geneExpressionData)
-        })
-
-        if (inherits(load_result, "try-error")) {
-            showNotification("Error loading gene expression data",
-                type = "error",
-                duration = 5
-            )
-        } else {
-            # Remove loading notification
-            removeNotification(id = "loading_notification")
-            showNotification("Gene expression data loaded successfully!",
+    # In your server function, add this observeEvent
+    observeEvent(input$navBar, {
+        # Check if user selected the mRNA Expression tab and data not yet loaded
+        if (input$navBar == "mRNA Expression Boxplots" && is.null(gene_expression_store())) {
+            # Show a loading message
+            showNotification("Loading gene expression data...",
                 type = "message",
-                duration = 3
+                duration = NULL,
+                id = "loading_notification"
             )
+
+            # Load the data
+            load_result <- try({
+                temp_env <- new.env()
+                load("dat/geneExpressionData.RData", envir = temp_env)
+                gene_expression_store(temp_env$geneExpressionData)
+            })
+
+            if (inherits(load_result, "try-error")) {
+                showNotification("Error loading gene expression data",
+                    type = "error",
+                    duration = 5
+                )
+            } else {
+                # Remove loading notification
+                removeNotification(id = "loading_notification")
+                showNotification("Gene expression data loaded successfully!",
+                    type = "message",
+                    duration = 3
+                )
+            }
         }
-    }
-})
+    })
 
     # Observe clicks on Survival Analysis image and switch to the corresponding tab
     observeEvent(input$goto_survival, {
@@ -968,7 +969,7 @@ observeEvent(input$navBar, {
     })
     output$tsnePlot <- renderPlotly({
         data <- filteredData()
-        validate(need(nrow(data) > 0, "No data available to plot."))
+        # validate(need(nrow(data) > 0, "No data available to plot."))
         data$diagnosisClass <- factor(data$diagnosisClass)
         data$diagnosisFinal <- factor(data$diagnosisFinal)
         non_tumor_data <- data[data$diagnosisClass == "NON-TUMOR", ]
@@ -1074,12 +1075,12 @@ output$dataTable <- DT::renderDataTable({
     }
 })
     # mRNA Expression Boxplots Logic **********************************************
-    validate(
-        need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
+    # validate(
+        # need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
         # need(exists("geneExpressionData"), "Error: `geneExpressionData` is not loaded."),
-        need(exists("atlasDataClean"), "Error: `atlasDataClean` is not loaded."),
-        need(exists("go_to_genes_list"), "Error: `go_to_genes_list` is not loaded.")
-    )
+        # need(exists("atlasDataClean"), "Error: `atlasDataClean` is not loaded."),
+        # need(exists("go_to_genes_list"), "Error: `go_to_genes_list` is not loaded.")
+    # )
 
     gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
     # all_valid_genes <- gene_annotations %>%
@@ -1182,53 +1183,53 @@ output$dataTable <- DT::renderDataTable({
             )
         }
     })
-final_data <- eventReactive(input$run, {
-    chosen_genes <- selected_genes_now()
-    if (length(chosen_genes) == 0) {
-        shinyalert("Oops!", "You must select at least one gene to run the plot.",
-            type = "error",
-            confirmButtonCol = "#0B3B60", size = "m"
-        )
-        return(NULL)
-    }
-
-    # Get the gene expression data from our reactive store
-    geneExpressionData <- gene_expression_store()
-
-    # Check if data is available
-    if (is.null(geneExpressionData)) {
-        shinyalert("Data Not Loaded", "The gene expression data is not yet loaded. Please wait or try reloading the page.",
-            type = "warning",
-            confirmButtonCol = "#0B3B60", size = "m"
-        )
-        return(NULL)
-    }
-
-    isolate({
-        entrez_ids <- gene_annotations %>%
-            filter(SYMBOL %in% chosen_genes) %>%
-            pull(ENTREZID)
-
-        if (length(entrez_ids) == 0) {
-            return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
+    final_data <- eventReactive(input$run, {
+        chosen_genes <- selected_genes_now()
+        if (length(chosen_genes) == 0) {
+            shinyalert("Oops!", "You must select at least one gene to run the plot.",
+                type = "error",
+                confirmButtonCol = "#0B3B60", size = "m"
+            )
+            return(NULL)
         }
 
-        gene_data <- geneExpressionData[rownames(geneExpressionData) %in% entrez_ids, ]
+        # Get the gene expression data from our reactive store
+        geneExpressionData <- gene_expression_store()
 
-        if (nrow(gene_data) == 0) {
-            return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
+        # Check if data is available
+        if (is.null(geneExpressionData)) {
+            shinyalert("Data Not Loaded", "The gene expression data is not yet loaded. Please wait or try reloading the page.",
+                type = "warning",
+                confirmButtonCol = "#0B3B60", size = "m"
+            )
+            return(NULL)
         }
 
-        gene_data <- gene_data %>%
-            as.data.frame() %>%
-            mutate(ENTREZID = rownames(.)) %>%
-            pivot_longer(cols = -ENTREZID, names_to = "filename", values_to = "expression") %>%
-            left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
-            left_join(atlasDataClean, by = "filename")
+        isolate({
+            entrez_ids <- gene_annotations %>%
+                filter(SYMBOL %in% chosen_genes) %>%
+                pull(ENTREZID)
 
-        list(df = gene_data, doGroup = input$use_group_by, grpVar = input$group_by)
+            if (length(entrez_ids) == 0) {
+                return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
+            }
+
+            gene_data <- geneExpressionData[rownames(geneExpressionData) %in% entrez_ids, ]
+
+            if (nrow(gene_data) == 0) {
+                return(list(df = data.frame(), doGroup = FALSE, grpVar = NULL))
+            }
+
+            gene_data <- gene_data %>%
+                as.data.frame() %>%
+                mutate(ENTREZID = rownames(.)) %>%
+                pivot_longer(cols = -ENTREZID, names_to = "filename", values_to = "expression") %>%
+                left_join(gene_annotations %>% select(ENTREZID, SYMBOL, GENENAME), by = "ENTREZID") %>%
+                left_join(atlasDataClean, by = "filename")
+
+            list(df = gene_data, doGroup = input$use_group_by, grpVar = input$group_by)
+        })
     })
-})
     plot_cleared <- reactiveVal(FALSE)
     output$boxplot <- renderPlot({
         if (plot_cleared()) {
@@ -1369,76 +1370,110 @@ final_data <- eventReactive(input$run, {
         }
     )
 
-# Contact form logic -----
-# Initialize status
-status_type <- reactiveVal("ready")
-status_message <- reactiveVal("Ready to submit")
 
-# Render the status message with advanced styling
-output$status <- renderUI({
-    div(
-        class = "status-message",
-        style = paste0(
-            "padding: 15px; border-radius: 8px; ",
-            "border-left: 5px solid ", if (grepl("Error", status_message())) "#f44336" else "#4caf50", "; ",
-            "margin-top: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1);"
-        ),
-        tags$div(
-            style = "display: flex; align-items: center;",
-            tags$i(
-                class = if (grepl("Error", status_message())) "fa fa-exclamation-circle" else "fa fa-check-circle",
-                style = paste0(
-                    "margin-right: 10px; font-size: 24px; color: ",
-                    if (grepl("Error", status_message())) "#f44336" else "#4caf50"
-                )
+
+    # Contact form logic -----
+
+    status_type <- reactiveVal("ready")
+    status_message <- reactiveVal("Ready to submit")
+
+    output$status <- renderUI({
+        div(
+            class = "status-message",
+            style = paste0(
+                "padding: 15px; border-radius: 8px; ",
+                "border-left: 5px solid ", if (grepl("Error", status_message())) "#f44336" else "#4caf50", "; ",
+                "margin-top: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1);"
             ),
-            h3(style = "margin: 0; font-weight: 500;", status_message())
+            tags$div(
+                style = "display: flex; align-items: center;",
+                tags$i(
+                    class = if (grepl("Error", status_message())) "fa fa-exclamation-circle" else "fa fa-check-circle",
+                    style = paste0(
+                        "margin-right: 10px; font-size: 24px; color: ",
+                        if (grepl("Error", status_message())) "#f44336" else "#4caf50"
+                    )
+                ),
+                h3(style = "margin: 0; font-weight: 500;", status_message())
+            )
         )
-    )
-})
+    })
 
-observeEvent(input$submit, {
-    # Validate form fields
-    if (input$name == "" || input$email == "" || input$message == "") {
-        # Show notification for missing fields with default colors
-        showNotification(
-            ui = div(
-                tags$b("Error:"),
-                "Please fill in all required fields."
-            ),
-            type = "error",
-            duration = 5
+    observeEvent(input$submit, {
+        # Validate inputs
+        if (input$name == "" || input$email == "" || input$message == "") {
+            showNotification(
+                ui = div(
+                    tags$b("Error:"),
+                    "Please fill in all required fields."
+                ),
+                type = "error",
+                duration = 5
+            )
+            status_type("error")
+            status_message("Error: All fields are required!")
+            return()
+        }
+
+        # Validate name for safe characters
+        if (!grepl("^[A-Za-z0-9 ]+$", input$name)) {
+            showNotification(
+                ui = div(
+                    tags$b("Error:"),
+                    "Name contains invalid characters."
+                ),
+                type = "error",
+                duration = 5
+            )
+            status_type("error")
+            status_message("Error: Invalid characters in name!")
+            return()
+        }
+
+        # Validate message isn't empty or only whitespace
+        if (nchar(trimws(input$message)) == 0) {
+            showNotification(
+                ui = div(
+                    tags$b("Error:"),
+                    "Message cannot be empty or only whitespace."
+                ),
+                type = "error",
+                duration = 5
+            )
+            status_type("error")
+            status_message("Error: Message cannot be empty!")
+            return()
+        }
+
+        status_type("ready")
+        status_message("Processing submission...")
+
+        api_token <- Sys.getenv("api_token")
+        board_id <- Sys.getenv("board_id")
+
+        # Log board_id for debugging
+        cat("Board ID:", board_id, "\n")
+
+        current_date <- format(Sys.Date(), "%Y-%m-%d")
+
+        # Escape input$message for JSON and GraphQL
+        escaped_message <- gsub('(["\\])', "\\\\\\1", input$message) # Escape quotes and backslashes
+        escaped_message <- gsub("\n", "\\n", escaped_message) # Explicitly escape newlines
+        escaped_message <- gsub("\t", "\\t", escaped_message) # Explicitly escape tabs
+        cat("Escaped message:", escaped_message, "\n")
+
+        column_values <- paste0(
+            "{",
+            '"text_mkq6vaar": "', current_date, '",',
+            '"text_mkq6awc2": "', escaped_message, '",',
+            '"text_mkq6cbxg": "', input$email, '"',
+            "}"
         )
 
-        # Update status
-        status_type("error")
-        status_message("Error: All fields are required!")
+        # Log column_values for debugging
+        cat("Column values:", column_values, "\n")
 
-        return() # Stop execution
-    }
-
-    # Update status while processing
-    status_type("ready")
-    status_message("Processing submission...")
-
-    # Monday.com API details
-    api_token <- Sys.getenv("api_token")
-    board_id <- Sys.getenv("board_id")
-
-    # Get current system date
-    current_date <- format(Sys.Date(), "%Y-%m-%d")
-
-    # Using the exact column IDs from your board
-    column_values <- paste0(
-        "{",
-        '"text_mkq6vaar": "', current_date, '",',
-        '"text_mkq6awc2": "', gsub('"', '\\\\"', input$message), '",',
-        '"text_mkq6cbxg": "', input$email, '"',
-        "}"
-    )
-
-    # Create the GraphQL mutation
-    query <- paste0("mutation {
+        query <- paste0("mutation {
     create_item (
       board_id: ", board_id, ',
       item_name: "', input$name, '",
@@ -1448,64 +1483,80 @@ observeEvent(input$submit, {
     }
   }')
 
-    # Print the query for debugging
-    print(query)
+        # Log query for debugging
+        cat("Query:", query, "\n")
 
-    # Make API call to Monday.com
-    response <- POST(
-        url = "https://api.monday.com/v2",
-        add_headers("Authorization" = api_token, "Content-Type" = "application/json"),
-        body = list(query = query),
-        encode = "json"
-    )
-
-    # Print the response for debugging
-    print(content(response, "text"))
-
-    # Check response status and update UI
-    if (status_code(response) == 200) {
-        # Show success notification with default colors
-        showNotification(
-            ui = div(
-                tags$b("Success!"),
-                "Your message has been submitted."
-            ),
-            type = "message",
-            duration = 5
+        # Send API request with error handling
+        response <- tryCatch(
+            {
+                POST(
+                    url = "https://api.monday.com/v2",
+                    add_headers("Authorization" = api_token, "Content-Type" = "application/json"),
+                    body = list(query = query),
+                    encode = "json"
+                )
+            },
+            error = function(e) {
+                showNotification(
+                    ui = div(
+                        tags$b("Error:"),
+                        "Network issue connecting to Monday.com"
+                    ),
+                    type = "error",
+                    duration = 5
+                )
+                status_type("error")
+                status_message("Error: Network issue connecting to Monday.com")
+                return(NULL)
+            }
         )
 
-        # Clear the form fields after successful submission
+        if (is.null(response)) {
+            return()
+        }
+
+        # Parse response
+        response_body <- content(response, "parsed")
+        cat("Response:", toJSON(response_body, pretty = TRUE), "\n")
+
+        if (status_code(response) == 200 && !is.null(response_body$data$create_item$id)) {
+            item_id <- response_body$data$create_item$id
+            showNotification(
+                ui = div(
+                    tags$b("Success!"),
+                    paste("Your message has been submitted. Item ID:", item_id)
+                ),
+                type = "message",
+                duration = 5
+            )
+            updateTextInput(session, "message", value = "")
+            updateTextInput(session, "name", value = "")
+            updateTextInput(session, "email", value = "")
+            status_type("success")
+            status_message(paste("Successfully submitted! Item ID:", item_id))
+        } else {
+            error_msg <- if (!is.null(response_body$errors)) toJSON(response_body$errors, pretty = TRUE) else "Unknown error"
+            showNotification(
+                ui = div(
+                    tags$b("Error!"),
+                    paste("Status code:", status_code(response), "Details:", error_msg)
+                ),
+                type = "error",
+                duration = 5
+            )
+            status_type("error")
+            status_message(paste("Error submitting. Status code:", status_code(response), "Details:", error_msg))
+        }
+    })
+
+    observeEvent(input$clear_form, {
         updateTextInput(session, "message", value = "")
         updateTextInput(session, "name", value = "")
         updateTextInput(session, "email", value = "")
+    })
 
-        # Update status
-        status_type("success")
-        status_message("Successfully submitted!")
-    } else {
-        # Show error notification with default colors
-        showNotification(
-            ui = div(
-                tags$b("Error!"),
-                paste("Status code:", status_code(response))
-            ),
-            type = "error",
-            duration = 5
-        )
 
-        # Update status with error
-        status_type("error")
-        status_message(paste("Error submitting. Status code:", status_code(response)))
-    }
-})
-
-observeEvent(input$clear_form, {
-    # Clear the form fields after successful submission
-    updateTextInput(session, "message", value = "")
-    updateTextInput(session, "name", value = "")
-    updateTextInput(session, "email", value = "")
-})
-
+    # stopper -----
 } # end of server function
 
 # Run the application
