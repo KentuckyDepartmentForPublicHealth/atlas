@@ -297,17 +297,32 @@ ui <- page_navbar(
         )
     ),
     # t-SNE Dimensionality Reduction Tab -----
-
     nav_panel(
         title = "t-SNE Dimensionality Reduction", icon = icon("th"),
         fluidPage(
             withSpinner(plotlyOutput("tsnePlot", height = "600px"), type = 4),
+            
+            br(), # Add space
+            div(style = "border-top: 2px solid; padding-top: 15px; margin-top: 10px;"), # Add divider
+            
             div(
                 class = "dark-mode-table-container",
+                h2(tags$b("Data Table"), style = "font-size: 24px;"), # Bolder, styled title
                 DT::dataTableOutput("dataTable")
             )
         )
     ),
+    # nav_panel(
+    #     title = "t-SNE Dimensionality Reduction", icon = icon("th"),
+    #     fluidPage(
+    #         withSpinner(plotlyOutput("tsnePlot", height = "600px"), type = 4),
+    #         div(
+    #             class = "dark-mode-table-container",
+    #             h2("Data Table"),
+    #             DT::dataTableOutput("dataTable")
+    #         )
+    #     )
+    # ),
     # mRNA Expression Boxplots Tab -----
     nav_panel(
         title = "mRNA Expression Boxplots", icon = icon("vial"),
