@@ -1,47 +1,3 @@
-# Load libraries
-library(shiny)
-library(bslib)
-library(survival)
-library(dplyr)
-library(DT)
-library(ggplot2)
-library(gridExtra)
-library(shinyjs)
-library(shinycssloaders)
-library(plotly)
-library(tidyr)
-library(shinyalert)
-library(rlang)
-library(forcats)
-library(httr)
-library(jsonlite)
-
-# Create a reactive value to track if gene expression data is loaded
-# gene_data_loaded <- reactiveVal(FALSE)
-
-# Create a placeholder for the gene expression data
-geneExpressionData <- NULL
-
-# Load the data (assuming it's available in the environment)
-# load("../../../dat/atlasDataClean.RData")
-# load("../../../dat/geneExpressionData.RData")
-# load("../../../dat/annotations.RData")
-load("dat/atlasDataClean.RData")
-# load("dat/geneExpressionData.RData")
-load("dat/annotations.RData")
-# Assume geneExpressionData, gene_annotations, and go_to_genes_list are also loaded
-
-# Define tumor colors for t-SNE plot
-tumor_colors <- c(
-    "#6a0033", "#e4016e", "#ff527b", "#360e15", "#ff757c", "#dc002d",
-    "#ff9170", "#7a2000", "#ff7e40", "#ac5300", "#da6c00", "#401f00",
-    "#ffb173", "#d79600", "#6a4800", "#d6c6b2", "#ddaf00", "#d6ca6f",
-    "#6e6900", "#1d1c10", "#8db600", "#1b7a00", "#8ddb76", "#00b861",
-    "#9ad5b1", "#005d3f", "#01bbb7", "#00444d", "#01afc7", "#54d8f9",
-    "#0189dd", "#8ab5ff", "#5292ff", "#004690", "#00317f", "#4263ff",
-    "#240a4e", "#271332", "#fa63ff", "#760078", "#ff77f6", "#8a005f",
-    "#ffa5ca"
-)
 
 # Define UI using bslib's page_navbar and remove debug tab.
 ui <- page_navbar(
@@ -978,20 +934,25 @@ server <- function(input, output, session) {
         tumor_data <- data[data$diagnosisClass != "NON-TUMOR", ]
         non_tumor_diagnoses <- levels(factor(non_tumor_data$diagnosisFinal))
         tumor_diagnoses <- levels(factor(tumor_data$diagnosisFinal))
+        
+        # Choose colors based on mode more concisely
+        is_dark_mode <- input$mode_toggle == "dark"
         non_tumor_colors <- if (length(non_tumor_diagnoses) > 0) {
-            setNames(gray.colors(length(non_tumor_diagnoses), start = 0.2, end = 0.8), non_tumor_diagnoses)
-        } else {
-            NULL
-        }
+            gray_start <- if(is_dark_mode) 0.5 else 0.2
+            gray_end <- if(is_dark_mode) 0.9 else 0.8
+            setNames(gray.colors(length(non_tumor_diagnoses), start = gray_start, end = gray_end), non_tumor_diagnoses)
+        } else { NULL }
+        
         tumor_color_mapping <- if (length(tumor_diagnoses) > 0) {
+            tumor_colors <- if(is_dark_mode) tumor_colors_during_dark_mode else tumor_colors_during_light_mode
             setNames(tumor_colors[1:length(tumor_diagnoses)], tumor_diagnoses)
-        } else {
-            NULL
-        }
+        } else { NULL }
+        
         all_colors <- c(non_tumor_colors, tumor_color_mapping)
         centroids <- data %>%
             group_by(diagnosisFinal) %>%
             summarise(tsne1 = median(tsne1), tsne2 = median(tsne2))
+            
         p <- plot_ly(source = "A")
         for (class in levels(data$diagnosisClass)) {
             class_data <- data[data$diagnosisClass == class, ]
@@ -1004,9 +965,7 @@ server <- function(input, output, session) {
                     name = diagnosis, legendgroup = class, showlegend = TRUE,
                     legendgrouptitle = if (diagnosis == levels(factor(class_data$diagnosisFinal))[1]) {
                         list(text = class)
-                    } else {
-                        NULL
-                    },
+                    } else { NULL },
                     marker = list(size = 5, opacity = 0.8, color = all_colors[diagnosis]),
                     text = ~ paste(
                         "Sample:", sampleID, "<br>Diagnosis Class:", diagnosisClass,
@@ -1016,13 +975,19 @@ server <- function(input, output, session) {
                 )
             }
         }
+        
+        # Update plot colors based on dark mode
+        bg_color <- if(is_dark_mode) "black" else "white"
+        text_color <- if(is_dark_mode) "white" else "black"
+        grid_color <- if(is_dark_mode) "#444444" else "#dddddd"
+        
         p <- layout(p,
             title = "t-SNE Dimensionality Reduction",
-            xaxis = list(title = "t-SNE 1", color = "black"),
-            yaxis = list(title = "t-SNE 2", color = "black"),
-            plot_bgcolor = "white",
-            paper_bgcolor = "white",
-            font = list(color = "black"),
+            xaxis = list(title = "t-SNE 1", color = text_color, gridcolor = grid_color),
+            yaxis = list(title = "t-SNE 2", color = text_color, gridcolor = grid_color),
+            plot_bgcolor = bg_color,
+            paper_bgcolor = bg_color,
+            font = list(color = text_color),
             dragmode = "select",
             legend = list(itemclick = "toggleothers", itemdoubleclick = FALSE),
             annotations = lapply(1:nrow(centroids), function(i) {
@@ -1030,7 +995,8 @@ server <- function(input, output, session) {
                     x = centroids$tsne1[i],
                     y = centroids$tsne2[i],
                     text = centroids$diagnosisFinal[i],
-                    showarrow = FALSE, font = list(size = 10, color = "gray10")
+                    showarrow = FALSE, 
+                    font = list(size = 10, color = if(is_dark_mode) "gray90" else "gray10")
                 )
             })
         )
