@@ -108,8 +108,19 @@ ui <- page_navbar(
         title = "Home", icon = icon("house"),
         tags$head(
             #   tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
-            tags$link(rel = "shortcut icon", href = "favicon.ico")
-        ),
+            tags$link(rel = "shortcut icon", href = "favicon.ico"),
+        tags$style(HTML("
+            /* Custom animations for img hover */
+            .bouncy  {
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                border-radius: 10px;
+            }
+            .bouncy:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+            }
+        "))            
+        ), # end of tags$head
         span(img(src = "main-banner-1400x400.png"), style = 'text-align: center; width = "15%";'),
         # h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
         tags$blockquote(
@@ -130,7 +141,8 @@ ui <- page_navbar(
                         label = tags$img(
                             src = "survival_analysis_banner.png",
                             alt = "Survival Analysis",
-                            style = "width:100%; cursor:pointer; margin-bottom: 20px;"
+                            style = "width:100%; cursor:pointer; margin-bottom: 20px;",
+                            class = "bouncy" # Added class for CSS styling
                         )
                     ),
                     tags$b("Survival Analysis:"),
@@ -148,7 +160,8 @@ ui <- page_navbar(
                         label = tags$img(
                             src = "tsne_banner.png",
                             alt = "t-SNE Dimensionality Reduction",
-                            style = "width:100%; cursor:pointer; margin-bottom: 20px;"
+                            style = "width:100%; cursor:pointer; margin-bottom: 20px;",
+                            class = "bouncy" # Added class for CSS styling
                         )
                     ),
                     tags$b("t-SNE Dimensionality Reduction:"),
@@ -166,7 +179,8 @@ ui <- page_navbar(
                         label = tags$img(
                             src = "mrna_expression_banner.png",
                             alt = "mRNA Expression Boxplots",
-                            style = "width:100%; cursor:pointer; margin-bottom: 20px;"
+                            style = "width:100%; cursor:pointer; margin-bottom: 20px;",
+                            class = "bouncy" # Added class for CSS styling
                         )
                     ),
                     tags$b("mRNA Expression Boxplots:"),
