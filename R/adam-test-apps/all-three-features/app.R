@@ -301,15 +301,24 @@ ui <- page_navbar(
         title = "t-SNE Dimensionality Reduction", icon = icon("th"),
         fluidPage(
             withSpinner(plotlyOutput("tsnePlot", height = "600px"), type = 4),
-            
             br(), # Add space
             div(style = "border-top: 2px solid; padding-top: 15px; margin-top: 10px;"), # Add divider
-            
+
             div(
                 class = "dark-mode-table-container",
                 h2(tags$b("Data Table"), style = "font-size: 24px;"), # Bolder, styled title
-                DT::dataTableOutput("dataTable"),
-                 uiOutput("clearSelectionsUI")
+                DT::dataTableOutput("dataTable")
+                #  uiOutput("clearSelectionsUI")
+            ),
+            # In the UI section, add this near the tsne plot and data table
+            # In the UI section, add this near the tsne plot and data table
+            div(
+                class = "card mt-3 mb-3",
+                id = "selection-manager-card", # Add an ID for client-side theming
+                div(
+                    class = "card-body",
+                    uiOutput("selectionManagerUI")
+                )
             )
         )
     ),
@@ -1018,16 +1027,29 @@ server <- function(input, output, session) {
         return(p)
     })
     # user selects points
-    # ... existing code ...
 
     # Create a reactive value to store accumulated selections
     accumulated_selections <- reactiveVal(list())
+    selection_counter <- reactiveVal(0)
 
+    selected_points <- reactive({
+        # Only try to get event data if the plot exists
+        if (is.null(output$tsnePlot)) {
+            return(NULL)
+        }
+        event_data("plotly_selected", source = "A")
+    })
+
+    # Create a reactive value to store accumulated selections
+    accumulated_selections <- reactiveVal(list())
+    selection_counter <- reactiveVal(0)
+
+    # Reactive to get the selected points
     selected_points <- reactive({
         event_data("plotly_selected", source = "A")
     })
 
-    # Add observer to accumulate selections
+    # Observer to handle new selections
     observeEvent(selected_points(), {
         select_data <- selected_points()
         
@@ -1035,31 +1057,295 @@ server <- function(input, output, session) {
             # Get current accumulated selections
             current_selections <- accumulated_selections()
             
-            # Add new selection with a timestamp as identifier
+            # Increment selection counter
+            new_count <- selection_counter() + 1
+            selection_counter(new_count)
+            
+            # Add new selection with a default name
             new_selection <- list(
-                id = paste0("Selection_", format(Sys.time(), "%Y%m%d_%H%M%S")),
-                keys = as.numeric(select_data$key)
+                id = paste0("Selection_", new_count),
+                name = paste("Selection", new_count),
+                keys = as.numeric(select_data$key),
+                color = sample(colors()[grep("^[a-z]", colors())], 1) # Random color
             )
             
             # Add to accumulated selections
             current_selections <- c(current_selections, list(new_selection))
             accumulated_selections(current_selections)
+            
+            # Show naming modal
+            showModal(modalDialog(
+                title = "Name Your Selection",
+                textInput("selectionName", "Selection Name:", paste("Selection", new_count)),
+                footer = tagList(
+                    actionButton("saveSelectionName", "Save", class = "btn-primary"),
+                    modalButton("Cancel")
+                )
+            ))
         }
     })
-    
-    # Add a button to clear all selections
-    output$clearSelectionsUI <- renderUI({
-        actionButton("clearSelections", "Clear All Selections", 
-                     class = if(input$mode_toggle == "dark") "btn-outline-light" else "btn-outline-dark")
+
+    # Observer to save selection name
+    observeEvent(input$saveSelectionName, {
+        if (nchar(input$selectionName) > 0) {
+            current_selections <- accumulated_selections()
+            if (length(current_selections) > 0) {
+                # Update the name of the most recent selection
+                current_selections[[length(current_selections)]]$name <- input$selectionName
+                accumulated_selections(current_selections)
+            }
+        }
+        removeModal()
     })
-    
+
+    # UI for selection management
+    output$selectionManagerUI <- renderUI({
+        selections <- accumulated_selections()
+        if (length(selections) == 0) {
+            return(div(
+                class = if (input$mode_toggle == "dark") "text-light" else "text-dark",
+                "No selections yet. Select points on the plot to create a selection group."
+            ))
+        }
+
+        # Create UI for each selection
+        selection_items <- lapply(seq_along(selections), function(i) {
+            selection <- selections[[i]]
+            div(
+                class = "selection-item mb-2 p-2 border rounded",
+                style = paste0("border-left: 5px solid ", selection$color, " !important;"),
+                div(
+                    class = "d-flex justify-content-between align-items-center",
+                    tags$strong(selection$name, class = "mr-2"),
+                    span(paste0("(", length(selection$keys), " points)"), class = "text-muted"),
+                    div(
+                        actionButton(
+                            inputId = paste0("renameSelection_", i),
+                            label = icon("pencil-alt"),
+                            class = "btn-sm btn-outline-secondary mr-1"
+                        ),
+                        actionButton(
+                            inputId = paste0("deleteSelection_", i),
+                            label = icon("trash"),
+                            class = "btn-sm btn-outline-danger"
+                        )
+                    )
+                )
+            )
+        })
+
+        div(
+            h4("Selection Groups", class = if (input$mode_toggle == "dark") "text-light" else "text-dark"),
+            div(class = "selection-list", selection_items),
+            div(
+                class = "mt-3",
+                actionButton("clearSelections", "Clear All Selections",
+                    class = if (input$mode_toggle == "dark") "btn-outline-light" else "btn-outline-dark"
+                ),
+                actionButton("compareSelections", "Compare Selections",
+                    class = "btn-outline-primary ml-2",
+                    disabled = length(selections) < 2
+                )
+            )
+        )
+    })
+
+# Use a reactiveVal to track which selection to rename
+selection_to_rename <- reactiveVal(NULL)
+
+# Observers for rename buttons  
+observe({
+    selections <- accumulated_selections()
+    for (i in seq_along(selections)) {
+        local({
+            local_i <- i
+            button_id <- paste0("renameSelection_", local_i)
+            observeEvent(input[[button_id]], {
+                selection_to_rename(local_i)
+                showModal(modalDialog(
+                    title = "Rename Selection",
+                    textInput("newSelectionName", "New Name:", 
+                              accumulated_selections()[[local_i]]$name),
+                    footer = tagList(
+                        actionButton("saveNewName", "Save", class = "btn-primary"),
+                        modalButton("Cancel")
+                    ),
+                    easyClose = TRUE
+                ))
+            }, ignoreNULL = TRUE, ignoreInit = TRUE)
+        })
+    }
+})
+
+# Save new name
+observeEvent(input$saveNewName, {
+    i <- selection_to_rename()
+    if (!is.null(i) && nchar(input$newSelectionName) > 0) {
+        current_selections <- accumulated_selections()
+        if (i <= length(current_selections)) {
+            current_selections[[i]]$name <- input$newSelectionName
+            accumulated_selections(current_selections)
+        }
+    }
+    removeModal()
+})
+
+# Observers for delete buttons
+observe({
+    selections <- accumulated_selections()
+    for (i in seq_along(selections)) {
+        local({
+            local_i <- i
+            button_id <- paste0("deleteSelection_", local_i)
+            observeEvent(input[[button_id]], {
+                current_selections <- accumulated_selections()
+                current_selections <- current_selections[-local_i]
+                accumulated_selections(current_selections)
+            }, ignoreNULL = TRUE, ignoreInit = TRUE)
+        })
+    }
+})
+    # Save new name
+    observeEvent(input$saveNewName, {
+        if (exists("selection_to_rename") && nchar(input$newSelectionName) > 0) {
+            current_selections <- accumulated_selections()
+            i <- selection_to_rename()
+            if (i <= length(current_selections)) {
+                current_selections[[i]]$name <- input$newSelectionName
+                accumulated_selections(current_selections)
+            }
+        }
+        removeModal()
+    })
+
+
+    # Clear all selections
     observeEvent(input$clearSelections, {
         accumulated_selections(list())
+        selection_counter(0)
+    })
+
+    # Compare selections
+    observeEvent(input$compareSelections, {
+        selections <- accumulated_selections()
+        if (length(selections) >= 2) {
+            showModal(modalDialog(
+                title = "Compare Selections",
+                size = "l",
+                easyClose = TRUE,
+                selectInput("compareVariable", "Compare by variable:",
+                    choices = setdiff(names(atlasDataClean), c("key", "tsne1", "tsne2")),
+                    selected = "diagnosisFinal"
+                ),
+                checkboxGroupInput("selectionsToCompare", "Selections to compare:",
+                    choices = sapply(selections, function(s) s$name),
+                    selected = sapply(selections, function(s) s$name)
+                ),
+                plotOutput("comparisonPlot", height = "400px"),
+                tableOutput("comparisonTable"),
+                footer = modalButton("Close")
+            ))
+        }
+    })
+
+# Comparison plot
+output$comparisonPlot <- renderPlot({
+    req(input$compareVariable, input$selectionsToCompare)
+    selections <- accumulated_selections()
+    selected_indices <- which(sapply(selections, function(s) s$name) %in% input$selectionsToCompare)
+    
+    if (length(selected_indices) < 1) return(NULL)
+    
+    # Prepare data
+    plot_data <- NULL
+    for (i in selected_indices) {
+        selection <- selections[[i]]
+        selected_data <- atlasDataClean[atlasDataClean$key %in% selection$keys, ]
+        selected_data$selection_group <- selection$name
+        plot_data <- rbind(plot_data, selected_data)
+    }
+    
+    if (is.null(plot_data) || nrow(plot_data) == 0) return(NULL)
+    
+    var_name <- input$compareVariable
+    
+    # Check variable type and create appropriate plot
+    if (is.numeric(plot_data[[var_name]])) {
+        # For numeric variables - boxplot
+        p <- ggplot(plot_data) +
+            aes_q(x = ~selection_group, y = as.name(var_name), fill = ~selection_group) +
+            geom_boxplot() +
+            labs(title = paste("Comparison of", var_name, "across selection groups"),
+                 x = "Selection Group", y = var_name) +
+            theme_minimal() +
+            theme(legend.position = "none")
+    } else {
+        # For categorical variables - bar chart
+        p <- ggplot(plot_data) +
+            aes_q(x = as.name(var_name), fill = ~selection_group) +
+            geom_bar(position = "dodge") +
+            labs(title = paste("Comparison of", var_name, "distributions"),
+                 x = var_name, y = "Count", fill = "Selection Group") +
+            theme_minimal() +
+            theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    }
+    
+    p
+})
+    # Comparison table
+    output$comparisonTable <- renderTable({
+        req(input$compareVariable, input$selectionsToCompare)
+        selections <- accumulated_selections()
+        selected_indices <- which(sapply(selections, function(s) s$name) %in% input$selectionsToCompare)
+
+        if (length(selected_indices) < 1) {
+            return(NULL)
+        }
+
+        # Create summary stats
+        summary_data <- data.frame(
+            Selection = character(),
+            Count = integer(),
+            stringsAsFactors = FALSE
+        )
+
+        for (i in selected_indices) {
+            selection <- selections[[i]]
+            selected_data <- atlasDataClean[atlasDataClean$key %in% selection$keys, ]
+
+            if (is.numeric(selected_data[[input$compareVariable]])) {
+                # For numeric variables
+                stats <- data.frame(
+                    Selection = selection$name,
+                    Count = nrow(selected_data),
+                    Mean = mean(selected_data[[input$compareVariable]], na.rm = TRUE),
+                    Median = median(selected_data[[input$compareVariable]], na.rm = TRUE),
+                    SD = sd(selected_data[[input$compareVariable]], na.rm = TRUE),
+                    Min = min(selected_data[[input$compareVariable]], na.rm = TRUE),
+                    Max = max(selected_data[[input$compareVariable]], na.rm = TRUE)
+                )
+                summary_data <- if (nrow(summary_data) == 0) stats else rbind(summary_data, stats)
+            } else {
+                # For categorical variables, get the top categories
+                freq_table <- table(selected_data[[input$compareVariable]])
+                top_categories <- names(sort(freq_table, decreasing = TRUE)[1:min(3, length(freq_table))])
+
+                stats <- data.frame(
+                    Selection = selection$name,
+                    Count = nrow(selected_data),
+                    TopCategories = paste(top_categories, collapse = ", "),
+                    TopCategoryCounts = paste(freq_table[top_categories], collapse = ", ")
+                )
+                summary_data <- if (nrow(summary_data) == 0) stats else rbind(summary_data, stats)
+            }
+        }
+
+        summary_data
     })
 
     output$dataTable <- DT::renderDataTable({
         selections <- accumulated_selections()
-        
+
         if (length(selections) == 0) {
             DT::datatable(
                 data.frame(Message = "Please select at least one data point in the t-SNE plot."),
@@ -1067,37 +1353,122 @@ server <- function(input, output, session) {
                 rownames = FALSE
             )
         } else {
-            # Combine all selected keys
-            all_keys <- unique(unlist(lapply(selections, function(s) s$keys)))
-            
-            if (length(all_keys) == 0 || all(is.na(all_keys))) {
+            # Combine all selected keys with selection info
+            all_selected_data <- data.frame()
+            for (selection in selections) {
+                if (length(selection$keys) > 0) {
+                    selection_data <- atlasDataClean[atlasDataClean$key %in% selection$keys, ]
+                    selection_data$selection_group <- selection$name
+                    all_selected_data <- rbind(all_selected_data, selection_data)
+                }
+            }
+
+            if (nrow(all_selected_data) == 0) {
                 DT::datatable(
                     data.frame(Message = "No valid points selected."),
                     options = list(pageLength = 5, scrollX = TRUE),
                     rownames = FALSE
                 )
             } else {
-                # Get all selected data
-                selected_data <- atlasDataClean[atlasDataClean$key %in% all_keys, ]
-                
-                # Add selection group information
-                selected_data$selection_groups <- sapply(selected_data$key, function(k) {
-                    groups <- sapply(selections, function(s) {
-                        if (k %in% s$keys) s$id else NA
-                    })
-                    paste(na.omit(groups), collapse = ", ")
-                })
-                
                 DT::datatable(
-                    selected_data,
-                    options = list(pageLength = 5, scrollX = TRUE),
+                    all_selected_data,
+                    options = list(
+                        pageLength = 5,
+                        scrollX = TRUE,
+                        columnDefs = list(list(targets = "selection_group", searchable = TRUE))
+                    ),
                     rownames = FALSE
-                )
+                ) %>%
+                    DT::formatStyle(
+                        "selection_group",
+                        backgroundColor = DT::styleEqual(
+                            sapply(selections, function(s) s$name),
+                            sapply(selections, function(s) s$color)
+                        )
+                    )
             }
         }
     })
-    
+
     # ... rest of code ...
+    # # Create a reactive value to store accumulated selections
+    # accumulated_selections <- reactiveVal(list())
+
+    # selected_points <- reactive({
+    #     event_data("plotly_selected", source = "A")
+    # })
+
+    # # Add observer to accumulate selections
+    # observeEvent(selected_points(), {
+    #     select_data <- selected_points()
+
+    #     if (!is.null(select_data) && is.data.frame(select_data) && nrow(select_data) > 0 && "key" %in% names(select_data)) {
+    #         # Get current accumulated selections
+    #         current_selections <- accumulated_selections()
+
+    #         # Add new selection with a timestamp as identifier
+    #         new_selection <- list(
+    #             id = paste0("Selection_", format(Sys.time(), "%Y%m%d_%H%M%S")),
+    #             keys = as.numeric(select_data$key)
+    #         )
+
+    #         # Add to accumulated selections
+    #         current_selections <- c(current_selections, list(new_selection))
+    #         accumulated_selections(current_selections)
+    #     }
+    # })
+
+    # # Add a button to clear all selections
+    # output$clearSelectionsUI <- renderUI({
+    #     actionButton("clearSelections", "Clear All Selections",
+    #                  class = if(input$mode_toggle == "dark") "btn-outline-light" else "btn-outline-dark")
+    # })
+
+    # observeEvent(input$clearSelections, {
+    #     accumulated_selections(list())
+    # })
+
+    # output$dataTable <- DT::renderDataTable({
+    #     selections <- accumulated_selections()
+
+    #     if (length(selections) == 0) {
+    #         DT::datatable(
+    #             data.frame(Message = "Please select at least one data point in the t-SNE plot."),
+    #             options = list(pageLength = 5, scrollX = TRUE),
+    #             rownames = FALSE
+    #         )
+    #     } else {
+    #         # Combine all selected keys
+    #         all_keys <- unique(unlist(lapply(selections, function(s) s$keys)))
+
+    #         if (length(all_keys) == 0 || all(is.na(all_keys))) {
+    #             DT::datatable(
+    #                 data.frame(Message = "No valid points selected."),
+    #                 options = list(pageLength = 5, scrollX = TRUE),
+    #                 rownames = FALSE
+    #             )
+    #         } else {
+    #             # Get all selected data
+    #             selected_data <- atlasDataClean[atlasDataClean$key %in% all_keys, ]
+
+    #             # Add selection group information
+    #             selected_data$selection_groups <- sapply(selected_data$key, function(k) {
+    #                 groups <- sapply(selections, function(s) {
+    #                     if (k %in% s$keys) s$id else NA
+    #                 })
+    #                 paste(na.omit(groups), collapse = ", ")
+    #             })
+
+    #             DT::datatable(
+    #                 selected_data,
+    #                 options = list(pageLength = 5, scrollX = TRUE),
+    #                 rownames = FALSE
+    #             )
+    #         }
+    #     }
+    # })
+
+    # works
     # selected_points <- reactive({
     #     event_data("plotly_selected", source = "A")
     # })
@@ -1137,6 +1508,8 @@ server <- function(input, output, session) {
     #         }
     #     }
     # })
+    # works
+
     # mRNA Expression Boxplots Logic **********************************************
     # validate(
     # need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
