@@ -74,3 +74,8 @@ get_color_palette <- function(mode, n_colors) {
 # saveRDS(currentDate, file = paste0(getwd(), '/R/adam-test-apps/all-three-features/dat/currentDate.rds'))
 currentDate <- readRDS(file = "dat/currentDate.rds")
 getwd()
+
+# deployrment --------------------------------------------------------------------
+
+# setwd('./R/adam-test-apps/all-three-features')
+# rsconnect::deployApp(appName = "atlas-dev")
