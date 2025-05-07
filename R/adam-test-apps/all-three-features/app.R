@@ -82,27 +82,6 @@ ui <- page_navbar(
         #     style = "font-weight: bold; color: #B85042; font-size: .75em;"
         # )
     ),
-    # nav_item(
-    #     tags$span(
-    #         icon("wrench", class = "text-warning"),
-    #         "UNDER CONSTRUCTION",
-    #         style = "font-weight: bold; color: orange; text-shadow: 0 0 5px orange;"
-    #     )
-    # ),
-    #     nav_item(
-    #     tags$span(
-    #         icon("hourglass-half", class = "text-info"),
-    #         "IN DEVELOPMENT",
-    #         style = "font-weight: bold; color: blue; text-shadow: 0 0 5px blue;"
-    #     )
-    # ),
-    #     nav_item(
-    #     tags$span(
-    #         # icon("flask", class = "text-primary"),
-    #         "BETA MODE",
-    #         style = "font-weight: bold; color: purple; text-shadow: 0 0 5px purple;"
-    #     )
-    # ),
     # Home -----
     nav_panel(
         title = "Home", icon = icon("house"),
@@ -119,6 +98,25 @@ ui <- page_navbar(
                 transform: translateY(-5px);
                 box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
             }
+        /* Target headers, cell content, pagination controls, and info text */
+        body.dark-mode .dark-mode-table-container .dataTable th,
+        body.dark-mode .dark-mode-table-container .dataTable td,
+        body.dark-mode .dark-mode-table-container .dataTables_info,
+        body.dark-mode .dark-mode-table-container .dataTables_paginate,
+        body.dark-mode .dark-mode-table-container .dataTables_length,
+        body.dark-mode .dark-mode-table-container .dataTables_filter {
+            color: white !important;
+        }
+        
+        /* Special styling for pagination buttons */
+        body.dark-mode .dark-mode-table-container .paginate_button {
+            color: white !important;
+        }
+        
+        /* Current page number in pagination */
+        body.dark-mode .dark-mode-table-container .paginate_button.current {
+            color: #333 !important; /* Keep this dark for contrast with its background */
+        }      
         "))            
         ), # end of tags$head
         span(img(src = "main-banner-1400x400.png"), style = 'text-align: center; width = "15%";'),
@@ -213,28 +211,6 @@ ui <- page_navbar(
             "These variables enable you to investigate how molecular signatures correlate with clinical outcomes, tumor heterogeneity, and potential therapeutic targets."
         ),
 
-        # h3(icon('chart-line'), ' What This App Offers'),
-        # p(
-        #     "This app brings the atlas to life with three interactive tools tailored to neuro-oncology exploration:",
-        #     tags$ul(
-        #         tags$li(
-        #             tags$b("Survival Analysis:"),
-        #             " Use Kaplan-Meier curves to examine survival trends across tumor types, genetic mutations (e.g., IDH, MGMT), or demographic factors (e.g., age, sex). Filter by diagnosis or age group, and generate single-variable or multi-variable grids to compare outcomes.",
-        #             span(img(src = "survival_analysis_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
-        #         ),
-        #         tags$li(
-        #             tags$b("t-SNE Dimensionality Reduction:"),
-        #             " Visualize how 7,375 samples cluster based on their transcriptomic profiles in a 2D plot. Select points to explore sample details, revealing patterns of similarity and difference across diagnoses.",
-        #             span(img(src = "tsne_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
-        #         ),
-        #         tags$li(
-        #             tags$b("mRNA Expression Boxplots:"),
-        #             " Compare gene expression levels across tumors or groups. Search by Gene Ontology terms (e.g., cell cycle, apoptosis) or specific genes, and group results by variables like diagnosis, grade, or sex to uncover molecular insights.",
-        #             span(img(src = "mrna_expression_banner.png"), style = 'text-align: center; width = "100%"; margin-bottom: 20px;')
-        #         )
-        #     ),
-        #     "Each tool is designed for ease of use—select options, generate plots, and download results to fuel your research or education."
-        # ),
         h3(icon("rocket"), " Get Started"),
         p(
             "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data."
@@ -242,9 +218,9 @@ ui <- page_navbar(
         ),
         span(tagList(
             br(),
-            img(src = "KY Pediatric Cancer Research - Final.png", style = "width:25%; object-fit: contain;"),
-            img(src = "DPH and PHAB logo.png", style = "width:35%; object-fit: contain;"),
-            img(src = "u_of_l.jpg", style = "width:20%; object-fit: contain;"),
+            img(src = "KY Pediatric Cancer Research - Final.png", class = 'bouncy', style = "width:25%; object-fit: contain;"),
+            img(src = "DPH and PHAB logo.png", class = 'bouncy', style = "width:35%; object-fit: contain;"),
+            img(src = "u_of_l.jpg", class = 'bouncy', style = "width:20%; object-fit: contain;"),
             br(),
             paste0("Last updated: ", currentDate), br(),
             p(
@@ -347,11 +323,11 @@ ui <- page_navbar(
                         "Survival Plot",
                         conditionalPanel(
                             condition = "input.analysis_type == 'single'",
-                            withSpinner(plotOutput("survival_plot", height = "600px"))
+                            withSpinner(plotOutput("survival_plot", height = "600px"), type = 4)
                         ),
                         conditionalPanel(
                             condition = "input.analysis_type == 'grid'",
-                            withSpinner(plotOutput("grid_plot", height = "800px"))
+                            withSpinner(plotOutput("grid_plot", height = "800px"), type = 4)
                         )
                     ),
                     tabPanel(
@@ -371,8 +347,10 @@ ui <- page_navbar(
     nav_panel(
         title = "t-SNE Dimensionality Reduction", icon = icon("th"),
         fluidPage(
-            withSpinner(plotlyOutput("tsnePlot", height = "600px")),
-            DT::dataTableOutput("dataTable")
+            withSpinner(plotlyOutput("tsnePlot", height = "600px"), type = 4),
+            div(class = "dark-mode-table-container",
+                DT::dataTableOutput("dataTable")
+            )
         )
     ),
     # mRNA Expression Boxplots Tab -----
@@ -506,6 +484,16 @@ ui <- page_navbar(
 
 # Server logic remains unchanged, same as before
 server <- function(input, output, session) {
+
+# dark mode table headers
+    observe({
+        if (input$mode_toggle == "dark") {
+            shinyjs::addClass(selector = "body", class = "dark-mode")
+        } else {
+            shinyjs::removeClass(selector = "body", class = "dark-mode")
+        }
+    })
+
     # Create a reactive value to store gene expression data
     gene_expression_store <- reactiveVal(NULL)
 
