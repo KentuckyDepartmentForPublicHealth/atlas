@@ -15,6 +15,7 @@ library(rlang)
 library(forcats)
 library(httr)
 library(jsonlite)
+library(rlang)
 
 # Create a reactive value to track if gene expression data is loaded
 # gene_data_loaded <- reactiveVal(FALSE)
