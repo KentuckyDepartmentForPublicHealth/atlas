@@ -1,4 +1,3 @@
-
 # Define UI using bslib's page_navbar and remove debug tab.
 ui <- page_navbar(
     id = "navBar",
@@ -44,7 +43,7 @@ ui <- page_navbar(
         tags$head(
             #   tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
             tags$link(rel = "shortcut icon", href = "favicon.ico"),
-        tags$style(HTML("
+            tags$style(HTML("
             /* Custom animations for img hover */
             .bouncy  {
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -63,17 +62,17 @@ ui <- page_navbar(
         body.dark-mode .dark-mode-table-container .dataTables_filter {
             color: white !important;
         }
-        
+
         /* Special styling for pagination buttons */
         body.dark-mode .dark-mode-table-container .paginate_button {
             color: white !important;
         }
-        
+
         /* Current page number in pagination */
         body.dark-mode .dark-mode-table-container .paginate_button.current {
             color: #333 !important; /* Keep this dark for contrast with its background */
-        }      
-        "))            
+        }
+        "))
         ), # end of tags$head
         span(img(src = "main-banner-1400x400.png"), style = 'text-align: center; width = "15%";'),
         # h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
@@ -166,7 +165,6 @@ ui <- page_navbar(
             ),
             "These variables enable you to investigate how molecular signatures correlate with clinical outcomes, tumor heterogeneity, and potential therapeutic targets."
         ),
-
         h3(icon("rocket"), " Get Started"),
         p(
             "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data."
@@ -174,9 +172,9 @@ ui <- page_navbar(
         ),
         span(tagList(
             br(),
-            img(src = "KY Pediatric Cancer Research - Final.png", class = 'bouncy', style = "width:25%; object-fit: contain;"),
-            img(src = "DPH and PHAB logo.png", class = 'bouncy', style = "width:35%; object-fit: contain;"),
-            img(src = "u_of_l.jpg", class = 'bouncy', style = "width:20%; object-fit: contain;"),
+            img(src = "KY Pediatric Cancer Research - Final.png", class = "bouncy", style = "width:25%; object-fit: contain;"),
+            img(src = "DPH and PHAB logo.png", class = "bouncy", style = "width:35%; object-fit: contain;"),
+            img(src = "u_of_l.jpg", class = "bouncy", style = "width:20%; object-fit: contain;"),
             br(),
             paste0("Last updated: ", currentDate), br(),
             p(
@@ -304,7 +302,8 @@ ui <- page_navbar(
         title = "t-SNE Dimensionality Reduction", icon = icon("th"),
         fluidPage(
             withSpinner(plotlyOutput("tsnePlot", height = "600px"), type = 4),
-            div(class = "dark-mode-table-container",
+            div(
+                class = "dark-mode-table-container",
                 DT::dataTableOutput("dataTable")
             )
         )
@@ -440,8 +439,7 @@ ui <- page_navbar(
 
 # Server logic remains unchanged, same as before
 server <- function(input, output, session) {
-
-# dark mode table headers
+    # dark mode table headers
     observe({
         if (input$mode_toggle == "dark") {
             shinyjs::addClass(selector = "body", class = "dark-mode")
@@ -934,25 +932,34 @@ server <- function(input, output, session) {
         tumor_data <- data[data$diagnosisClass != "NON-TUMOR", ]
         non_tumor_diagnoses <- levels(factor(non_tumor_data$diagnosisFinal))
         tumor_diagnoses <- levels(factor(tumor_data$diagnosisFinal))
-        
+
         # Choose colors based on mode more concisely
         is_dark_mode <- input$mode_toggle == "dark"
+        # Get non-tumor colors
         non_tumor_colors <- if (length(non_tumor_diagnoses) > 0) {
-            gray_start <- if(is_dark_mode) 0.5 else 0.2
-            gray_end <- if(is_dark_mode) 0.9 else 0.8
-            setNames(gray.colors(length(non_tumor_diagnoses), start = gray_start, end = gray_end), non_tumor_diagnoses)
-        } else { NULL }
-        
+            gray_start <- if (is_dark_mode) 0.5 else 0.2
+            gray_end <- if (is_dark_mode) 0.9 else 0.8
+            setNames(
+                gray.colors(length(non_tumor_diagnoses), start = gray_start, end = gray_end),
+                non_tumor_diagnoses
+            )
+        } else {
+            NULL
+        }
+
+        # Get tumor colors dynamically using our function
         tumor_color_mapping <- if (length(tumor_diagnoses) > 0) {
-            tumor_colors <- if(is_dark_mode) tumor_colors_during_dark_mode else tumor_colors_during_light_mode
-            setNames(tumor_colors[1:length(tumor_diagnoses)], tumor_diagnoses)
-        } else { NULL }
-        
+            tumor_colors <- get_color_palette(input$mode_toggle, length(tumor_diagnoses))
+            setNames(tumor_colors, tumor_diagnoses)
+        } else {
+            NULL
+        }
+
         all_colors <- c(non_tumor_colors, tumor_color_mapping)
         centroids <- data %>%
             group_by(diagnosisFinal) %>%
             summarise(tsne1 = median(tsne1), tsne2 = median(tsne2))
-            
+
         p <- plot_ly(source = "A")
         for (class in levels(data$diagnosisClass)) {
             class_data <- data[data$diagnosisClass == class, ]
@@ -965,7 +972,9 @@ server <- function(input, output, session) {
                     name = diagnosis, legendgroup = class, showlegend = TRUE,
                     legendgrouptitle = if (diagnosis == levels(factor(class_data$diagnosisFinal))[1]) {
                         list(text = class)
-                    } else { NULL },
+                    } else {
+                        NULL
+                    },
                     marker = list(size = 5, opacity = 0.8, color = all_colors[diagnosis]),
                     text = ~ paste(
                         "Sample:", sampleID, "<br>Diagnosis Class:", diagnosisClass,
@@ -975,12 +984,12 @@ server <- function(input, output, session) {
                 )
             }
         }
-        
+
         # Update plot colors based on dark mode
-        bg_color <- if(is_dark_mode) "black" else "white"
-        text_color <- if(is_dark_mode) "white" else "black"
-        grid_color <- if(is_dark_mode) "#444444" else "#dddddd"
-        
+        bg_color <- if (is_dark_mode) "black" else "white"
+        text_color <- if (is_dark_mode) "white" else "black"
+        grid_color <- if (is_dark_mode) "#444444" else "#dddddd"
+
         p <- layout(p,
             title = "t-SNE Dimensionality Reduction",
             xaxis = list(title = "t-SNE 1", color = text_color, gridcolor = grid_color),
@@ -995,8 +1004,8 @@ server <- function(input, output, session) {
                     x = centroids$tsne1[i],
                     y = centroids$tsne2[i],
                     text = centroids$diagnosisFinal[i],
-                    showarrow = FALSE, 
-                    font = list(size = 10, color = if(is_dark_mode) "gray90" else "gray10")
+                    showarrow = FALSE,
+                    font = list(size = 10, color = if (is_dark_mode) "gray90" else "gray10")
                 )
             })
         )
@@ -1006,48 +1015,48 @@ server <- function(input, output, session) {
     selected_points <- reactive({
         event_data("plotly_selected", source = "A")
     })
-output$dataTable <- DT::renderDataTable({
-    select_data <- selected_points()
+    output$dataTable <- DT::renderDataTable({
+        select_data <- selected_points()
 
-    if (is.null(select_data) || !is.data.frame(select_data) || nrow(select_data) == 0) {
-        DT::datatable(
-            data.frame(Message = "Please select at least one data point in the t-SNE plot."),
-            options = list(pageLength = 5, scrollX = TRUE),
-            rownames = FALSE
-        )
-    } else {
-        if (!"key" %in% names(select_data)) {
-            validate(need(FALSE, "Key column missing in selected data."))
-        }
-
-        point_keys <- as.numeric(select_data$key)
-        if (all(is.na(point_keys))) {
-            validate(need(FALSE, "No valid keys in selected data."))
-        }
-
-        selected_data <- atlasDataClean[atlasDataClean$key %in% point_keys, ]
-
-        if (nrow(selected_data) == 0) {
+        if (is.null(select_data) || !is.data.frame(select_data) || nrow(select_data) == 0) {
             DT::datatable(
-                data.frame(Message = "No valid points selected."),
+                data.frame(Message = "Please select at least one data point in the t-SNE plot."),
                 options = list(pageLength = 5, scrollX = TRUE),
                 rownames = FALSE
             )
         } else {
-            DT::datatable(
-                selected_data,
-                options = list(pageLength = 5, scrollX = TRUE),
-                rownames = FALSE
-            )
+            if (!"key" %in% names(select_data)) {
+                validate(need(FALSE, "Key column missing in selected data."))
+            }
+
+            point_keys <- as.numeric(select_data$key)
+            if (all(is.na(point_keys))) {
+                validate(need(FALSE, "No valid keys in selected data."))
+            }
+
+            selected_data <- atlasDataClean[atlasDataClean$key %in% point_keys, ]
+
+            if (nrow(selected_data) == 0) {
+                DT::datatable(
+                    data.frame(Message = "No valid points selected."),
+                    options = list(pageLength = 5, scrollX = TRUE),
+                    rownames = FALSE
+                )
+            } else {
+                DT::datatable(
+                    selected_data,
+                    options = list(pageLength = 5, scrollX = TRUE),
+                    rownames = FALSE
+                )
+            }
         }
-    }
-})
+    })
     # mRNA Expression Boxplots Logic **********************************************
     # validate(
-        # need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
-        # need(exists("geneExpressionData"), "Error: `geneExpressionData` is not loaded."),
-        # need(exists("atlasDataClean"), "Error: `atlasDataClean` is not loaded."),
-        # need(exists("go_to_genes_list"), "Error: `go_to_genes_list` is not loaded.")
+    # need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
+    # need(exists("geneExpressionData"), "Error: `geneExpressionData` is not loaded."),
+    # need(exists("atlasDataClean"), "Error: `atlasDataClean` is not loaded."),
+    # need(exists("go_to_genes_list"), "Error: `go_to_genes_list` is not loaded.")
     # )
 
     gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
