@@ -300,18 +300,6 @@ ui <- page_navbar(
     nav_panel(
         title = "t-SNE Dimensionality Reduction", icon = icon("th"),
         fluidPage(
-            withSpinner(plotlyOutput("tsnePlot", height = "600px"), type = 4),
-            br(), # Add space
-            div(style = "border-top: 2px solid; padding-top: 15px; margin-top: 10px;"), # Add divider
-
-            div(
-                class = "dark-mode-table-container",
-                h2(tags$b("Data Table"), style = "font-size: 24px;"), # Bolder, styled title
-                DT::dataTableOutput("dataTable")
-                #  uiOutput("clearSelectionsUI")
-            ),
-            # In the UI section, add this near the tsne plot and data table
-            # In the UI section, add this near the tsne plot and data table
             div(
                 class = "card mt-3 mb-3",
                 id = "selection-manager-card", # Add an ID for client-side theming
@@ -319,6 +307,14 @@ ui <- page_navbar(
                     class = "card-body",
                     uiOutput("selectionManagerUI")
                 )
+            ),
+            withSpinner(plotlyOutput("tsnePlot", height = "600px"), type = 4),
+            br(), hr(), # Add space
+            div(
+                class = "dark-mode-table-container",
+                h2(tags$b("Data Table"), style = "font-size: 24px;"), # Bolder, styled title
+                DT::dataTableOutput("dataTable")
+                #  uiOutput("clearSelectionsUI")
             )
         )
     ),
@@ -1009,7 +1005,13 @@ server <- function(input, output, session) {
         grid_color <- if (is_dark_mode) "#444444" else "#dddddd"
 
         p <- layout(p,
-            title = "t-SNE Dimensionality Reduction",
+            title = list(
+              text = "t-SNE Dimensionality Reduction (interactive)",
+              font = list(size = 26),  # Increased title font size
+              y = 0.95,                # Position from top (0-1 range)
+              pad = list(t = 20)       # Add top padding
+            ),
+            margin = list(t = 80),  
             xaxis = list(title = "t-SNE 1", color = text_color, gridcolor = grid_color),
             yaxis = list(title = "t-SNE 2", color = text_color, gridcolor = grid_color),
             plot_bgcolor = bg_color,
