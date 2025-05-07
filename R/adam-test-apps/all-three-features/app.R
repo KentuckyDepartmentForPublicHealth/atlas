@@ -308,21 +308,11 @@ ui <- page_navbar(
             div(
                 class = "dark-mode-table-container",
                 h2(tags$b("Data Table"), style = "font-size: 24px;"), # Bolder, styled title
-                DT::dataTableOutput("dataTable")
+                DT::dataTableOutput("dataTable"),
+                 uiOutput("clearSelectionsUI")
             )
         )
     ),
-    # nav_panel(
-    #     title = "t-SNE Dimensionality Reduction", icon = icon("th"),
-    #     fluidPage(
-    #         withSpinner(plotlyOutput("tsnePlot", height = "600px"), type = 4),
-    #         div(
-    #             class = "dark-mode-table-container",
-    #             h2("Data Table"),
-    #             DT::dataTableOutput("dataTable")
-    #         )
-    #     )
-    # ),
     # mRNA Expression Boxplots Tab -----
     nav_panel(
         title = "mRNA Expression Boxplots", icon = icon("vial"),
@@ -1027,37 +1017,77 @@ server <- function(input, output, session) {
         p <- event_register(p, "plotly_selected")
         return(p)
     })
+    # user selects points
+    # ... existing code ...
+
+    # Create a reactive value to store accumulated selections
+    accumulated_selections <- reactiveVal(list())
+
     selected_points <- reactive({
         event_data("plotly_selected", source = "A")
     })
-    output$dataTable <- DT::renderDataTable({
-        select_data <- selected_points()
 
-        if (is.null(select_data) || !is.data.frame(select_data) || nrow(select_data) == 0) {
+    # Add observer to accumulate selections
+    observeEvent(selected_points(), {
+        select_data <- selected_points()
+        
+        if (!is.null(select_data) && is.data.frame(select_data) && nrow(select_data) > 0 && "key" %in% names(select_data)) {
+            # Get current accumulated selections
+            current_selections <- accumulated_selections()
+            
+            # Add new selection with a timestamp as identifier
+            new_selection <- list(
+                id = paste0("Selection_", format(Sys.time(), "%Y%m%d_%H%M%S")),
+                keys = as.numeric(select_data$key)
+            )
+            
+            # Add to accumulated selections
+            current_selections <- c(current_selections, list(new_selection))
+            accumulated_selections(current_selections)
+        }
+    })
+    
+    # Add a button to clear all selections
+    output$clearSelectionsUI <- renderUI({
+        actionButton("clearSelections", "Clear All Selections", 
+                     class = if(input$mode_toggle == "dark") "btn-outline-light" else "btn-outline-dark")
+    })
+    
+    observeEvent(input$clearSelections, {
+        accumulated_selections(list())
+    })
+
+    output$dataTable <- DT::renderDataTable({
+        selections <- accumulated_selections()
+        
+        if (length(selections) == 0) {
             DT::datatable(
                 data.frame(Message = "Please select at least one data point in the t-SNE plot."),
                 options = list(pageLength = 5, scrollX = TRUE),
                 rownames = FALSE
             )
         } else {
-            if (!"key" %in% names(select_data)) {
-                validate(need(FALSE, "Key column missing in selected data."))
-            }
-
-            point_keys <- as.numeric(select_data$key)
-            if (all(is.na(point_keys))) {
-                validate(need(FALSE, "No valid keys in selected data."))
-            }
-
-            selected_data <- atlasDataClean[atlasDataClean$key %in% point_keys, ]
-
-            if (nrow(selected_data) == 0) {
+            # Combine all selected keys
+            all_keys <- unique(unlist(lapply(selections, function(s) s$keys)))
+            
+            if (length(all_keys) == 0 || all(is.na(all_keys))) {
                 DT::datatable(
                     data.frame(Message = "No valid points selected."),
                     options = list(pageLength = 5, scrollX = TRUE),
                     rownames = FALSE
                 )
             } else {
+                # Get all selected data
+                selected_data <- atlasDataClean[atlasDataClean$key %in% all_keys, ]
+                
+                # Add selection group information
+                selected_data$selection_groups <- sapply(selected_data$key, function(k) {
+                    groups <- sapply(selections, function(s) {
+                        if (k %in% s$keys) s$id else NA
+                    })
+                    paste(na.omit(groups), collapse = ", ")
+                })
+                
                 DT::datatable(
                     selected_data,
                     options = list(pageLength = 5, scrollX = TRUE),
@@ -1066,6 +1096,47 @@ server <- function(input, output, session) {
             }
         }
     })
+    
+    # ... rest of code ...
+    # selected_points <- reactive({
+    #     event_data("plotly_selected", source = "A")
+    # })
+    # output$dataTable <- DT::renderDataTable({
+    #     select_data <- selected_points()
+
+    #     if (is.null(select_data) || !is.data.frame(select_data) || nrow(select_data) == 0) {
+    #         DT::datatable(
+    #             data.frame(Message = "Please select at least one data point in the t-SNE plot."),
+    #             options = list(pageLength = 5, scrollX = TRUE),
+    #             rownames = FALSE
+    #         )
+    #     } else {
+    #         if (!"key" %in% names(select_data)) {
+    #             validate(need(FALSE, "Key column missing in selected data."))
+    #         }
+
+    #         point_keys <- as.numeric(select_data$key)
+    #         if (all(is.na(point_keys))) {
+    #             validate(need(FALSE, "No valid keys in selected data."))
+    #         }
+
+    #         selected_data <- atlasDataClean[atlasDataClean$key %in% point_keys, ]
+
+    #         if (nrow(selected_data) == 0) {
+    #             DT::datatable(
+    #                 data.frame(Message = "No valid points selected."),
+    #                 options = list(pageLength = 5, scrollX = TRUE),
+    #                 rownames = FALSE
+    #             )
+    #         } else {
+    #             DT::datatable(
+    #                 selected_data,
+    #                 options = list(pageLength = 5, scrollX = TRUE),
+    #                 rownames = FALSE
+    #             )
+    #         }
+    #     }
+    # })
     # mRNA Expression Boxplots Logic **********************************************
     # validate(
     # need(exists("gene_annotations"), "Error: `gene_annotations` is not loaded."),
