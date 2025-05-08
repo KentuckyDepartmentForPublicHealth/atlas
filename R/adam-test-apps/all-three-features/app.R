@@ -170,22 +170,25 @@ ui <- page_navbar(
             "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data."
             # tags$a(href = "mailto:axitamm@gmail.com", "axitamm@gmail.com"), "."
         ),
-        span(tagList(
-            br(),
-            img(src = "KY Pediatric Cancer Research - Final.png", class = "bouncy", style = "width:25%; object-fit: contain;"),
-            img(src = "DPH and PHAB logo.png", class = "bouncy", style = "width:35%; object-fit: contain;"),
-            img(src = "u_of_l.jpg", class = "bouncy", style = "width:20%; object-fit: contain;"),
-            br(),
-            paste0("Last updated: ", currentDate), br(),
-            p(
-                "Download",
-                tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", target = "_blank", "source data"),
-                "and",
-                tags$a(href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas", target = "_blank", "application code"), br(),
-                "Project funded by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/dpqi/cdpb/Pages/pcrtf.aspx", target = "_blank", "Kentucky Pediatric Cancer Research Trust Fund"), br(),
-                "ShinyApp powered by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/Pages/default.aspx", target = "_blank", "Kentucky Department for Public Health")
-            )
-        ), style = "display: block; width: 100%; font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;"),
+        span(
+            tagList(
+                br(),
+                img(src = "KY Pediatric Cancer Research - Final.png", class = "bouncy", style = "width:25%; object-fit: contain;"),
+                img(src = "DPH and PHAB logo.png", class = "bouncy", style = "width:35%; object-fit: contain;"),
+                img(src = "u_of_l.jpg", class = "bouncy", style = "width:20%; object-fit: contain;"),
+                p(strong("Updated on: "), currentDate),
+                 tags$br(),
+                 p(
+                    "Download",
+                    tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", target = "_blank", "source data"),
+                    "and",
+                    tags$a(href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas", target = "_blank", "application code"), br(),
+                    "Project funded by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/dpqi/cdpb/Pages/pcrtf.aspx", target = "_blank", "Kentucky Pediatric Cancer Research Trust Fund"), br(),
+                    "ShinyApp powered by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/Pages/default.aspx", target = "_blank", "Kentucky Department for Public Health")
+                )
+            ),
+            style = "display: block; width: 100%; font-size: 1.25em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;"
+        ),
         br()
     ),
     # Survival Analysis Tab -----
@@ -930,12 +933,12 @@ server <- function(input, output, session) {
     if (!"key" %in% names(atlasDataClean)) {
         atlasDataClean$key <- seq_len(nrow(atlasDataClean))
     }
-    
+
     # KEEP: This reactive
     filteredData <- reactive({
         atlasDataClean
     })
-    
+
     # KEEP: The entire tsnePlot render function
     output$tsnePlot <- renderPlotly({
         data <- filteredData()
@@ -1006,12 +1009,12 @@ server <- function(input, output, session) {
 
         p <- layout(p,
             title = list(
-              text = "t-SNE Dimensionality Reduction (interactive)",
-              font = list(size = 26),  # Increased title font size
-              y = 0.95,                # Position from top (0-1 range)
-              pad = list(t = 20)       # Add top padding
+                text = "t-SNE Dimensionality Reduction (interactive)",
+                font = list(size = 26), # Increased title font size
+                y = 0.95, # Position from top (0-1 range)
+                pad = list(t = 20) # Add top padding
             ),
-            margin = list(t = 80),  
+            margin = list(t = 80),
             xaxis = list(title = "t-SNE 1", color = text_color, gridcolor = grid_color),
             yaxis = list(title = "t-SNE 2", color = text_color, gridcolor = grid_color),
             plot_bgcolor = bg_color,
@@ -1032,9 +1035,9 @@ server <- function(input, output, session) {
         p <- event_register(p, "plotly_selected")
         return(p)
     })
-    
+
     # REPLACE: Everything below with our new implementation
-    
+
     # Create reactive values to store accumulated selections and counter
     accumulated_selections <- reactiveVal(list())
     selection_counter <- reactiveVal(0)
@@ -1047,24 +1050,24 @@ server <- function(input, output, session) {
     # Observer to handle new selections
     observeEvent(selected_points(), {
         select_data <- selected_points()
-        
+
         if (!is.null(select_data) && is.data.frame(select_data) && nrow(select_data) > 0 && "key" %in% names(select_data)) {
             # Get current accumulated selections
             current_selections <- accumulated_selections()
-            
+
             # Increment selection counter
             new_count <- selection_counter() + 1
             selection_counter(new_count)
-            
+
             # Generate a color that contrasts with background
             is_dark_mode <- input$mode_toggle == "dark"
-            color_palette <- if(is_dark_mode) {
+            color_palette <- if (is_dark_mode) {
                 c("#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf")
             } else {
                 c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22")
             }
             selection_color <- color_palette[(new_count - 1) %% length(color_palette) + 1]
-            
+
             # Add new selection with a default name
             new_selection <- list(
                 id = paste0("Selection_", new_count),
@@ -1072,11 +1075,11 @@ server <- function(input, output, session) {
                 keys = as.numeric(select_data$key),
                 color = selection_color
             )
-            
+
             # Add to accumulated selections
             current_selections <- c(current_selections, list(new_selection))
             accumulated_selections(current_selections)
-            
+
             # Show naming modal
             showModal(modalDialog(
                 title = "Name Your Selection",
@@ -1088,7 +1091,7 @@ server <- function(input, output, session) {
             ))
         }
     })
-    
+
     # Observer to save selection name
     observeEvent(input$saveSelectionName, {
         if (nchar(input$selectionName) > 0) {
@@ -1101,84 +1104,88 @@ server <- function(input, output, session) {
         }
         removeModal()
     })
-    
+
     # Selection Manager UI
-output$selectionManagerUI <- renderUI({
-    selections <- accumulated_selections()
-    is_dark_mode <- input$mode_toggle == "dark"
+    output$selectionManagerUI <- renderUI({
+        selections <- accumulated_selections()
+        is_dark_mode <- input$mode_toggle == "dark"
 
-    # Debug input
-    observe({
-        print(input$mode_toggle)
-    })
+        # Debug input
+        observe({
+            print(input$mode_toggle)
+        })
 
-    if (length(selections) == 0) {
-        return(div(
-            class = if (is_dark_mode) "text-light" else "text-dark",
-            "No selections yet. Select points on the plot to create a selection group."
-        ))
-    }
+        if (length(selections) == 0) {
+            return(div(
+                class = if (is_dark_mode) "text-light" else "text-dark",
+                "No selections yet. Select points on the plot to create a selection group."
+            ))
+        }
 
-    selection_items <- lapply(seq_along(selections), function(i) {
-        selection <- selections[[i]]
-        div(
-            class = "selection-item mb-2?”p-2 border rounded",
-            style = paste0("border-left: 5px solid ", selection$color, " !important;"),
+        selection_items <- lapply(seq_along(selections), function(i) {
+            selection <- selections[[i]]
             div(
-                class = "d-flex justify-content-between align-items-center",
-                tags$strong(selection$name, class = "mr-2"),
-                span(paste0("(", length(selection$keys), " points)"), class = "text-muted"),
+                class = "selection-item mb-2?”p-2 border rounded",
+                style = paste0("border-left: 5px solid ", selection$color, " !important;"),
                 div(
-                    actionButton(
-                        inputId = paste0("renameSelection_", i),
-                        label = icon("pencil-alt"),
-                        class = "btn-sm btn-outline-secondary mr-1",
-                        onclick = sprintf("Shiny.setInputValue('renameBtn', {id: %d, ts: Date.now()})", i)
-                    ),
-                    actionButton(
-                        inputId = paste0("deleteSelection_", i),
-                        label = icon("trash"),
-                        class = "btn-sm btn-outline-danger",
-                        onclick = sprintf("Shiny.setInputValue('deleteBtn', {id: %d, ts: Date.now()})", i)
+                    class = "d-flex justify-content-between align-items-center",
+                    tags$strong(selection$name, class = "mr-2"),
+                    span(paste0("(", length(selection$keys), " points)"), class = "text-muted"),
+                    div(
+                        actionButton(
+                            inputId = paste0("renameSelection_", i),
+                            label = icon("pencil-alt"),
+                            class = "btn-sm btn-outline-secondary mr-1",
+                            onclick = sprintf("Shiny.setInputValue('renameBtn', {id: %d, ts: Date.now()})", i)
+                        ),
+                        actionButton(
+                            inputId = paste0("deleteSelection_", i),
+                            label = icon("trash"),
+                            class = "btn-sm btn-outline-danger",
+                            onclick = sprintf("Shiny.setInputValue('deleteBtn', {id: %d, ts: Date.now()})", i)
+                        )
                     )
+                )
+            )
+        })
+
+        # btn_class <- if (is_dark_mode) "btn-outline-light" else "btn-outline-dark"
+        div(
+            h4("Selection Groups", class = if (is_dark_mode) "text-light" else "text-dark"),
+            div(class = "selection-list", selection_items),
+            div(
+                class = "mt-3",
+                actionButton("clearSelections", "Clear All Selections",
+                    # class = paste0("btn-warning ", btn_class)
+                    class = "btn-warning"
+                ),
+                actionButton("compareSelections", "Compare Selections",
+                    # class = paste0("btn-primary ml-2 ", btn_class),
+                    class = "btn-primary",
+                    disabled = length(selections) < 2
                 )
             )
         )
     })
 
-    # btn_class <- if (is_dark_mode) "btn-outline-light" else "btn-outline-dark"
-    div(
-        h4("Selection Groups", class = if (is_dark_mode) "text-light" else "text-dark"),
-        div(class = "selection-list", selection_items),
-        div(
-            class = "mt-3",
-            actionButton("clearSelections", "Clear All Selections",
-                # class = paste0("btn-warning ", btn_class)
-                class = "btn-warning"
-            ),
-            actionButton("compareSelections", "Compare Selections",
-                # class = paste0("btn-primary ml-2 ", btn_class),
-                class = "btn-primary",
-                disabled = length(selections) < 2
-            )
-        )
-    )
-})
-    
     # Use JavaScript to handle rename events
     observeEvent(input$renameBtn, {
         if (!is.null(input$renameBtn)) {
             i <- input$renameBtn$id
             selections <- accumulated_selections()
-            
+
             if (i <= length(selections)) {
                 showModal(modalDialog(
                     title = "Rename Selection",
-                    textInput("newSelectionName", "New Name:", 
-                              selections[[i]]$name),
+                    textInput(
+                        "newSelectionName", "New Name:",
+                        selections[[i]]$name
+                    ),
                     footer = tagList(
-                        actionButton("saveNewName", "Save", class = "btn-primary", 
-                                   onclick = sprintf("Shiny.setInputValue('saveRename', {id: %d, ts: Date.now()})", i)),
+                        actionButton("saveNewName", "Save",
+                            class = "btn-primary",
+                            onclick = sprintf("Shiny.setInputValue('saveRename', {id: %d, ts: Date.now()})", i)
+                        ),
                         modalButton("Cancel")
                     ),
                     easyClose = TRUE
@@ -1186,7 +1193,7 @@ output$selectionManagerUI <- renderUI({
             }
         }
     })
-    
+
     # Handle save rename events
     observeEvent(input$saveRename, {
         if (!is.null(input$saveRename) && nchar(input$newSelectionName) > 0) {
@@ -1199,7 +1206,7 @@ output$selectionManagerUI <- renderUI({
         }
         removeModal()
     })
-    
+
     # Handle delete events
     observeEvent(input$deleteBtn, {
         if (!is.null(input$deleteBtn)) {
@@ -1210,13 +1217,13 @@ output$selectionManagerUI <- renderUI({
             }
         }
     })
-    
+
     # Clear all selections
     observeEvent(input$clearSelections, {
         accumulated_selections(list())
         selection_counter(0)
     })
-    
+
     # Compare selections
     observeEvent(input$compareSelections, {
         selections <- accumulated_selections()
@@ -1239,15 +1246,17 @@ output$selectionManagerUI <- renderUI({
             ))
         }
     })
-    
+
     # Comparison plot
     output$comparisonPlot <- renderPlot({
         req(input$compareVariable, input$selectionsToCompare)
         selections <- accumulated_selections()
         selected_names <- input$selectionsToCompare
-        
-        if (length(selected_names) < 1) return(NULL)
-        
+
+        if (length(selected_names) < 1) {
+            return(NULL)
+        }
+
         # Prepare data
         plot_data <- NULL
         for (name in selected_names) {
@@ -1259,50 +1268,60 @@ output$selectionManagerUI <- renderUI({
                 plot_data <- rbind(plot_data, selected_data)
             }
         }
-        
-        if (is.null(plot_data) || nrow(plot_data) == 0) return(NULL)
-        
+
+        if (is.null(plot_data) || nrow(plot_data) == 0) {
+            return(NULL)
+        }
+
         var_name <- input$compareVariable
-        
+
         # Check variable type and create appropriate plot
         if (is.numeric(plot_data[[var_name]])) {
             # For numeric variables - boxplot
             ggplot(plot_data, aes(x = selection_group, y = .data[[var_name]], fill = selection_group)) +
                 geom_boxplot() +
-                labs(title = paste("Comparison of", var_name, "across selection groups"),
-                     x = "Selection Group", y = var_name) +
+                labs(
+                    title = paste("Comparison of", var_name, "across selection groups"),
+                    x = "Selection Group", y = var_name
+                ) +
                 theme_minimal() +
                 theme(legend.position = "none")
         } else {
             # For categorical variables - bar chart
             ggplot(plot_data, aes(x = .data[[var_name]], fill = selection_group)) +
                 geom_bar(position = "dodge") +
-                labs(title = paste("Comparison of", var_name, "distributions"),
-                     x = var_name, y = "Count", fill = "Selection Group") +
+                labs(
+                    title = paste("Comparison of", var_name, "distributions"),
+                    x = var_name, y = "Count", fill = "Selection Group"
+                ) +
                 theme_minimal() +
                 theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
     })
-    
+
     # Comparison table
     output$comparisonTable <- renderTable({
         req(input$compareVariable, input$selectionsToCompare)
         selections <- accumulated_selections()
         selected_names <- input$selectionsToCompare
-        
-        if (length(selected_names) < 1) return(NULL)
-        
+
+        if (length(selected_names) < 1) {
+            return(NULL)
+        }
+
         # Create summary stats
-        summary_data <- data.frame(Selection = character(),
-                                  Count = integer(),
-                                  stringsAsFactors = FALSE)
-        
+        summary_data <- data.frame(
+            Selection = character(),
+            Count = integer(),
+            stringsAsFactors = FALSE
+        )
+
         for (name in selected_names) {
             selection_idx <- which(sapply(selections, function(s) s$name == name))
             if (length(selection_idx) == 1) {
                 selection <- selections[[selection_idx]]
                 selected_data <- atlasDataClean[atlasDataClean$key %in% selection$keys, ]
-                
+
                 if (is.numeric(selected_data[[input$compareVariable]])) {
                     # For numeric variables
                     stats <- data.frame(
@@ -1314,30 +1333,30 @@ output$selectionManagerUI <- renderUI({
                         Min = min(selected_data[[input$compareVariable]], na.rm = TRUE),
                         Max = max(selected_data[[input$compareVariable]], na.rm = TRUE)
                     )
-                    summary_data <- if(nrow(summary_data) == 0) stats else rbind(summary_data, stats)
+                    summary_data <- if (nrow(summary_data) == 0) stats else rbind(summary_data, stats)
                 } else {
                     # For categorical variables, get the top categories
                     freq_table <- table(selected_data[[input$compareVariable]])
                     top_categories <- names(sort(freq_table, decreasing = TRUE)[1:min(3, length(freq_table))])
-                    
+
                     stats <- data.frame(
                         Selection = selection$name,
                         Count = nrow(selected_data),
                         TopCategories = paste(top_categories, collapse = ", "),
                         TopCategoryCounts = paste(freq_table[top_categories], collapse = ", ")
                     )
-                    summary_data <- if(nrow(summary_data) == 0) stats else rbind(summary_data, stats)
+                    summary_data <- if (nrow(summary_data) == 0) stats else rbind(summary_data, stats)
                 }
             }
         }
-        
+
         summary_data
     })
-    
+
     # Modified data table to show selections
     output$dataTable <- DT::renderDataTable({
         selections <- accumulated_selections()
-        
+
         if (length(selections) == 0) {
             DT::datatable(
                 data.frame(Message = "Please select at least one data point in the t-SNE plot."),
@@ -1354,7 +1373,7 @@ output$selectionManagerUI <- renderUI({
                     all_selected_data <- rbind(all_selected_data, selection_data)
                 }
             }
-            
+
             if (nrow(all_selected_data) == 0) {
                 DT::datatable(
                     data.frame(Message = "No valid points selected."),
@@ -1365,24 +1384,24 @@ output$selectionManagerUI <- renderUI({
                 dt <- DT::datatable(
                     all_selected_data,
                     options = list(
-                        pageLength = 5, 
+                        pageLength = 5,
                         scrollX = TRUE,
-                        columnDefs = list(list(targets = 'selection_group', searchable = TRUE))
+                        columnDefs = list(list(targets = "selection_group", searchable = TRUE))
                     ),
                     rownames = FALSE
                 )
-                
+
                 # Create style mapping for each selection group
                 color_mapping <- sapply(selections, function(s) s$color)
                 names(color_mapping) <- sapply(selections, function(s) s$name)
-                
+
                 # Apply the styling
                 dt <- DT::formatStyle(
                     dt,
-                    'selection_group',
+                    "selection_group",
                     backgroundColor = DT::styleEqual(names(color_mapping), color_mapping)
                 )
-                
+
                 dt
             }
         }
