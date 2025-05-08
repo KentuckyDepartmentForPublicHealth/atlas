@@ -1103,60 +1103,67 @@ server <- function(input, output, session) {
     })
     
     # Selection Manager UI
-    output$selectionManagerUI <- renderUI({
-        selections <- accumulated_selections()
-        is_dark_mode <- input$mode_toggle == "dark"
-        
-        if (length(selections) == 0) {
-            return(div(
-                class = if(is_dark_mode) "text-light" else "text-dark",
-                "No selections yet. Select points on the plot to create a selection group."
-            ))
-        }
-        
-        # Create UI for each selection
-        selection_items <- lapply(seq_along(selections), function(i) {
-            selection <- selections[[i]]
+output$selectionManagerUI <- renderUI({
+    selections <- accumulated_selections()
+    is_dark_mode <- input$mode_toggle == "dark"
+
+    # Debug input
+    observe({
+        print(input$mode_toggle)
+    })
+
+    if (length(selections) == 0) {
+        return(div(
+            class = if (is_dark_mode) "text-light" else "text-dark",
+            "No selections yet. Select points on the plot to create a selection group."
+        ))
+    }
+
+    selection_items <- lapply(seq_along(selections), function(i) {
+        selection <- selections[[i]]
+        div(
+            class = "selection-item mb-2?”p-2 border rounded",
+            style = paste0("border-left: 5px solid ", selection$color, " !important;"),
             div(
-                class = "selection-item mb-2 p-2 border rounded",
-                style = paste0("border-left: 5px solid ", selection$color, " !important;"),
+                class = "d-flex justify-content-between align-items-center",
+                tags$strong(selection$name, class = "mr-2"),
+                span(paste0("(", length(selection$keys), " points)"), class = "text-muted"),
                 div(
-                    class = "d-flex justify-content-between align-items-center",
-                    tags$strong(selection$name, class = "mr-2"),
-                    span(paste0("(", length(selection$keys), " points)"), class = "text-muted"),
-                    div(
-                        actionButton(
-                            inputId = paste0("renameSelection_", i),
-                            label = icon("pencil-alt"), 
-                            class = "btn-sm btn-outline-secondary mr-1",
-                            onclick = sprintf("Shiny.setInputValue('renameBtn', {id: %d, ts: Date.now()})", i)
-                        ),
-                        actionButton(
-                            inputId = paste0("deleteSelection_", i),
-                            label = icon("trash"), 
-                            class = "btn-sm btn-outline-danger",
-                            onclick = sprintf("Shiny.setInputValue('deleteBtn', {id: %d, ts: Date.now()})", i)
-                        )
+                    actionButton(
+                        inputId = paste0("renameSelection_", i),
+                        label = icon("pencil-alt"),
+                        class = "btn-sm btn-outline-secondary mr-1",
+                        onclick = sprintf("Shiny.setInputValue('renameBtn', {id: %d, ts: Date.now()})", i)
+                    ),
+                    actionButton(
+                        inputId = paste0("deleteSelection_", i),
+                        label = icon("trash"),
+                        class = "btn-sm btn-outline-danger",
+                        onclick = sprintf("Shiny.setInputValue('deleteBtn', {id: %d, ts: Date.now()})", i)
                     )
                 )
             )
-        })
-        
-        btn_class <- if(is_dark_mode) "btn-outline-light" else "btn-outline-dark"
-        
-        div(
-            h4("Selection Groups", class = if(is_dark_mode) "text-light" else "text-dark"),
-            div(class = "selection-list", selection_items),
-            div(
-                class = "mt-3",
-                actionButton("clearSelections", "Clear All Selections", 
-                            class = btn_class),
-                actionButton("compareSelections", "Compare Selections", 
-                            class = "btn-outline-primary ml-2",
-                            disabled = length(selections) < 2)
-            )
         )
     })
+
+    # btn_class <- if (is_dark_mode) "btn-outline-light" else "btn-outline-dark"
+    div(
+        h4("Selection Groups", class = if (is_dark_mode) "text-light" else "text-dark"),
+        div(class = "selection-list", selection_items),
+        div(
+            class = "mt-3",
+            actionButton("clearSelections", "Clear All Selections",
+                # class = paste0("btn-warning ", btn_class)
+                class = "btn-warning"
+            ),
+            actionButton("compareSelections", "Compare Selections",
+                # class = paste0("btn-primary ml-2 ", btn_class),
+                class = "btn-primary",
+                disabled = length(selections) < 2
+            )
+        )
+    )
+})
     
     # Use JavaScript to handle rename events
     observeEvent(input$renameBtn, {
