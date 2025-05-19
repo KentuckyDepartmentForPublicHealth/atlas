@@ -1,3 +1,5 @@
+***Note: This application is in BETA version. Expect frequent updates and improvements, with some features under construction.***
+
 # Transcriptomic Atlas of Nervous System Tumors
 
 This Shiny app is designed to explore and analyze a large, annotated transcriptomic atlas of nervous system tumors and non-tumor entities. It provides three main functionalities: mRNA boxplots, dimensionality reduction, and survival analysis.
@@ -14,19 +16,24 @@ This app draws inspiration from the glioVis R app and aims to provide similar fu
 
 - Visualize gene expression levels across different tumor types and non-tumor samples
 - Compare expression distributions using boxplots
-- Filter samples based on various clinical and demographic factors
+- Search by Gene Ontology (GO) terms or specific genes, with grouping options by variables like diagnosis or sex
 
 ### 2. Dimensionality Reduction
 
 - Apply machine learning techniques (FIt-SNE, DBSCAN, OPTICS) to identify clusters by diagnosis
-- Visualize high-dimensional data in 2D or 3D space
-- Explore clustering patterns and relationships between tumor types
+- Visualize high-dimensional data in 2D or 3D space to explore transcriptomic clustering
+- Select points to view sample details and compare selections interactively
 
 ### 3. Survival Analysis
 
 - Perform Kaplan-Meier survival analysis for different tumor groups
 - Investigate the impact of gene expression on survival outcomes
 - Compare survival curves across various clinical and molecular subgroups
+- Supports single-variable and multi-variable grid analyses with downloadable PDF plots
+
+### 4. Contact Form
+
+- Submit feedback or inquiries to the project team, integrated with Monday.com for submission tracking
 
 ## Usage
 
@@ -57,7 +64,7 @@ This app draws inspiration from the glioVis R app and aims to provide similar fu
 
 - R version 4.0 or higher
 - Shiny package
-- Additional R packages for specific analyses (e.g., ggplot2, survival, Rtsne, dbscan)
+- Additional R packages for specific analyses
 
 ## Installation
 
@@ -68,13 +75,24 @@ This app draws inspiration from the glioVis R app and aims to provide similar fu
 
 2. Install required R packages:
    ```
-   install.packages(c("shiny", "ggplot2", "survival", "Rtsne", "dbscan"))
+   install.packages(c(
+    "shiny", "bslib", "shinyjs", "shinycssloaders", "DT", "plotly",
+    "dplyr", "tidyr", "ggplot2", "survival", "survminer", "forcats",
+    "httr", "jsonlite", "shinyalert"))
    ```
 
 3. Run the app:
    ```
    shiny::runApp()
    ```
+## Data Files
+
+geneExpressionData.RData: Contains gene expression data.
+atlasDataClean: Dataset with cleaned transcriptomic and clinical metadata.
+gene_annotations: Gene annotation data with ENTREZID and SYMBOL.
+go_to_genes_list: Mapping of GO terms to genes.
+
+Ensure these files are placed in the dat/ directory.
 
 ## Contributing
 
