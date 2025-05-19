@@ -1,0 +1,169 @@
+---
+title: "Feb13_pres"
+format: revealjs
+editor: visual
+---
+
+## A summary of Findings + Ideas 
+
+Author : Ethan Heck
+
+## Survival Model: Using Mistry's work as a starting point
+```{r, echo=FALSE}
+
+# mac Syntax
+# load("~/Desktop/Survival Intern Project/Survival/atlas/dat/atlasDataClean.RData")
+
+#windows syntax
+load("~/atlas/dat/atlasDataClean.RData")
+
+#package 
+library(survival)
+library(survminer) 
+library(ggplot2) 
+library(dplyr)
+```
+
+```{r, echo=TRUE}
+
+####Getting complete cases for survival######
+atlasDataClean <- subset(atlasDataClean,atlasDataClean$survivalMonths != "NA")
+
+#surv model
+fit <- survfit(Surv(time = as.numeric(survivalMonths), event = mortality) ~ grade , 
+               data = atlasDataClean)
+
+ggsurvplot(
+  fit,
+  data = atlasDataClean,
+  risk.table = TRUE)
+```
+
+## Two ways of plotting KP curves (so far)
+
+
+```{r, echo=TRUE}
+# Example survival model (stratified by 4 groups)
+fit <- survfit(Surv(time = as.numeric(survivalMonths), event = mortality) ~ grade , 
+               data = atlasDataClean) 
+
+# Convert survfit object to tidy data
+surv_df <- as.data.frame(summary(fit)[c("time", "surv", "strata", "lower", "upper")])
+
+# Rename columns for convenience
+colnames(surv_df) <- c("time", "survival", "group", "lower", "upper")
+
+
+
+# Create the Kaplan-Meier plot using ggplot
+ggplot(surv_df, aes(x = time, y = survival, color = group, fill = group)) +
+  geom_step(size = 1.2) +  # Kaplan-Meier survival curve
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color = NA) +  # Confidence intervals
+  labs(
+    title = "Survival Probability (Months) ",
+    x = "Time (Months)",
+    y = "Survival Probability",
+    color = "Group",
+    fill = "Group"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    legend.position = "right"
+  )
+
+#same plot using ggsurvfit
+ggsurvplot(
+  fit,
+  data = atlasDataClean,
+  conf.int = TRUE,
+  pval = TRUE,
+  xlab = "Time (Months)",
+  ylab = 'Survival Probability',
+  risk.table = TRUE)
+```
+
+---
+## Two ways of plotting : Continued
+-Using ggplot
+    -Have to convert surv obj to df
+    -can switch names if preferred
+    -then plot with ggplot directly
+    -can work w ggplot customizations directly
+-Using ggsurvplot
+    -takes surv object directly
+    -can use most ggoptions within the plot directly
+    -preferred method*
+    
+
+## Outputting Median Survival Times
+```{r, echo=TRUE}
+##for whole survival table 
+summary(fit)$table
+
+
+## for just median survival times 
+summary(fit)$table[, "median"]
+
+```
+
+-Note: group 1 has "NA" for median survival time... why?
+    - this is because in this model, where survival is stratified by grade,
+    the survival probability of those with a grade 1 tumor never falls at or below 0.5.
+    -By definition, median survival time is the time at which the probability of survival is 0.5. 
+    
+## Hazard Ratios - CoxPH models
+
+```{r, echo=TRUE}
+#cox model --- uses same surv syntax as fit object above
+cox_model <- coxph(Surv(time = as.numeric(survivalMonths), event = mortality) ~ grade, 
+                   data = atlasDataClean)
+summary(cox_model)
+
+#Have to exponentiate model coefficients (betas) to get Hazard ratios 
+hr_values <- exp(coef(cox_model))
+
+
+print(hr_values)
+
+```
+
+-First question? - why does grade 1 have no value
+    -this is because grade 1 is the reference group for creating hazard ratios
+    -this can be changed if preferred using "relevel"
+- Interpretting hazard ratios?
+    -Grade 2 [5.59] - those with grade 2 tumors are 5.6x likely to experience an event (death) than grade 1
+    -Grade 3 [8.14] - those with a grade 3 tumor are 8.14x likely to experience an event (death) than
+grade 1
+    -Grade 4 [19.99] - those with a grade 4 tumor are 20x likely to experience an event (death) than 
+grade 1
+
+#Other Categorical Variables where reference level matters
+-age group
+-sex
+-the other thing that truly changes is the interpretation
+    -Which level is designated as reference depends on question being proposed, what you desire to find
+    -Example: age group 0-19 may not be the best reference group since cancers are (comparatively) uncommon versus other groups so the hazard ratio will be assumed to be higher for other groups anyways. 
+
+#Potential Strata Options to be Explored
+-stratifying by diagnosis first: that is, looking at say tumor grade within a specific diagnosis (53 total)
+-stratifying by compartment and then by another strata such as comparing diganosis of interest 
+-by gene
+    -Using the sample link btw the two datasets to pull info only for certain genes 
+
+#Next thing to determine: Strata options for Atlas Site
+-Determining factors:
+    -Meaningful results, that is, the model strata need to make sense in context of desired output
+    -Biological Connections ie certain tumor types more common in certain compartments or age groups
+-GlioVis Inspiration:
+    -choose between adult or pediatric
+    -tumor type options
+    -Gene
+    -Histology
+    -Gender 
+#Using Gene Link to Stratify by Genes
+-Need to Link Gene name (annotation) to file names to pull out desired gene
+-This is what I plan on working on for the next week or so 
+-Needs to be a pipeline/system that will work efficently and can be based on user input in the future
+-Most important goal is to simply get it working!
+

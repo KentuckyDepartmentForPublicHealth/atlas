@@ -3,6 +3,7 @@
 
 ```{r}
 message("Annotation pipeline begin..")
+message("Entrez mapping begin..")
 
 library(org.Hs.eg.db)
 
@@ -20,12 +21,15 @@ gene_annotations <- AnnotationDbi::select(org.Hs.eg.db,
 # Potential shift in data structure
 # geneExpressionDataAnnotated <- merge(geneExpressionData, gene_annotations, by.x = "row.names", by.y = "ENTREZID", all.x = TRUE)
 library(dplyr)
+library(tibble)
 
 # Assuming geneExpressionData is a data frame with gene IDs as row names
 geneExpressionDataAnnotated <- geneExpressionData %>%
   rownames_to_column(var = "ENTREZID") %>% # Convert row names to a column
   inner_join(gene_annotations, by = "ENTREZID") %>%
   dplyr::select(ENTREZID, SYMBOL, GENENAME, everything())
+
+message("Entrez mapping finished.")
 ```
 
 
@@ -49,7 +53,7 @@ fetch_gene_info <- function(id) {
 missing_ids <- gene_annotations$ENTREZID[is.na(gene_annotations$SYMBOL)]
 new_annotations <- do.call(rbind, lapply(missing_ids, fetch_gene_info))
 
-message("Find missing finished.")
+message("Find missing annotations finished.")
 ```
 
 ## Add annotations where SYMBOL is NA
@@ -61,7 +65,6 @@ message(paste0("Adding ", nrow(new_annotations), " missing annotation(s).."))
 # glimpse(gene_annotations)
 # table(is.na(gene_annotations$SYMBOL))
 # glimpse(new_annotations)
-library(dplyr)
 
 # Update gene_annotations where SYMBOL is NA using new_annotations
 gene_annotations <- gene_annotations %>%
@@ -120,6 +123,7 @@ message("Biological process finished.")
 
 
 ```{r}
+message("Creating vector for app..")
 # all_possible_genes <- select(gene_annotations, SYMBOL) %>%
 #   filter(!is.na(SYMBOL)) %>%
 #   pull(SYMBOL)
@@ -129,7 +133,10 @@ all_valid_genes <- gene_annotations %>%
   pull(SYMBOL) %>%
   unique() %>%
   sort()
+
+message("Created vector.")
 ```
+
 
 # Save
 
@@ -137,30 +144,5 @@ all_valid_genes <- gene_annotations %>%
 save(gene_annotations, go_to_genes_list, all_valid_genes, file = "dat/annotations.RData")
 
 message("Annotation pipeline finished.")
-```
-
-
-```{r}
-
-```
-
-
-```{r}
-
-```
-
-
-```{r}
-
-```
-
-
-```{r}
-
-```
-
-
-```{r}
-
 ```
 
