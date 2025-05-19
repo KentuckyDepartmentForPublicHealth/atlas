@@ -1,11 +1,28 @@
+# R-specific ignores
 .Rproj.user
 .Rhistory
-.RData
+# .RData
 .Ruserdata
-dat/geneExpressionData.RData
-.vscode/*
-dat/image-latest.RData
-**/chat_history.json
-R/adam-test-apps/all-three-features/dat/
-rsconnect
 .Renviron
+.dcf
+
+# Project-specific data files
+dat/geneExpressionData.RData
+dat/image-latest.RData
+
+# VS Code settings
+.vscode/*
+
+# Shiny app deployment
+rsconnect/
+
+# General ignores
+# *.Rds
+*.log
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
