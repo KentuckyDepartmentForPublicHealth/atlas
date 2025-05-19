@@ -275,7 +275,7 @@ gene_data_wide_plus <- join_atlas_on_demand(
 
 
 ###############################################################
-Sample Data Analysis
+# Sample Data Analysis
 
 ###############################################################
 library(dplyr)
