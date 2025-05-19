@@ -4,6 +4,8 @@
 
 This Shiny app is designed to explore and analyze a large, annotated transcriptomic atlas of nervous system tumors and non-tumor entities. It provides three main functionalities: mRNA boxplots, dimensionality reduction, and survival analysis.
 
+[![Main Banner](main-banner-1400x400-fullglobe.png)]([https://site.com](https://kdph.shinyapps.io/atlas/))
+
 ## Overview
 
 The underlying dataset consists of 5,402 neoplastic and 1,973 non-neoplastic samples collected from public sources and processed using Applied Biosystems GeneChip for data uniformity. The raw data has been reprocessed, normalized, and harmonized to create a cohesive dataset.
