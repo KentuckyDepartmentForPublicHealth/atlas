@@ -87,10 +87,10 @@ This app draws inspiration from the glioVis R app and aims to provide similar fu
    ```
 ## Data Files
 
-geneExpressionData.RData: Contains gene expression data.
-atlasDataClean: Dataset with cleaned transcriptomic and clinical metadata.
-gene_annotations: Gene annotation data with ENTREZID and SYMBOL.
-go_to_genes_list: Mapping of GO terms to genes.
+- geneExpressionData.RData: Contains gene expression data
+- atlasDataClean: Dataset with cleaned transcriptomic and clinical metadata
+- gene_annotations: Gene annotation data with ENTREZID and SYMBOL
+- go_to_genes_list: Mapping of GO terms to genes
 
 Ensure these files are placed in the dat/ directory.
 
