@@ -1,0 +1,1065 @@
+
+
+# survival analysis
+```{r}
+
+freq(is.na(atlasDataClean$survivalMonths))
+
+myView(subset(atlasDataClean, !is.na(survivalMonths)))
+
+
+myView(subset(atlasData, !is.na("Overall survival (months)")))
+
+
+sink('togrok'); freq(atlasData$`Overall survival (months)`); sink()
+
+# Filter Overall survival (months) to only include values with special characters 
+# (excluding decimal points)
+special_char_values <- atlasData[grepl("[^a-zA-Z0-9 \\.]", atlasData$`Overall survival (months)`), "Overall survival (months)"]
+
+# Display the filtered values
+special_char_values
+
+# Filter rows where Overall survival (months) contains special characters (excluding decimal points)
+special_char_rows <- atlasData[grepl("[^a-zA-Z0-9 \\.]", atlasData$`Overall survival (months)`), ]
+
+# Display the filtered rows
+special_char_rows
+
+special_char_values <- atlasData[grepl("[-<>]", atlasData$`Overall survival (months)`), "Overall survival (months)"]
+special_char_values
+
+special_char_values <- atlasData[grepl("[^0-9]", atlasData$`Overall survival (months)`), "Overall survival (months)"]
+special_char_values
+
+
+names(atlasDataClean)
+# subgroup, country
+
+```
+
+
+```{r}
+atlasDataCleanSurvival <- atlasDataClean %>%
+  filter(!is.na(survivalMonths))
+
+atlasDataClean %>%
+  filter(!is.na(survivalMonths)) %>% 
+  nrow()
+
+glimpse(atlasDataClean)
+```
+
+
+```{r}
+# Function to count occurrences for each variable, one at a time
+count_by_variables <- function(data, group_vars) {
+  results_list <- list()
+  
+  for (var in group_vars) {
+    cat("Counting by:", var, "\n") # Optional: print progress
+    
+    results_list[[var]] <- data %>%
+      filter(!is.na(survivalMonths)) %>%
+      group_by(across(all_of(var))) %>%
+      count(sort = TRUE)
+  }
+  
+  return(results_list)
+}
+
+# Define your list of variables to group by
+# group_vars <- c("cancer_type", "gender", "age_group", "stage", "treatment_type", 
+#                 "smoking_status", "tumor_site", "histology") # Add all 40 variables
+
+exclude_vars <- c("filename", "dataID", "sampleID", 
+                  "classifierLightGBM", "classifierRandomForest", 
+                  "classifierEuclidean", "classifierTSNE",
+                  "tsne1", "tsne2", "age", "survivalMonths")
+
+# group_vars <- names(atlasDataClean)
+
+group_vars <- setdiff(names(atlasDataClean), exclude_vars)
+
+# Run the function
+count_results <- count_by_variables(atlasDataClean, group_vars)
+
+# To view results for a specific variable:
+count_results[["cancer_type"]]
+
+sink("variable_counts.txt")
+
+# To print all results:
+for (var in group_vars) {
+  cat("\n\n===", var, "===\n")
+  print(count_results[[var]])
+}
+
+sink()
+# Alternatively, if you want to apply a function to each variable and return the results directly:
+# map_results <- group_vars %>%
+#   purrr::map(~{
+#     atlasDataClean %>%
+#       filter(!is.na(survivalMonths)) %>%
+#       group_by(across(all_of(.x))) %>%
+#       count(sort = TRUE)
+#   })
+
+# # Name the results with their respective variable names
+# names(map_results) <- group_vars
+```
+
+
+```{r}
+freq(atlasDataClean$diagnosisClass)
+
+unique(atlasDataClean$sampleID) %>% length()
+
+group_by(atlasDataClean, sampleID) %>% count(sort = T) %>% filter(n > 1)
+```
+
+# assign missing diagnosis class to testing data set?
+
+```{r, groupings}
+
+atlasDataClean %>% 
+  group_by(diagnosisClass, diagnosisFinal) %>%
+  summarise(n = n()) %>% 
+  arrange(diagnosisFinal)
+
+
+```
+
+# attempt to use the diagnosisFinal to assign missing diagnosisClass
+```{r}
+# Create a reference mapping from existing valid entries
+diagnosis_mapping <- atlasDataClean %>%
+  filter(diagnosisClass != "#N/A" & !is.na(diagnosisClass)) %>%
+  distinct(diagnosisFinal, diagnosisClass)
+
+# Apply the mapping to fill in #N/A values
+atlasDataClean2 <- atlasDataClean %>%
+  # left join safer; but for now, same output as inner_join
+  left_join(diagnosis_mapping, by = "diagnosisFinal", suffix = c("", "_new")) %>% 
+  mutate(diagnosisClass = ifelse(diagnosisClass == "#N/A" | is.na(diagnosisClass),
+                                diagnosisClass_new,
+                                diagnosisClass)) %>%
+  select(-diagnosisClass_new)
+
+rm(diagnosis_mapping)
+```
+
+# understand
+# gene ontology biological processes (BP) cannot be merged into a DF with 20360 rows because "one to many" is the relationship of ENTREZID and BP
+
+```{r}
+# jan 21 2025
+# understand gene annotations
+
+tellMe <- names(mapped_genes) %>% 
+  unique()
+
+sample(tellMe, 50)
+
+
+glimpse(atlasDataClean)
+glimpse(geneExpressionData[1:25, 1:5])
+glimpse(gene_annotations)
+rownames(geneExpressionData[1:25, 1:5])
+
+# jan 23 2025
+
+# Load necessary library
+library(purrr)
+
+# Assuming 'mapped_genes' is a list or a vector where each element is like mapped_genes[1]
+result <- map(mapped_genes, function(x) {
+  if(is.list(x) && length(x) == 1) {
+    # If x is a list with one element, apply the operation
+    return(length(unlist(x[[1]])))
+  } else {
+    # If x does not match expected structure, return NA or another fallback value
+    return(NA)
+  }
+})
+
+# Convert the result to integers, assuming all results are numeric or can be converted
+integer_values <- as.integer(unlist(result))
+
+# Check if we have 6394 elements
+if(length(integer_values) == 6394) {
+  print("Successfully processed 6394 elements.")
+} else {
+  warning("The number of processed elements does not match 6394.")
+}
+
+# Print or use integer_values as needed
+print(integer_values)
+
+# Calculate the sum of the lengths of all elements in mapped_genes
+total_elements <- sum(lengths(mapped_genes))
+
+print(total_elements)
+
+# n = 406318.. ENTREZIDs in multiple categories?
+# Combine all elements into one vector, then find unique values and count them
+unique_elements <- unique(unlist(mapped_genes))
+total_unique_elements <- length(unique_elements)
+
+print(total_unique_elements)
+
+# Combine all elements into one vector
+all_values <- unlist(mapped_genes)
+
+# If you want to see the first few elements of this vector for verification:
+print(head(all_values))
+li(all_values, rownames(geneExpressionData))
+
+# check gene annotations
+
+library(rentrez)
+
+# Function to check if an Entrez ID is valid
+check_entrez_id <- function(id) {
+  tryCatch({
+    # Query NCBI for the gene ID
+    result <- entrez_summary(db="gene", id=id)
+    return(TRUE)
+  }, error = function(e) {
+    # If an error occurs (e.g., ID not found), return FALSE
+    return(FALSE)
+  })
+}
+
+# Example IDs, replace with your full list
+ids_to_check <- filter(gene_annotations, is.na(SYMBOL)) %>% pull(ENTREZID)
+
+# Check validity
+valid_ids <- sapply(ids_to_check, check_entrez_id)
+print(valid_ids)
+
+filter(gene_annotations, is.na(SYMBOL)) %>% glimpse()
+
+#####
+
+```
+
+# rentrez
+
+```{r}
+library(rentrez)
+
+fetch_gene_info <- function(id) {
+  result <- entrez_summary(db="gene", id=id)
+  return(data.frame(ENTREZID = id, 
+                    SYMBOL = result$name, 
+                    GENENAME = result$description))
+}
+
+# Fetch info for missing IDs
+missing_ids <- gene_annotations$ENTREZID[is.na(gene_annotations$SYMBOL)]
+new_annotations <- do.call(rbind, lapply(missing_ids, fetch_gene_info))
+
+# Merge with existing annotations
+# gene_annotations <- rbind(gene_annotations[!is.na(gene_annotations$SYMBOL), ], new_annotations)
+
+
+##
+
+# library(AnnotationHub)
+# Warning in install.packages :
+#   package ‘AnnotationHub’ is not available for this version of R
+# ah <- AnnotationHub()
+# # Query for human gene databases
+# query(ah, "Homo sapiens")  # Look for relevant databases
+```
+
+# rentrez II
+
+```{r}
+## RUN TIME: > 45 minutes
+
+# library(rentrez)
+# 
+# fetch_gene_info <- function(entrez_ids) {
+#   # Initialize an empty list to store results
+#   results <- list()
+# 
+#   # Loop through each Entrez ID
+#   for (id in entrez_ids) {
+#     try({
+#       # Fetch gene summary for each ID
+#       result <- entrez_summary(db="gene", id=id)
+#       results[[id]] <- data.frame(ENTREZID = id, 
+#                                   SYMBOL = result$name, 
+#                                   GENENAME = result$description)
+#     }, silent = TRUE)  # Silent error handling to continue with next ID if one fails
+#   }
+# 
+#   # Combine all results into one data frame
+#   if (length(results) > 0) {
+#     do.call(rbind, results)
+#   } else {
+#     data.frame(ENTREZID = character(), SYMBOL = character(), GENENAME = character())
+#   }
+# }
+# 
+# # Use the function with the rownames of geneExpressionData
+# gene_info <- fetch_gene_info(rownames(geneExpressionData))
+```
+
+# validated appender
+
+```{r}
+# Assuming 'mapped_genes' is a list where keys are names and values are vectors of ENTREZIDs
+
+# Convert the list to a data frame where each ENTREZID can have multiple names
+library(data.table)
+
+# Create a data frame from the list
+mapped_genes_df <- data.table::rbindlist(
+  lapply(names(mapped_genes), function(name) {
+    data.frame(ENTREZID = mapped_genes[[name]], NAME = name)
+  }), fill = TRUE
+)
+
+# Convert ENTREZID to character if it's not already (to match with gene_annotations)
+mapped_genes_df$ENTREZID <- as.character(mapped_genes_df$ENTREZID)
+
+# Perform a left join (or merge) to add all NAMEs from mapped_genes_df to gene_annotations
+# where ENTREZID matches. This will create a row for each name per ENTREZID.
+result <- merge(gene_annotations, mapped_genes_df, by = "ENTREZID", all.x = TRUE)
+
+# If you want to aggregate names for each ENTREZID (since one ENTREZID can match multiple names)
+result <- result %>%
+  dplyr::group_by(ENTREZID, SYMBOL, GENENAME) %>%
+  dplyr::summarise(NAME = paste(unique(NAME), collapse = ", "), .groups = 'drop')
+
+# Display the head of the result
+head(result)
+```
+
+## this would be next step (see note next to 'understand')
+
+```{r}
+library(dplyr)
+
+# Update result SYMBOLs where they are NA and there's a matching ENTREZID in new_annotations
+result <- result %>%
+  left_join(new_annotations %>% select(ENTREZID, SYMBOL), by = "ENTREZID") %>%
+  mutate(SYMBOL = if_else(is.na(SYMBOL.x), SYMBOL.y, SYMBOL.x)) %>%
+  select(-SYMBOL.x, -SYMBOL.y)
+
+# Verify changes
+sum(is.na(result$SYMBOL))  # Should be less than 96 if matches exist
+
+# gene groupings
+
+# Summary
+# To find gene groupings:
+
+# Use predefined databases (MSigDB, GO, KEGG, Reactome).
+# Analyze your data for statistical groupings (e.g., variability, DEGs).
+# Map genes to functional categories with Bioconductor tools.
+# Create custom groupings based on literature or expert input.
+# Organize these groupings into a structure suitable for Shiny selectors (lists or data frames).
+
+# org.Hs.eg.db
+
+```
+
+
+```{r}
+# BiocManager::install("org.Hs.eg.db")
+
+library(org.Hs.eg.db)
+
+# Column Availability
+# cols_available <- columns(org.Hs.eg.db)
+
+# Map Entrez IDs to Gene Symbols and Names
+gene_annotations <- AnnotationDbi::select(org.Hs.eg.db,
+                                          keys = rownames(geneExpressionData),
+                                          columns = c("SYMBOL", "GENENAME"),
+                                          # columns = cols_available,
+                                          keytype = "ENTREZID")
+
+# head(gene_annotations)
+# select(gene_annotations, ONTOLOGY) %>% pull %>% unique()
+# freq(gene_annotations$ONTOLOGY)
+# table(gene_annotations$ONTOLOGY, useNA = "ifany")
+# handle unmapped IDs (none! found)
+# unmapped_ids <- setdiff(rownames(geneExpressionData), gene_annotations$ENTREZID)
+# print(unmapped_ids)
+
+
+# Group genes
+
+# biological pathways
+# BiocManager::install("clusterProfiler")
+library(clusterProfiler)
+
+# Map genes to KEGG pathways (400 error)
+# kegg_annotations <- enrichKEGG(gene = rownames(geneExpressionData),
+#                                 organism = "hsa", # homo sapiens
+#                                 keyType = "ENTREZID")
+# head(kegg_annotations)
+
+# gene ontology terms
+go_annotations <- enrichGO(gene = rownames(geneExpressionData),
+                            OrgDb = org.Hs.eg.db,
+                            ont = "BP", # Biological Process (or: “BP”, “MF”, “CC”, “ALL”)
+                            keyType = "ENTREZID")
+head(go_annotations)
+
+# Extract gene-to-GO mapping
+# This creates a named list where:
+# 
+# The names are GO terms (descriptions).
+# The values are comma-separated gene IDs.
+go_to_genes <- setNames(go_annotations@result$geneID, go_annotations@result$Description)
+
+# Split the gene IDs into vectors
+go_to_genes_list <- lapply(go_to_genes, function(x) unlist(strsplit(x, "/")))
+
+# Find overlap with your gene expression data
+mapped_genes <- lapply(go_to_genes_list, function(genes) {
+  intersect(genes, rownames(geneExpressionData))
+})
+
+# Summarize expression by GO terms
+go_expression <- sapply(names(mapped_genes), function(go_term) {
+  genes <- mapped_genes[[go_term]]
+  if (length(genes) > 0) {
+    rowMeans(geneExpressionData[genes, , drop = FALSE])  # Mean expression for the term
+  } else {
+    NA  # No mapped genes for this GO term
+  }
+})
+
+save(go_expression, gene_annotations, go_annotations, go_to_genes_list, go_to_genes, mapped_genes, file = 'dat/annotations.RData')
+
+```
+
+# check mapped_genes
+
+```{r}
+# Assuming mapped_genes is a list where each element can have different lengths
+lengths <- numeric(6394)  # Pre-allocate space for efficiency
+for (i in 1:6394) {
+  # Check if the list index exists to avoid errors
+  if (i <= length(mapped_genes)) {
+    lengths[i] <- length(mapped_genes[[i]])
+  } else {
+    lengths[i] <- NA  # or some default value if the index is out of bounds
+  }
+}
+# lengths now contains the length of each element in mapped_genes
+# No print statement needed; the vector 'lengths' is ready for use or further operations
+
+
+## check uniqueness
+# Combine all elements into one list
+all_elements <- unlist(mapped_genes, recursive = FALSE)
+
+# Find the distinct count of all items
+distinct_count <- length(unique(all_elements))
+
+# Optional: If you want to see the unique values
+# unique_values <- unique(all_elements)
+
+# Print or use the distinct count as needed
+print(distinct_count)
+
+#  > 14000/20360
+
+#  [1] 0.6876228 (of all genes represented in mapped_genes)
+```
+
+## pheatmap
+
+```{r}
+library(pheatmap)
+
+# Remove GO terms with no mapped genes
+# go_expression_clean <- go_expression[!is.na(go_expression), ] # threw error
+go_expression_clean <- go_expression[!is.na(go_expression)]
+str(go_expression_clean) # list. needs to be numeric matrix or df
+# Convert the list to a numeric matrix
+go_expression_clean <- do.call(rbind, lapply(go_expression_clean, as.numeric))
+
+# Check the resulting structure
+str(go_expression_clean)
+
+
+# Plot heatmap
+pheatmap(go_expression_clean, cluster_rows = TRUE, cluster_cols = TRUE,
+         main = "GO Term-Level Expression")
+
+
+library(heatmaply) # way too slow; dont run again
+
+heatmaply(go_expression_clean, 
+          k_row = 10,  # Cluster rows into 10 groups
+          k_col = 10,  # Cluster columns into 10 groups
+          main = "GO Term-Level Expression")
+
+library(ggplot2)
+
+# Summarize mean expression for GO terms
+mean_expression <- rowMeans(go_expression_clean)
+
+# Barplot for top 20 GO terms
+top_mean_expression <- sort(mean_expression, decreasing = TRUE)[1:20]
+ggplot(data = data.frame(GO = names(top_mean_expression), Expression = top_mean_expression),
+       aes(x = reorder(GO, Expression), y = Expression)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Top 20 GO Terms by Mean Expression", x = "GO Term", y = "Mean Expression")
+
+```
+
+## Ensembl
+
+```{r}
+library(org.Hs.eg.db)
+library(clusterProfiler)
+library(biomaRt)
+library(ggplot2)
+library(pheatmap)
+
+# Assuming 'geneExpressionData' is your data frame or matrix with Entrez IDs as rownames
+
+# Fetch gene symbols from Ensembl
+ensembl = useMart("ensembl", dataset="hsapiens_gene_ensembl")
+geneSymbols <- getBM(attributes = c("entrezgene_id", "hgnc_symbol"),
+                     filters = "entrezgene_id", 
+                     values = rownames(geneExpressionData),
+                     # values = test_ids,
+                     mart = ensembl)
+
+# output = 18906 / 20360 = 0.93
+
+# Create unique gene symbols to avoid duplicate row name issues
+# Here, we ensure uniqueness by considering both Entrez ID and the original symbol
+unique_symbols <- paste(geneSymbols$hgnc_symbol, geneSymbols$entrezgene_id, sep = "_")
+geneSymbols$unique_symbol <- make.unique(unique_symbols, sep = "_")
+
+# Set row names with these unique symbols
+rownames(geneExpressionData) <- setNames(geneSymbols$unique_symbol, 
+                                         geneSymbols$entrezgene_id)[rownames(geneExpressionData)]
+
+# Use original Entrez IDs for GO and KEGG analysis
+entrez_ids <- rownames(geneExpressionData[1:100,])
+
+# Perform GO enrichment
+go_enrich <- enrichGO(gene = entrez_ids,
+                      OrgDb = org.Hs.eg.db,
+                      ont = "BP",
+                      pAdjustMethod = "BH",
+                      pvalueCutoff = 0.05,
+                      qvalueCutoff = 0.2,
+                      readable = TRUE)
+
+# Display GO enrichment results
+print(head(go_enrich, n = 10))
+
+# KEGG pathway analysis
+kegg_enrich <- enrichKEGG(gene = entrez_ids,
+                          organism = 'hsa',  
+                          pvalueCutoff = 0.05)
+
+# Display KEGG results
+print(head(kegg_enrich))
+
+# Custom grouping for ZNF genes
+znf_genes <- grep("^ZNF", rownames(geneExpressionData), value = TRUE)
+if(length(znf_genes) > 0) {
+  znf_group <- data.frame(Gene = znf_genes, Group = "ZNF")
+  print(znf_group)
+
+  # Visualization of GO enrichment
+  print(dotplot(go_enrich, showCategory = 30) + ggtitle("GO Enrichment Analysis"))
+
+  # Heatmap for ZNF genes
+  pheatmap(geneExpressionData[znf_genes,], 
+           show_rownames = TRUE, 
+           main = "Expression of ZNF Genes",
+           fontsize_row = 6)
+} else {
+  print("No ZNF genes found or they might have unique suffixes.")
+}
+```
+
+
+```{r}
+# cross reference with known dB
+# Select a small subset of IDs
+test_ids <- head(rownames(geneExpressionData))
+
+# Map these IDs to gene symbols
+mapped_genes <- AnnotationDbi::select(org.Hs.eg.db, 
+                                      keys = test_ids,
+                                      # keys = rownames(geneExpressionData),
+                                      columns = c("SYMBOL", "GENENAME", "GO", "PATH"), 
+                                      keytype = "ENTREZID")
+print(mapped_genes)
+
+# map genes to GO biological processes
+
+# enrichGO(gene = test_ids, OrgDb = org.Hs.eg.db, ont = "BP")
+
+
+# merge
+# Example of merging annotations with gene expression data
+# merged_data <- merge(geneExpressionData, annotations, 
+#                      by.x = "rownames", by.y = "ENTREZID", all.x = TRUE)
+
+```
+
+## kegg
+
+```{r}
+library(KEGGREST)
+library(clusterProfiler)
+
+# Convert Entrez IDs to KEGG IDs
+entrez_ids <- rownames(geneExpressionData)
+# kegg_ids <- keggConv("kegg", "hsa")  # Converts human Entrez IDs to KEGG IDs
+kegg_ids <- keggConv("hsa", "ncbi-geneid")
+
+# Filter your Entrez IDs to match KEGG
+valid_kegg_ids <- intersect(entrez_ids, gsub(".*:", "", names(kegg_ids)))
+
+# Run enrichment analysis with valid KEGG IDs
+kegg_annotations <- enrichKEGG(gene = valid_kegg_ids,
+                                organism = "hsa", 
+                                keyType = "kegg")
+
+# length of intersection between keggID and ENTREZID in this dataset = 16949 / 20360 = 0.83
+
+```
+
+# examine
+
+## non-tumor?
+
+```{r cross-reference and explore}
+
+examine <- geneExpressionData %>% 
+  select(AGZ_001_U133_2.CEL)
+
+examineOther <- atlasData %>% 
+  filter(Filename %in% 'AGZ_001_U133_2.CEL')
+
+rownames(examine) %>% length() %>% unique()
+
+n_distinct(atlasData$Filename) # matches 7375
+
+atlasData %>% 
+  group_by(
+    Filename
+  ) %>% 
+  count()
+
+# List of non-tumor categories from the image
+non_tumor_categories <- toupper(c("Cerebellum", "Cerebellum, Fetal", "Choroid Plexus", 
+                          "CNS", "Nerve Ganglia", "Peri. Nerve", "Pituitary", 
+                          "Retina", "Retina, Fetal"))
+
+
+# Create the binary indicator variable
+atlasData2$is_tumor <- ifelse(
+  # atlasData2$`Final diagnosis` %in% non_tumor_categories, 
+  atlasData2$`Diagnosis class` %in% 'Non-tumor',
+  0, 
+  1
+)
+
+# Check the frequency to ensure the counts match
+freq(atlasData2$is_tumor)
+
+sample(atlasData$'Sample ID', 250) %>% freq
+
+atlasDataClean %>% 
+  mutate(
+    x = str_sub(filename, 1, 3),
+    .keep = 'used'
+  ) %>% 
+  group_by(x) %>% 
+  count(sort = T)
+
+
+```
+
+
+
+```{r}
+
+glimpse(geneExpressionData)
+glimpse(atlasData)
+
+```
+
+
+
+## freqs
+
+```{r freqs}
+
+
+map(atlasData[, "Diagnosis class", drop = F], ~ freq(.x))
+map(atlasData[, "Diagnosis", drop = F], ~ freq(.x))
+map(atlasData[, "Final diagnosis", drop = F], ~ freq(.x))
+map(atlasData[, "Age (grouped)", drop = F], ~ freq(.x))
+
+map(select(atlasData, contains('classifier')), drop = F, ~ freq(.x))
+
+map(atlasData[, , drop = F], ~ freq(.x) %>% head())
+map(atlasDataClean[, , drop = F], ~ freq(.x) %>% head())
+sink('dat/all-freqs'); map(atlasData, ~ freq(.x)); sink()
+sink('dat/all-freqs2'); map(atlasDataClean, ~ freq(.x)); sink()
+sink('out/all-freqs3'); map(atlasDataClean, ~ freq(.x)); sink()
+sink('out/all-freqs4'); map(select(atlasDataClean, -c('filename', 'dataID', 'sampleID', 'tsne1', 'tsne2')), ~ freq(.x)); sink()
+
+atlasData %>% filter(as.logical(is_tumor)) %>% pull('Final diagnosis') %>% freq
+atlasData %>% filter(as.logical(is_tumor)) %>% pull('Diagnosis class') %>% freq
+
+atlasDataClean %>% 
+  pull(diagnosisFinal) %>% 
+  freq()
+atlasDataClean %>% 
+  pull(diagnosis) %>% 
+  freq()
+atlasDataClean %>% 
+  pull(diagnosisClass) %>% 
+  freq()
+
+
+```
+
+
+
+
+# extra
+
+## read
+
+```{r}
+# ubuntu
+# geneExpressionData <- readRDS('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds')
+# atlasData <- read_csv('/mnt/KDPH/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Atlas_Data.csv')
+
+# windows
+
+# geneExpressionData <- readRDS("P:/PQI/Division Office/PQI Data Analytics/BrainTumorAtlas-main/Gene Expression Data/ExpData.rds")
+# # atlasData <- read_csv('dat/Atlas_Data.csv')
+# save(atlasData, file = 'dat/atlasData.RData')
+```
+
+## vec
+
+```{r}
+
+# Define the vector for both ageGroup levels and labels
+# age_groups <- c("FETAL", "0-5YRS", "5-10YRS", "10-20YRS", "20-40YRS", "40-60YRS", "60-80YRS", "80+YRS")
+
+
+```
+
+
+## NA-check
+
+```{r na-check}
+library(tidyverse)
+
+# Determine which columns are of double type
+double_columns <- geneExpressionData %>%
+  summarise(across(everything(), is.double)) %>%
+  pivot_longer(everything(), names_to = "column", values_to = "is_double") %>%
+  filter(is_double) %>%
+  pull(column)
+
+# Check for NA values in these double columns
+na_check <- geneExpressionData %>%
+  select(all_of(double_columns)) %>%
+  summarise(across(everything(), ~any(is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "column", values_to = "has_na") %>%
+  filter(has_na)
+
+# Display the result
+if (nrow(na_check) > 0) {
+  print("Columns with NA values in double type:")
+  print(na_check$column)
+} else {
+  print("No NA values found in any double type columns.")
+}
+
+
+
+```
+
+# henry-adapted
+
+
+```{r adapt-from-hn}
+# #atlas<-readRDS("C:/Users/henry/Downloads/ExpData.rds")
+# mean.frame <- data.frame(colMeans(geneExpressionData))
+# jde.mean<- data.frame(mean.frame[1:170,])
+# # jde.hist <- read.csv("C:/Users/henry/Downloads/hist.csv")
+# hist <- read_csv("hist.csv")
+# jde.data<- bind_cols(jde.mean,hist)
+# colnames(jde.data)[colnames(jde.data) == "mean.frame.1.170..."] <- "Mean"
+# boxplot(Mean ~ Histology, data = jde.data,
+#         main = "Boxplot by Histology", 
+#         xlab = "Histology", 
+#         ylab = "mRNA Expression (log2)")
+```
+
+
+
+```{r adapt-from-hn}
+
+
+# # jde.surv<- read.csv("C:/Users/henry/Downloads/jde survival.csv")
+# jde_survival <- read_csv("jdesurv.csv")
+# jde.survival$Age.Groups <- jde_survival$`Age (grouped)`
+# 
+# jde.survival<- jde_survival[, c("Vital status","Overall survival (months)","Original histology"), drop=F]
+# # jde.survival$`Overall survival (months)` <- as.numeric(jde.survival$`Overall survival (months)`)
+# fit<- survfit(Surv(`Overall survival (months)`,`Vital status`)~strata(Age.Groups), data=jde.survival)
+# plot(fit, xlab="Time", ylab="Survival", main="JDE Data", col=c(1:4), lty=c(1),conf.int = F)
+# legend("bottomleft",title = "Age Groups", 0.7, legend=c("10-20","20-40","40-60","60-80"), lty=1, col=1:4)
+
+
+```
+
+
+
+
+
+# fig1
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# First, let's summarize the data to get counts for each diagnosis
+diagnosis_counts <- atlasData %>%
+  count(`Final diagnosis`, sort = TRUE) %>%
+  filter(n > 50)  # Only show labels for diagnoses with more than 50 occurrences
+
+# Now, compute the position for labels to avoid overlap
+diagnosis_positions <- atlasData %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  ) %>%
+  inner_join(diagnosis_counts, by = "Final diagnosis")
+
+# Create the plot
+ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = `Final diagnosis`), alpha = 0.7, size = 2) +
+  geom_text(data = diagnosis_positions, 
+            aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+            size = 3, check_overlap = TRUE, vjust = 1, hjust = 1) +  # Adjust size and position
+  theme_minimal() +
+  labs(title = "t-SNE Visualization of Tumor Types with Diagnosis Labels",
+       x = "t-SNE 1",
+       y = "t-SNE 2",
+       color = "Diagnosis") +
+  theme(legend.position = "none")  # Remove legend since we're using labels
+
+# Save the plot if you want
+# ggsave("tsne_plot_with_labels.png", width = 15, height = 10, dpi = 300)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(ggrepel)  # For better label placement
+
+# Compute the position for labels
+diagnosis_positions <- atlasData %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  )
+
+# Create the plot with all labels
+ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = `Final diagnosis`), alpha = 0.7, size = 2) +
+  geom_text_repel(data = diagnosis_positions, 
+                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+                  size = 3, 
+                  max.overlaps = Inf,  # Show all labels
+                  box.padding = 0.5, 
+                  point.padding = 0.5, 
+                  segment.color = 'grey50') +
+  theme_minimal() +
+  labs(title = "t-SNE Visualization of Tumor Types with All Diagnosis Labels",
+       x = "t-SNE 1",
+       y = "t-SNE 2") +
+  theme(legend.position = "none")  # Remove legend since we're using labels
+
+# Save the plot if you want
+# ggsave("tsne_plot_all_labels.png", width = 15, height = 10, dpi = 300)
+
+```
+
+```{r}
+# blue/red no/yes tumor?
+
+# Calculate median positions for labels
+diagnosis_positions <- atlasData2 %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  )
+
+# Create the plot with all labels and color by grok_final
+ggplot(atlasData2, aes(x = tsne1, y = tsne2)) +
+  geom_jitter(aes(color = factor(is_tumor)), alpha = 0.7, size = 2) +
+  geom_text_repel(data = diagnosis_positions, 
+                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+                  size = 3, 
+                  max.overlaps = Inf,  # Show all labels
+                  box.padding = 0.5, 
+                  point.padding = 0.5, 
+                  segment.color = 'grey50') +
+  scale_color_manual(values = c("0" = "blue", "1" = "red")) +
+  theme_minimal() +
+  labs(title = "t-SNE Visualization of Tumor Types with All Diagnosis Labels",
+       x = "t-SNE 1",
+       y = "t-SNE 2",
+       color = "Grok Final") +
+  theme(legend.position = "none")
+
+```
+
+# euclidean
+```{r}
+# Load required libraries
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+
+# Assuming atlasData contains columns: tsne1, tsne2, `Euclidean classifier`, grok_final
+
+# Median imputation for NA values in `Euclidean classifier`
+atlasData$`Euclidean classifier imputed` <- ifelse(is.na(atlasData$`Euclidean classifier`), 
+                                                   median(atlasData$`Euclidean classifier`, na.rm = TRUE), 
+                                                   atlasData$`Euclidean classifier`)
+
+# Calculate median positions for each diagnosis for labeling
+diagnosis_positions <- atlasData %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  )
+
+# Create the 2D plot with Euclidean classifier
+ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = factor(grok_final)), alpha = 0.7, size = 2) +
+  geom_text_repel(data = diagnosis_positions, 
+                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+                  size = 3, 
+                  max.overlaps = Inf,  # Show all labels
+                  box.padding = 0.5, 
+                  point.padding = 0.5, 
+                  segment.color = 'grey50') +
+  scale_color_manual(values = c("0" = "blue", "1" = "red")) +
+  theme_minimal() +
+  labs(title = "2D t-SNE Visualization with Euclidean Classifier",
+       x = "t-SNE 1",
+       y = "t-SNE 2",
+       color = "Grok Final") +
+  theme(legend.position = "none")
+```
+
+# tsne2
+
+```{r}
+# Load required libraries
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+
+# Assuming atlasData contains columns: tsne1, tsne2, `t-SNE classifier`, grok_final
+
+# Convert NA values to a specific category or handle them appropriately
+atlasData$`t-SNE classifier imputed` <- ifelse(is.na(atlasData$`t-SNE classifier`), 
+                                               "Unknown", 
+                                               as.character(atlasData$`t-SNE classifier`))
+
+# Calculate median positions for each diagnosis for labeling
+diagnosis_positions <- atlasData %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  )
+
+# Create the 2D plot with t-SNE classifier
+ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = `t-SNE classifier imputed`), alpha = 0.7, size = 2) +
+  geom_text_repel(data = diagnosis_positions, 
+                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+                  size = 3, 
+                  max.overlaps = Inf,  # Show all labels
+                  box.padding = 0.5, 
+                  point.padding = 0.5, 
+                  segment.color = 'grey50') +
+  theme_minimal() +
+  labs(title = "2D t-SNE Visualization with t-SNE Classifier",
+       x = "t-SNE 1",
+       y = "t-SNE 2",
+       color = "t-SNE Classifier") +
+  scale_color_discrete()  # Changed to discrete scale
+```
+
+#random forest
+
+```{r}
+# Load required libraries
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+
+# Assuming atlasData contains columns: tsne1, tsne2, `Random Forest classifier`, grok_final
+
+# Convert NA values to a specific category or handle them appropriately
+atlasData$`Random Forest classifier imputed` <- ifelse(is.na(atlasData$`Random Forest classifier`), 
+                                                      "Unknown", 
+                                                      as.character(atlasData$`Random Forest classifier`))
+
+# Calculate median positions for each diagnosis for labeling
+diagnosis_positions <- atlasData %>%
+  group_by(`Final diagnosis`) %>%
+  summarise(
+    tsne1 = median(tsne1),
+    tsne2 = median(tsne2)
+  )
+
+# Create the 2D plot with Random Forest classifier
+ggplot(atlasData, aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = `Random Forest classifier imputed`), alpha = 0.7, size = 2) +
+  geom_text_repel(data = diagnosis_positions, 
+                  aes(label = `Final diagnosis`, x = tsne1, y = tsne2),
+                  size = 3, 
+                  max.overlaps = Inf,  # Show all labels
+                  box.padding = 0.5, 
+                  point.padding = 0.5, 
+                  segment.color = 'grey50') +
+  theme_minimal() +
+  labs(title = "2D t-SNE Visualization with Random Forest Classifier",
+       x = "t-SNE 1",
+       y = "t-SNE 2",
+       color = "Random Forest Classifier") +
+  scale_color_discrete()  # Changed to discrete scale
+```
+

@@ -4,7 +4,7 @@
 ```{r options-libraries-functions}
 message("ETL begin..")
 
-source("R/system.R")
+source("ETL/system.R")
 ```
 
 # Pipeline
@@ -151,6 +151,7 @@ rm(diagnosis_mapping)
 # freq(atlasDataClean$survivalMonths) %>% filter(str_detect(var, '[^0-9.]')) # n=104 # not a digit, not a period
 # freq(atlasDataClean$age) %>% filter(str_detect(var, "[^0-9.]")) # n=590 # not a digit, not a period
 
+message("Recode finished.")
 
 ```
 
@@ -178,7 +179,7 @@ message("Insert finished.")
 message("Filter begin..")
 
 atlasDataClean <- atlasDataClean %>%
-  filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
+   filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
 
 
 # verifies record deletion

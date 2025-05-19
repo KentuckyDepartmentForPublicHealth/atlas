@@ -28,6 +28,10 @@ This application may utilize data from various sources. Users are responsible fo
 
 This application is built using the Shiny framework for R. Shiny is licensed under the GNU Affero General Public License, version 3. Users of this application should be aware of the licensing terms of Shiny and R when modifying or redistributing this application.
 
+## Non-Clinical Use
+
+This Shiny application is intended solely for exploration and educational purposes. It is not designed or intended to provide clinical advice or to be used for diagnostic, treatment, or other medical purposes. Users should consult qualified healthcare professionals for clinical decisions and not rely on this application for medical advice.
+
 ## Contact
 
 For questions or concerns about this Shiny application or its licensing, please contact:

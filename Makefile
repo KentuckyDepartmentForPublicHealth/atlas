@@ -4,3 +4,4 @@ git:
 	git commit -m "$m"
 	git push
 	git status
+	git log
