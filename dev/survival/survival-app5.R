@@ -11,7 +11,7 @@ library(RColorBrewer)
 # Load dataset with error handling
 tryCatch(
     {
-        load("/home/adam/Sandbox/Shiny/atlas/dat/atlasDataClean.RData")
+        load("atlasDataClean.RData")
         atlasDataCleanSurvival <- atlasDataClean %>% filter(!is.na(survivalMonths) & survivalMonths > 0)
         message("Data loaded successfully. ", nrow(atlasDataCleanSurvival), " rows available for analysis.")
     },

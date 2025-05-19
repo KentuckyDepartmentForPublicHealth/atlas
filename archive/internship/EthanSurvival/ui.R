@@ -13,7 +13,6 @@ library(cardx)
 message("inside global.R")
 # data
 # ajb load
-load("/home/adam/Sandbox/Shiny/atlas/dat/atlasDataClean.RData")
 
 # windows load
 # load("~/atlas/dat/atlasDataClean.RData")
