@@ -84,17 +84,8 @@ link_atlas_source <- tags$a(
 
 # deployment --------------------------------------------------------------------
 
-<<<<<<< HEAD:R/adam-test-apps/all-three-features/R/global.R
-# getwd()
-# setwd('./R/adam-test-apps/all-three-features')
-=======
->>>>>>> cleanup-reorg:R/global.R
 # currentDate <- format(Sys.time(), '%a, %b %d, %Y at %I:%M %p ET')
 # saveRDS(currentDate, file = "dat/currentDate.rds")
 currentDate <- readRDS(file = "dat/currentDate.rds")
 
-<<<<<<< HEAD:R/adam-test-apps/all-three-features/R/global.R
-# rsconnect::deployApp(appName = "atlas", logLevel = 'verbose')
-=======
 # rsconnect::deployApp(appName = "atlas-dev", appVisibility = "private")
->>>>>>> cleanup-reorg:R/global.R
