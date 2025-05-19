@@ -592,7 +592,6 @@ observeEvent(input$beta_badge_clicked, {
         return(p)
     })
     
-    # REPLACE: Everything below with our new implementation
     
     # Create reactive values to store accumulated selections and counter
     accumulated_selections <- reactiveVal(list())
@@ -778,14 +777,14 @@ observeEvent(input$beta_badge_clicked, {
                 size = "l",
                 easyClose = TRUE,
                 selectInput("compareVariable", "Compare by variable:",
-                    choices = setdiff(names(atlasDataClean), c("key", "tsne1", "tsne2")),
+                    choices = setdiff(names(atlasDataClean), c("key", "tsne1", "tsne2", "age", "sampleID", "filename", "dataID")) |> sort(),
                     selected = "diagnosisFinal"
                 ),
                 checkboxGroupInput("selectionsToCompare", "Selections to compare:",
                     choices = sapply(selections, function(s) s$name),
                     selected = sapply(selections, function(s) s$name)
                 ),
-                plotOutput("comparisonPlot", height = "400px"),
+                plotOutput("comparisonPlot", height = "600px"),
                 tableOutput("comparisonTable"),
                 footer = modalButton("Close")
             ))
