@@ -1,8 +1,12 @@
-***Note: This application is in BETA version. Expect frequent updates and improvements, with some features under construction.***
+<span style="background-color:#FFC107;color:#212529;padding:3px 6px;border-radius:3px;font-weight:bold;font-size:0.8em;" title="This app is in beta. Expect frequent updates and improvements as we continue development. Some features may be under construction.">
+  BETA VERSION
+</span>
+
+---
 
 # Transcriptomic Atlas of Nervous System Tumors
 
-This Shiny app is designed to explore and analyze a large, annotated transcriptomic atlas of nervous system tumors and non-tumor entities. It provides three main functionalities: mRNA boxplots, dimensionality reduction, and survival analysis.
+This app is designed to explore and analyze a large, annotated transcriptomic atlas of nervous system tumors and non-tumor entities. It provides several main functionalities: mRNA boxplots, dimensionality reduction, and survival analysis.
 
 [![Main Banner](www/main-banner-1400x400-fullglobe.png)]([https://site.com](https://kdph.shinyapps.io/atlas/))
 
@@ -10,7 +14,7 @@ This Shiny app is designed to explore and analyze a large, annotated transcripto
 
 The underlying dataset consists of 5,402 neoplastic and 1,973 non-neoplastic samples collected from public sources and processed using Applied Biosystems GeneChip for data uniformity. The raw data has been reprocessed, normalized, and harmonized to create a cohesive dataset.
 
-This app draws inspiration from the glioVis R app and aims to provide similar functionality for exploring the nervous system tumor atlas.
+This app draws inspiration from the [glioVis R app](https://kdph.shinyapps.io/GlioVis/) ([GitHub](https://github.com/KentuckyDepartmentForPublicHealth/shiny_GlioVis)) and aims to provide similar functionality for exploring the nervous system tumor atlas.
 
 ## Features
 
@@ -20,11 +24,20 @@ This app draws inspiration from the glioVis R app and aims to provide similar fu
 - Compare expression distributions using boxplots
 - Search by Gene Ontology (GO) terms or specific genes, with grouping options by variables like diagnosis or sex
 
+
+<a href="https://kdph.shinyapps.io/atlas/">
+  <img src="www/screenshots/mrna.png" alt="mRNA boxplots">
+</a>
+
 ### 2. Dimensionality Reduction
 
 - Apply machine learning techniques (FIt-SNE, DBSCAN, OPTICS) to identify clusters by diagnosis
 - Visualize high-dimensional data in 2D or 3D space to explore transcriptomic clustering
 - Select points to view sample details and compare selections interactively
+
+<a href="https://kdph.shinyapps.io/atlas/">
+  <img src="www/screenshots/tsne.png" alt="tSNE dimensionality reduction">
+</a>
 
 ### 3. Survival Analysis
 
@@ -33,9 +46,17 @@ This app draws inspiration from the glioVis R app and aims to provide similar fu
 - Compare survival curves across various clinical and molecular subgroups
 - Supports single-variable and multi-variable grid analyses with downloadable PDF plots
 
+<a href="https://kdph.shinyapps.io/atlas/">
+  <img src="www/screenshots/survival.png" alt="survival analysis">
+</a>
+
 ### 4. Contact Form
 
 - Submit feedback or inquiries to the project team, integrated with Monday.com for submission tracking
+
+<a href="https://kdph.shinyapps.io/atlas/">
+  <img src="www/screenshots/monday.png" alt="Monday.com form">
+</a>
 
 ## Usage
 
@@ -94,7 +115,7 @@ This app draws inspiration from the glioVis R app and aims to provide similar fu
 - gene_annotations: Gene annotation data with ENTREZID and SYMBOL
 - go_to_genes_list: Mapping of GO terms to genes
 
-Ensure these files are placed in the dat/ directory.
+Ensure [these files](https://github.com/KentuckyDepartmentForPublicHealth/atlas-data) are placed in the dat/ directory. Following, run the ETL/ Rmd scripts to clean the raw data and generate annotations.
 
 ## Contributing
 
@@ -106,7 +127,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-- The transcriptomic atlas of nervous system tumors and non-tumor entities
-- The glioVis R app for inspiration and guidance
 - All researchers and institutions that contributed to the underlying dataset
-
+- [Kentucky Pediatric Cancer Research Trust Fund](https://www.chfs.ky.gov/agencies/dph/dpqi/cdpb/Pages/pcrtf.aspx)
+- The glioVis R app for inspiration
