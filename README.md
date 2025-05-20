@@ -24,6 +24,7 @@ This app is designed to explore and analyze a large, annotated transcriptomic at
 - [Data Files](#data-files)
 - [Contributing](#contributing)
 - [License](#license)
+- [Citation](#citation)
 - [Acknowledgments](#acknowledgments)
 
 ## Overview
@@ -140,6 +141,16 @@ Contributions are welcome! Please fork the repository and submit pull requests w
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+Copyright (c) 2025 Kentucky Department for Public Health
+
+The MIT License allows you to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this software, subject to including the above copyright notice and permission notice in all copies or substantial portions of the software.
+
+## Citation
+
+> Kentucky Department for Public Health. (2025). Transcriptomic Atlas of Nervous System Tumors.
+> Source code: https://github.com/KentuckyDepartmentForPublicHealth/atlas
+> Deployed application: https://kdph.shinyapps.io/atlas/
 
 ## Acknowledgments
 

@@ -1,40 +1,59 @@
-# License for Kentucky Department for Public Health Shiny App
+# MIT License
 
-This Shiny application was developed by the Kentucky Department for Public Health. As a work of the Commonwealth of Kentucky, this software is in the public domain within the United States. You may freely use, copy, modify, and distribute this software without seeking permission.
+Copyright (c) 2023 Kentucky Department for Public Health
 
-## Public Domain Dedication
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-To the extent possible under law, the Kentucky Department for Public Health has waived all copyright and related or neighboring rights to this Shiny application. This work is published from the United States.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-## No Warranty
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the Kentucky Department for Public Health or the Commonwealth of Kentucky be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.
+## Beta Version Notice
+
+This application is currently in beta. Expect frequent updates and improvements as we continue development. Some features may be under construction or subject to change.
 
 ## Attribution
 
-While not required, we appreciate attribution to the Kentucky Department for Public Health when using or modifying this Shiny application. A suggested citation is:
+While not required by the license, we appreciate attribution to the Kentucky Department for Public Health when using or modifying this Shiny application. A suggested citation is:
 
-> Kentucky Department for Public Health. (2025). [Transcriptomic Atlas of Nervous System Tumors]. Retrieved from (https://github.com/KentuckyDepartmentForPublicHealth/atlas)
-
-## Third-Party Components
-
-This Shiny application may include or link to third-party components. These components may have their own licensing terms. Users are responsible for ensuring compliance with the licenses of any third-party components.
+> Kentucky Department for Public Health. (2025). Transcriptomic Atlas of Nervous System Tumors.
+> Source code: https://github.com/KentuckyDepartmentForPublicHealth/atlas
+> Deployed application: https://kdph.shinyapps.io/atlas/
 
 ## Data Usage
 
-This application may utilize data from various sources. Users are responsible for adhering to any terms of use or licensing agreements associated with the data used in this application.
+The underlying dataset referenced in this application consists of publicly available data that has been reprocessed, normalized, and harmonized. Users are responsible for adhering to any terms of use or licensing agreements associated with the original data sources. The data files provided in the repository are made available under the terms of this MIT License.
 
-## Shiny and R
+## Third-Party Components
 
-This application is built using the Shiny framework for R. Shiny is licensed under the GNU Affero General Public License, version 3. Users of this application should be aware of the licensing terms of Shiny and R when modifying or redistributing this application.
+This Shiny application includes or links to third-party components and R packages. These components may have their own licensing terms. Users are responsible for ensuring compliance with the licenses of any third-party components, including machine learning algorithms used for dimensionality reduction features.
 
 ## Non-Clinical Use
 
-This Shiny application is intended solely for exploration and educational purposes. It is not designed or intended to provide clinical advice or to be used for diagnostic, treatment, or other medical purposes. Users should consult qualified healthcare professionals for clinical decisions and not rely on this application for medical advice.
+This Shiny application is intended solely for exploration, research, and educational purposes. It is not designed or intended to provide clinical advice or to be used for diagnostic, treatment, or other medical purposes. Users should consult qualified healthcare professionals for clinical decisions and not rely on this application for medical advice.
+
+## Funding Acknowledgment
+
+This project has been supported by the Kentucky Pediatric Cancer Research Trust Fund. Any views or opinions expressed in this software do not necessarily represent those of the Fund.
 
 ## Contact
 
 For questions or concerns about this Shiny application or its licensing, please contact:
 
-Kentucky Department for Public Health
-
+Kentucky Department for Public Health  
+275 East Main Street  
+Frankfort, KY 40621  
+Email: adam.berrones@ky.gov (Division of Prevention and Quality Improvement)
+Website: https://www.chfs.ky.gov/agencies/dph/Pages/default.aspx
