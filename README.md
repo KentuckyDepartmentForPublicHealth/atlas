@@ -8,6 +8,24 @@ This app is designed to explore and analyze a large, annotated transcriptomic at
 
 [![Main Banner](www/main-banner-1400x400-fullglobe.png)](https://kdph.shinyapps.io/atlas/)
 
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+  - [mRNA Boxplots](#1-mrna-boxplots)
+  - [Dimensionality Reduction](#2-dimensionality-reduction)
+  - [Survival Analysis](#3-survival-analysis)
+  - [Contact Form](#4-contact-form)
+- [Usage](#usage)
+- [Key Findings from the Underlying Dataset](#key-findings-from-the-underlying-dataset)
+- [Applications](#applications)
+- [Limitations](#limitations)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Data Files](#data-files)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+
 ## Overview
 
 The underlying dataset consists of 5,402 neoplastic and 1,973 non-neoplastic samples collected from public sources and processed using Applied Biosystems GeneChip for data uniformity. The raw data has been reprocessed, normalized, and harmonized to create a cohesive dataset.
