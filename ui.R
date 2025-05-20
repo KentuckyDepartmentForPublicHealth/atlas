@@ -23,7 +23,7 @@ ui <- page_navbar(
     footer = NULL,
     nav_spacer(),
     nav_item(
-        span( # bsicons::bs_icon("wrench"),
+        span( 
             "BETA VERSION",
             # "Beta Version",
             class = "badge bg-warning ms-2",
@@ -38,49 +38,10 @@ ui <- page_navbar(
     nav_panel(
         title = "Home", icon = icon("house"),
         tags$head(
-            #   tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
+              tags$link(rel = "stylesheet", type = "text/css", href = "atlas.css"),
             tags$link(rel = "shortcut icon", href = "favicon.ico"),
-            tags$style(HTML("
-            /* Custom animations for img hover */
-            .bouncy  {
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-                border-radius: 10px;
-            }
-            .bouncy:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
-            }
-            
-        /* Target headers and cell content in dark mode */
-        body.dark-mode .dark-mode-table-container .dataTable th,
-        body.dark-mode .dark-mode-table-container .dataTable td {
-            color: white !important;
-        }
-
-        /* Table control elements - consistent in both modes */
-        .dark-mode-table-container .dataTables_length, 
-        .dark-mode-table-container .dataTables_filter,
-        .dark-mode-table-container .dataTables_info,
-        .dark-mode-table-container .dataTables_paginate {
-            background-color: white !important;
-            color: black !important;
-            padding: 3px 8px !important;
-            border-radius: 4px !important;
-        }
-        
-        /* Pagination buttons */
-        .dark-mode-table-container .paginate_button {
-            color: black !important;
-        }
-        
-        /* Current page button */
-        .dark-mode-table-container .paginate_button.current {
-            background: #e6e6e6 !important;
-            color: black !important;
-        }        "))
         ), # end of tags$head
         span(img(src = "main-banner-1400x400-fullglobe.png"), style = 'text-align: center; width = "15%";'),
-        # h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
         tags$blockquote(
             "Explore a pioneering resource in neuro-oncology with the Transcriptomic Atlas of Nervous System Tumors. This project aims to bridge critical gaps in understanding the molecular landscape of nervous system tumors by creating a comprehensive, publicly accessible dataset of gene expression profiles. This atlas integrates thousands of samples from diverse sources, offering a powerful tool for researchers, clinicians, and students to investigate tumor biology, refine diagnostics, and uncover new therapeutic insights. Whether you're analyzing survival trends, visualizing tumor heterogeneity, or comparing gene expression patterns, this app provides an interactive gateway to cutting-edge neuro-oncology research."
         ),
@@ -173,7 +134,6 @@ ui <- page_navbar(
         h3(icon("rocket"), " Get Started"),
         p(
             "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data."
-            # tags$a(href = "mailto:axitamm@gmail.com", "axitamm@gmail.com"), "."
         ),
         span(tagList(
             br(),

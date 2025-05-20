@@ -1,73 +1,38 @@
-.leaflet .info {
-  font-size: 1.5em;
-  color: black;
-  margin: 1em;
-  padding: 1em;
-  border: 2px solid gray;
+/* Custom animations for img hover */
+.bouncy {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 10px;
 }
 
-.card-body {
-  #background-color: white  ;
+.bouncy:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
 }
 
-.well {
-  #background-color: #00060C;  /* Change this to your desired color */
-  #color: white;  /* Change text color to white */
-}
-/*.navset-card-tab .leaflet-container {
-  height: 100% !important;
-  min-height: 1200px !important;
-}*/
-#map {
-  #height: 1400px !important;
-  #width: 100% !important;
-   border-radius: 8px;
-}
-/*blockquote {
-   # margin: 0 0 1rem;
-    #padding: .625rem 1.25rem;
-    border-left: .5rem solid #e9ecef;
-    border-right: .5rem solid #e9ecef;
-    border-radius: 15px;
-    text-align: center;
-}*/
-
-.mapfilebullet {
-  list-style-type: none;
-  padding: 0.25em;
-  margin: 0.25em;
+/* Target headers and cell content in dark mode */
+body.dark-mode .dark-mode-table-container .dataTable th,
+body.dark-mode .dark-mode-table-container .dataTable td {
+  color: white !important;
 }
 
-/*#footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 2.5rem;            /* Footer height */
-}*/
-
-.leaflet-wrapper {
- # display:block;
-  #  padding-bottom: 2.5rem;    /* Footer height */
+/* Table control elements - consistent in both modes */
+.dark-mode-table-container .dataTables_length,
+.dark-mode-table-container .dataTables_filter,
+.dark-mode-table-container .dataTables_info,
+.dark-mode-table-container .dataTables_paginate {
+  background-color: white !important;
+  color: black !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
 }
 
-
-
-/* 
-Target the light mode (sun) 
-#mode_toggle[data-mode="light"]::before {
-  content: url("www/icons8-brain-tumor-100.png");
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  background-size: contain;
+/* Pagination buttons */
+.dark-mode-table-container .paginate_button {
+  color: black !important;
 }
 
-Target the dark mode (moon) 
-#mode_toggle[data-mode="dark"]::before {
-  content: url("icons8-brain-tumor-100.png");
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  background-size: contain;
+/* Current page button */
+.dark-mode-table-container .paginate_button.current {
+  background: #e6e6e6 !important;
+  color: black !important;
 }
-*/
