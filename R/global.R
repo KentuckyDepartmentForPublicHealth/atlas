@@ -89,3 +89,4 @@ link_atlas_source <- tags$a(
 currentDate <- readRDS(file = "dat/currentDate.rds")
 
 # rsconnect::deployApp(appName = "atlas-dev", appVisibility = "private")
+# rsconnect::deployApp(appName = "atlas", appVisibility = "public", logLevel = "verbose")
