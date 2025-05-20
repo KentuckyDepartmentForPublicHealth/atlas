@@ -141,7 +141,7 @@ ui <- page_navbar(
             img(src = "DPH and PHAB logo.png", class = "bouncy", style = "width:35%; object-fit: contain;"),
             img(src = "u_of_l.jpg", class = "bouncy", style = "width:20%; object-fit: contain;"),
             br(),
-            paste0("Last updated: ", currentDate), br(),
+            paste0("Last updated: ", APP_TIMESTAMP), br(),
             p(
                 "Download",
                 tags$a(href = "https://github.com/axitamm/BrainTumorAtlas", target = "_blank", "source data"),

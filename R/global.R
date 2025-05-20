@@ -82,11 +82,5 @@ link_atlas_source <- tags$a(
 )
 
 
-# deployment --------------------------------------------------------------------
-
-# currentDate <- format(Sys.time(), '%a, %b %d, %Y at %I:%M %p ET')
-# saveRDS(currentDate, file = "dat/currentDate.rds")
-currentDate <- readRDS(file = "dat/currentDate.rds")
-
-# rsconnect::deployApp(appName = "atlas-dev", appVisibility = "private")
-# rsconnect::deployApp(appName = "atlas", appVisibility = "public", logLevel = "verbose")
+# Load the timestamp created during deployment
+APP_TIMESTAMP <- readRDS(file = "dat/APP_TIMESTAMP.rds")
