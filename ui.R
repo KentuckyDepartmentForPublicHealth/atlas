@@ -286,7 +286,6 @@ ui <- page_navbar(
                 class = "dark-mode-table-container",
                 h2(tags$b("Data Table"), style = "font-size: 24px;"), # Bolder, styled title
                 DT::dataTableOutput("dataTable")
-                #  uiOutput("clearSelectionsUI")
             )
         )
     ),
@@ -375,8 +374,6 @@ ui <- page_navbar(
     ),
 
     # Contact Tab -----
-
-
     nav_panel(
         title = "Contact", icon = icon("envelope"),
         fluidPage(
@@ -420,9 +417,8 @@ ui <- page_navbar(
             )
         )
     ),
-    # Remove the Debug tab here.
     # Dark mode toggle in the navbar (placed as a nav_item)
     nav_item(
         input_dark_mode(id = "mode_toggle", mode = "dark")
     )
-)
+) # end page_navbar UI

@@ -199,6 +199,8 @@ server <- function(input, output, session) {
             title <- paste("Survival by", strat_var)
         }
         xlim <- if (!is.null(max_time) && max_time > 0) c(0, max_time) else NULL
+        # Set larger margins for the plot
+        par(mar = c(5, 5, 4, 2) + 1) # Bottom, left, top, right margins
         plot(surv_fit,
             col = colors,
             lwd = 2,
@@ -206,7 +208,11 @@ server <- function(input, output, session) {
             ylab = "Survival Probability",
             main = title,
             mark.time = TRUE,
-            xlim = xlim
+            xlim = xlim,
+            cex.lab = 2,     # Increase axis label size
+            cex.main = 2,    # Increase main title size
+            cex.axis = 1.5,  # Increase axis text size
+            cex = 1.5        # Increase legend and other text elements
         )
         if (show_ci) {
             for (i in seq_along(levels)) {
@@ -234,7 +240,7 @@ server <- function(input, output, session) {
             col = colors,
             lty = 1,
             lwd = 2,
-            cex = 0.7,
+            cex = 1.3,  # Increase legend text size
             bty = "n"
         )
         if (show_pvalue && length(levels) > 1) {
@@ -273,7 +279,8 @@ server <- function(input, output, session) {
         n_plots <- length(input$grid_variables)
         n_cols <- if (n_plots <= 3) n_plots else 3
         n_rows <- if (n_plots <= 3) 1 else ceiling(n_plots / 3)
-        par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 3, 1))
+        # overrides the margins set in create_survival_plot for this output object only
+        par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 3, 1)) 
         for (var in input$grid_variables) {
             title <- switch(var,
                 "mutationIDH1/2" = "IDH Mutation",
