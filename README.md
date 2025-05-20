@@ -1,6 +1,4 @@
-<span style="background-color:#FFC107;color:#212529;padding:3px 6px;border-radius:3px;font-weight:bold;font-size:0.8em;" title="This app is in beta. Expect frequent updates and improvements as we continue development. Some features may be under construction.">
-  BETA VERSION
-</span>
+[![BETA VERSION](https://img.shields.io/badge/BETA-VERSION-yellow)](# "This app is in beta. Expect frequent updates and improvements as we continue development. Some features may be under construction.")
 
 ---
 
