@@ -1,27 +1,12 @@
-message("Setting system options, libraries, and functions.")
-
-# misc --------------------------------------------------------------------
-
-# rm(list=ls())
-
-
-# image-save -----
-#save.image(file = "dat/image-latest.RData")
-# load(file = "dat/image-latest.RData")
+message("Loading system options, libraries, and functions..")
 
 
 # system options and libraries --------------------------------------------
 
-options(dplyr.width = Inf, dplyr.print_max = 1e5, max.print = 1e5, shiny.launch.browser = FALSE)
+# options(dplyr.width = Inf, dplyr.print_max = 1e5, max.print = 1e5, shiny.launch.browser = FALSE)
 
 library(tidyverse)
-# library(readxl)
-# library(scales)
-# library(DBI)
-# library(RPostgres)
-# library(survival)
 library(shiny)
-# library(bslib)
 
 # CHFS colors -------------------------------------------------------------
 chfs <- list(
@@ -36,15 +21,12 @@ chfs <- list(
 )
 
 
-
 # time --------------------------------------------------------------------
 
 
 # currentDate <- format(Sys.time(), '%a, %b %d, %Y at %I:%M %p EDT')
 # saveRDS(currentDate, file = 'dat/currentDate.rds')
 currentDate <- readRDS(file = "dat/currentDate.rds")
-
-
 
 
 # helper functions --------------------------------------------------------
@@ -175,7 +157,7 @@ delete_column <- function(df, i) {
   cols_df <- colnames(df)
   temp <- F
   if (is.character(i)) {
-    if (sum(i %in% cols_df < 1)) stop("invalid column name")
+    if (sum(i %in% cols_df) < 1) stop("invalid column name")
     df2 <- df[!names(df) %in% (i)]
     temp <- T
   } else if (is.numeric(i)) {
@@ -360,9 +342,6 @@ createDt <- function(from, to, by) {
 } # end func definition
 
 
-
-
-
 # show column names -------------------------------------------------------
 
 # instead of sort(names(df))
@@ -380,8 +359,6 @@ sCols <- function(x, sorted = T, howMuch = 1:ncol(x)) {
     cat(paste(1:length(a), a, collapse = "\n"))
   }
 }
-
-
 
 
 # length intersect --------------------------------------------------------

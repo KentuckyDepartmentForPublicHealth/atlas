@@ -141,7 +141,7 @@ message("Created vector.")
 # Save
 
 ```{r}
-save(gene_annotations, go_to_genes_list, all_valid_genes, file = "dat/annotations.RData")
+# save(gene_annotations, go_to_genes_list, all_valid_genes, file = "dat/annotations.RData")
 
 message("Annotation pipeline finished.")
 ```
