@@ -190,7 +190,7 @@ ui <- page_navbar(
                 "Project funded by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/dpqi/cdpb/Pages/pcrtf.aspx", target = "_blank", "Kentucky Pediatric Cancer Research Trust Fund"), br(),
                 "ShinyApp powered by the", tags$a(href = "https://www.chfs.ky.gov/agencies/dph/Pages/default.aspx", target = "_blank", "Kentucky Department for Public Health")
             )
-        ), style = "display: block; width: 100%; font-size: 0.75em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;"),
+        ), style = "display: block; width: 100%; font-size: 1.5em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;"),
         br()
     ),
     # Survival Analysis Tab -----
