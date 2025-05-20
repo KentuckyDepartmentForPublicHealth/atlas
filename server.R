@@ -774,7 +774,7 @@ observeEvent(input$beta_badge_clicked, {
         if (length(selections) >= 2) {
             showModal(modalDialog(
                 title = "Compare Selections",
-                size = "l",
+                size = "xl",
                 easyClose = TRUE,
                 selectInput("compareVariable", "Compare by variable:",
                     choices = setdiff(names(atlasDataClean), c("key", "tsne1", "tsne2", "age", "sampleID", "filename", "dataID")) |> sort(),
@@ -784,7 +784,7 @@ observeEvent(input$beta_badge_clicked, {
                     choices = sapply(selections, function(s) s$name),
                     selected = sapply(selections, function(s) s$name)
                 ),
-                plotOutput("comparisonPlot", height = "600px"),
+                plotOutput("comparisonPlot", height = "800px"),
                 tableOutput("comparisonTable"),
                 footer = modalButton("Close")
             ))
@@ -815,6 +815,9 @@ observeEvent(input$beta_badge_clicked, {
         
         var_name <- input$compareVariable
         
+      # Define a base font size that works well across platforms
+        base_size <- 16
+        
         # Check variable type and create appropriate plot
         if (is.numeric(plot_data[[var_name]])) {
             # For numeric variables - boxplot
@@ -822,16 +825,28 @@ observeEvent(input$beta_badge_clicked, {
                 geom_boxplot() +
                 labs(title = paste("Comparison of", var_name, "across selection groups"),
                      x = "Selection Group", y = var_name) +
-                theme_minimal() +
-                theme(legend.position = "none")
+                theme_minimal(base_size = base_size) +
+                theme(
+                    legend.position = "none",
+                    plot.title = element_text(size = base_size * 1.2, face = "bold"),
+                    axis.title = element_text(size = base_size * 1.1),
+                    axis.text = element_text(size = base_size)
+                )
         } else {
             # For categorical variables - bar chart
             ggplot(plot_data, aes(x = .data[[var_name]], fill = selection_group)) +
                 geom_bar(position = "dodge") +
                 labs(title = paste("Comparison of", var_name, "distributions"),
                      x = var_name, y = "Count", fill = "Selection Group") +
-                theme_minimal() +
-                theme(axis.text.x = element_text(angle = 45, hjust = 1))
+                theme_minimal(base_size = base_size) +
+                theme(
+                    plot.title = element_text(size = base_size * 1.2, face = "bold"),
+                    axis.title = element_text(size = base_size * 1.1),
+                    axis.text = element_text(size = base_size),
+                    axis.text.x = element_text(angle = 45, hjust = 1, size = base_size),
+                    legend.title = element_text(size = base_size),
+                    legend.text = element_text(size = base_size * 0.9)
+                )
         }
     })
     

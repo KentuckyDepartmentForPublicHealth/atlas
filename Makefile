@@ -1,7 +1,9 @@
 git:
 	git pull
 	git add .
-	git commit -m "$m"
+	@echo "$$m" > .commit_msg.tmp
+	git commit -F .commit_msg.tmp
 	git push
 	git status
 	git log
+	@rm -f .commit_msg.tmp
