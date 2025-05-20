@@ -50,26 +50,34 @@ ui <- page_navbar(
                 transform: translateY(-5px);
                 box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
             }
-        /* Target headers, cell content, pagination controls, and info text */
+            
+        /* Target headers and cell content in dark mode */
         body.dark-mode .dark-mode-table-container .dataTable th,
-        body.dark-mode .dark-mode-table-container .dataTable td,
-        body.dark-mode .dark-mode-table-container .dataTables_info,
-        body.dark-mode .dark-mode-table-container .dataTables_paginate,
-        body.dark-mode .dark-mode-table-container .dataTables_length,
-        body.dark-mode .dark-mode-table-container .dataTables_filter {
+        body.dark-mode .dark-mode-table-container .dataTable td {
             color: white !important;
         }
 
-        /* Special styling for pagination buttons */
-        body.dark-mode .dark-mode-table-container .paginate_button {
-            color: white !important;
+        /* Table control elements - consistent in both modes */
+        .dark-mode-table-container .dataTables_length, 
+        .dark-mode-table-container .dataTables_filter,
+        .dark-mode-table-container .dataTables_info,
+        .dark-mode-table-container .dataTables_paginate {
+            background-color: white !important;
+            color: black !important;
+            padding: 3px 8px !important;
+            border-radius: 4px !important;
         }
-
-        /* Current page number in pagination */
-        body.dark-mode .dark-mode-table-container .paginate_button.current {
-            color: #333 !important; /* Keep this dark for contrast with its background */
+        
+        /* Pagination buttons */
+        .dark-mode-table-container .paginate_button {
+            color: black !important;
         }
-        "))
+        
+        /* Current page button */
+        .dark-mode-table-container .paginate_button.current {
+            background: #e6e6e6 !important;
+            color: black !important;
+        }        "))
         ), # end of tags$head
         span(img(src = "main-banner-1400x400-fullglobe.png"), style = 'text-align: center; width = "15%";'),
         # h2('Welcome to the Transcriptomic Atlas of Nervous System Tumors'),
@@ -289,7 +297,13 @@ ui <- page_navbar(
                         h4("Median Survival Estimates"),
                         tableOutput("median_survival")
                     ),
-                    tabPanel("Data", DTOutput("survival_data"))
+                    tabPanel(
+                        "Data",
+                        div(
+                            class = "dark-mode-table-container",
+                            DTOutput("survival_data")
+                        )
+                    )
                 )
             )
         )
@@ -393,12 +407,12 @@ ui <- page_navbar(
     ),
 
     # Info Tab -----
-      nav_menu(
-    title = "Info", icon = icon("info-circle"),
-    # align = "right",
-    nav_item(link_atlas_source),
-    nav_item(link_atlas_data)
-  ),
+    nav_menu(
+        title = "Info", icon = icon("info-circle"),
+        # align = "right",
+        nav_item(link_atlas_source),
+        nav_item(link_atlas_data)
+    ),
 
     # Contact Tab -----
 
