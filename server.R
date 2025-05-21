@@ -853,7 +853,9 @@ server <- function(input, output, session) {
                     legend.position = "none",
                     plot.title = element_text(size = base_size * 1.2, face = "bold"),
                     axis.title = element_text(size = base_size * 1.1),
-                    axis.text = element_text(size = base_size)
+                    axis.text = element_text(size = base_size),
+                    plot.margin = margin(15, 15, 15, 15) # Added margin: top, right, bottom, left
+
                 )
         } else {
             # For categorical variables - bar chart
@@ -870,7 +872,8 @@ server <- function(input, output, session) {
                     axis.text = element_text(size = base_size),
                     axis.text.x = element_text(angle = 45, hjust = 1, size = base_size),
                     legend.title = element_text(size = base_size),
-                    legend.text = element_text(size = base_size * 0.9)
+                    legend.text = element_text(size = base_size * 0.9),
+                    plot.margin = margin(15, 15, 15, 15) # Added margin: top, right, bottom, left
                 )
         }
     })
@@ -1347,10 +1350,8 @@ server <- function(input, output, session) {
         status_type("ready")
         status_message("Processing submission...")
 
-        # Log board_id for debugging
-        cat("Board ID:", board_id, "\n")
-
-        current_date <- format(Sys.Date(), "%Y-%m-%d")
+        # Get current date in NYC timezone
+        current_date <- format(as.POSIXct(Sys.time(), tz = "America/New_York"), "%Y-%m-%d")
 
         # Escape input$message for JSON and GraphQL
         escaped_message <- gsub('(["\\])', "\\\\\\1", input$message) # Escape quotes and backslashes
