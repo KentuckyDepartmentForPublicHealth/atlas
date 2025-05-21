@@ -1,4 +1,4 @@
-# Load libraries
+# Load libraries ***************************************************************
 library(shiny)
 library(bslib)
 library(survival)
@@ -17,23 +17,38 @@ library(httr)
 library(jsonlite)
 library(rlang)
 
+# Load environment variables ***************************************************
+api_token <- Sys.getenv("api_token")
+board_id <- Sys.getenv("board_id")
+
 # Create a reactive value to track if gene expression data is loaded
 # gene_data_loaded <- reactiveVal(FALSE)
 
 # Create a placeholder for the gene expression data
 geneExpressionData <- NULL
 
-# Load the data (assuming it's available in the environment)
-# load("../../../dat/atlasDataClean.RData")
-# load("../../../dat/geneExpressionData.RData")
-# load("../../../dat/annotations.RData")
+# Load data ********************************************************************
 load("dat/atlasDataClean.RData")
-# load("dat/geneExpressionData.RData")
-load("dat/annotations.RData")
-# Assume geneExpressionData, gene_annotations, and go_to_genes_list are also loaded
+# load("dat/geneExpressionData.RData") # will load when focus moved to mRNA boxplots Tab
+load("dat/annotations.RData") # loads gene_annotations, go_to_genes_list, all_valid_genes
 
+# Info tab *********************************************************************
+link_atlas_data <- tags$a(
+  shiny::icon("github"), "Source Data",
+  href = "https://github.com/axitamm/BrainTumorAtlas",
+  target = "_blank"
+)
 
-# Define a color palette generator function
+link_atlas_source <- tags$a(
+  shiny::icon("github"), "App Code",
+  href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas",
+  target = "_blank"
+)
+
+# Load the timestamp created during deployment *********************************
+APP_TIMESTAMP <- readRDS(file = "dat/APP_TIMESTAMP.rds")
+
+# Define a color palette generator function for t-SNE plot
 get_color_palette <- function(mode, n_colors) {
     if (mode == "dark") {
         # Use a palette that works well on dark backgrounds
@@ -66,21 +81,3 @@ get_color_palette <- function(mode, n_colors) {
         }
     }
 }
-
-# info tab -----
-
-link_atlas_data <- tags$a(
-  shiny::icon("github"), "Source Data",
-  href = "https://github.com/axitamm/BrainTumorAtlas",
-  target = "_blank"
-)
-
-link_atlas_source <- tags$a(
-  shiny::icon("github"), "App Code",
-  href = "https://github.com/KentuckyDepartmentForPublicHealth/atlas",
-  target = "_blank"
-)
-
-
-# Load the timestamp created during deployment
-APP_TIMESTAMP <- readRDS(file = "dat/APP_TIMESTAMP.rds")

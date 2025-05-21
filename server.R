@@ -209,10 +209,10 @@ server <- function(input, output, session) {
             main = title,
             mark.time = TRUE,
             xlim = xlim,
-            cex.lab = 2,     # Increase axis label size
-            cex.main = 2,    # Increase main title size
-            cex.axis = 1.5,  # Increase axis text size
-            cex = 1.5        # Increase legend and other text elements
+            cex.lab = 2, # Increase axis label size
+            cex.main = 2, # Increase main title size
+            cex.axis = 1.5, # Increase axis text size
+            cex = 1.5 # Increase legend and other text elements
         )
         if (show_ci) {
             for (i in seq_along(levels)) {
@@ -240,7 +240,7 @@ server <- function(input, output, session) {
             col = colors,
             lty = 1,
             lwd = 2,
-            cex = 1.3,  # Increase legend text size
+            cex = 1.3, # Increase legend text size
             bty = "n"
         )
         if (show_pvalue && length(levels) > 1) {
@@ -280,7 +280,7 @@ server <- function(input, output, session) {
         n_cols <- if (n_plots <= 3) n_plots else 3
         n_rows <- if (n_plots <= 3) 1 else ceiling(n_plots / 3)
         # overrides the margins set in create_survival_plot for this output object only
-        par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 3, 1)) 
+        par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 3, 1))
         for (var in input$grid_variables) {
             title <- switch(var,
                 "mutationIDH1/2" = "IDH Mutation",
@@ -511,7 +511,7 @@ server <- function(input, output, session) {
         atlasDataClean
     })
 
-    # Primary dimensionality reduction plot ***************************************
+    ## Primary dimensionality reduction plot ***************************************
     output$tsnePlot <- renderPlotly({
         data <- filteredData()
         # validate(need(nrow(data) > 0, "No data available to plot."))
@@ -608,7 +608,7 @@ server <- function(input, output, session) {
         return(p)
     })
 
-    ## Store accumulations; get selected points ***********************************************************
+    ## t-SNE acculumations and selections logic *************************************
     accumulated_selections <- reactiveVal(list())
     selection_counter <- reactiveVal(0)
 
@@ -616,7 +616,7 @@ server <- function(input, output, session) {
         event_data("plotly_selected", source = "A")
     })
 
-    ## Observer to handle new selections ******************************************************************
+    ### Handle new selections ********************************************************
     observeEvent(selected_points(), {
         select_data <- selected_points()
 
@@ -661,7 +661,7 @@ server <- function(input, output, session) {
         }
     })
 
-    ## Observer to save selection name *******************************************************************
+    ### Save selection name *******************************************************************
     observeEvent(input$saveSelectionName, {
         if (nchar(input$selectionName) > 0) {
             current_selections <- accumulated_selections()
@@ -674,7 +674,7 @@ server <- function(input, output, session) {
         removeModal()
     })
 
-    ## Selection Manager UI
+    ### Selection Manager UI ********************************************************************
     output$selectionManagerUI <- renderUI({
         selections <- accumulated_selections()
         is_dark_mode <- input$mode_toggle == "dark"
@@ -713,9 +713,7 @@ server <- function(input, output, session) {
                 )
             )
         })
-
         # btn_class <- if(is_dark_mode) "btn-outline-light" else "btn-outline-dark"
-
         div(
             h4("Selection Groups", class = if (is_dark_mode) "text-light" else "text-dark"),
             div(class = "selection-list", selection_items),
@@ -731,8 +729,7 @@ server <- function(input, output, session) {
             )
         )
     })
-
-    # Use JavaScript to handle rename events
+    ### JavaScript renames events **********************************************
     observeEvent(input$renameBtn, {
         if (!is.null(input$renameBtn)) {
             i <- input$renameBtn$id
@@ -758,7 +755,7 @@ server <- function(input, output, session) {
         }
     })
 
-    # Handle save rename events
+    ### Handle save rename events **********************************************
     observeEvent(input$saveRename, {
         if (!is.null(input$saveRename) && nchar(input$newSelectionName) > 0) {
             i <- input$saveRename$id
@@ -771,7 +768,7 @@ server <- function(input, output, session) {
         removeModal()
     })
 
-    # Handle delete events
+    ### Handle delete events *************************************************
     observeEvent(input$deleteBtn, {
         if (!is.null(input$deleteBtn)) {
             i <- input$deleteBtn$id
@@ -782,13 +779,13 @@ server <- function(input, output, session) {
         }
     })
 
-    # Clear all selections
+    ### Clear all selections **************************************************
     observeEvent(input$clearSelections, {
         accumulated_selections(list())
         selection_counter(0)
     })
 
-    # Compare selections
+    ### Compare selections ***************************************************
     observeEvent(input$compareSelections, {
         selections <- accumulated_selections()
         if (length(selections) >= 2) {
@@ -811,7 +808,7 @@ server <- function(input, output, session) {
         }
     })
 
-    # Comparison plot
+    ### Comparison plot ***************************************************
     output$comparisonPlot <- renderPlot({
         req(input$compareVariable, input$selectionsToCompare)
         selections <- accumulated_selections()
@@ -878,7 +875,7 @@ server <- function(input, output, session) {
         }
     })
 
-    # Comparison table
+    ### Comparison table **************************************************************
     output$comparisonTable <- renderTable({
         req(input$compareVariable, input$selectionsToCompare)
         selections <- accumulated_selections()
@@ -928,11 +925,9 @@ server <- function(input, output, session) {
                 }
             }
         }
-
         summary_data
     })
-
-    # Modified data table to show selections
+    ### Modified data table to show selections ******************************************************************
     output$dataTable <- DT::renderDataTable({
         selections <- accumulated_selections()
 
@@ -980,16 +975,13 @@ server <- function(input, output, session) {
                     "selection_group",
                     backgroundColor = DT::styleEqual(names(color_mapping), color_mapping)
                 )
-
                 dt
             }
         }
     })
-
-# mRNA Expression Boxplots Logic ************************************************************************************************************
-
+    # mRNA Expression Boxplots Logic ************************************************************************************************************
     gene_annotations <- gene_annotations %>% filter(!is.na(ENTREZID))
-    # all_valid_genes <- gene_annotations %>% # currently loaded with annotations data upon launch
+    # all_valid_genes <- gene_annotations %>% # currently loaded with annotations.RData at launch
     #     filter(ENTREZID %in% rownames(geneExpressionData)) %>%
     #     pull(SYMBOL) %>%
     #     unique() %>%
@@ -1002,6 +994,7 @@ server <- function(input, output, session) {
         choices = names(go_to_genes_list), selected = NULL,
         server = TRUE, options = list(maxOptions = 999999)
     )
+    ## Select search mode: GO or Gene ****************
     total_unique_genes <- reactive({
         req(input$search_mode)
         if (input$search_mode == "Select GO Term") {
@@ -1017,6 +1010,7 @@ server <- function(input, output, session) {
             0
         }
     })
+    ## mRNA selectors for UI *************************
     output$max_options_slider <- renderUI({
         req(total_unique_genes() > 0)
         sliderInput("max_options", "Number of Genes to Display in Dropdown",
@@ -1089,6 +1083,7 @@ server <- function(input, output, session) {
             )
         }
     })
+    ## Final data for mRNA selection ****************************************************************
     final_data <- eventReactive(input$run, {
         chosen_genes <- selected_genes_now()
         if (length(chosen_genes) == 0) {
@@ -1302,7 +1297,7 @@ server <- function(input, output, session) {
             )
         )
     })
-
+    ## Form Validation and Submission ***************************************************************
     observeEvent(input$submit, {
         # Validate inputs
         if (input$name == "" || input$email == "" || input$message == "") {
@@ -1352,9 +1347,6 @@ server <- function(input, output, session) {
         status_type("ready")
         status_message("Processing submission...")
 
-        api_token <- Sys.getenv("api_token")
-        board_id <- Sys.getenv("board_id")
-
         # Log board_id for debugging
         cat("Board ID:", board_id, "\n")
 
@@ -1377,15 +1369,15 @@ server <- function(input, output, session) {
         # Log column_values for debugging
         cat("Column values:", column_values, "\n")
 
-        query <- paste0("mutation {
-    create_item (
-      board_id: ", board_id, ',
-      item_name: "', input$name, '",
-      column_values: "', gsub('"', '\\\\"', column_values), '"
-    ) {
-      id
-    }
-  }')
+                query <- paste0("mutation {
+            create_item (
+            board_id: ", board_id, ',
+            item_name: "', input$name, '",
+            column_values: "', gsub('"', '\\\\"', column_values), '"
+            ) {
+            id
+            }
+        }')
 
         # Log query for debugging
         cat("Query:", query, "\n")

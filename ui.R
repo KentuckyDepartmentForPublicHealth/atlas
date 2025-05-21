@@ -1,4 +1,3 @@
-# Define UI using bslib's page_navbar
 ui <- page_navbar(
     id = "navBar",
     theme = bs_theme(
@@ -34,7 +33,7 @@ ui <- page_navbar(
             onclick = "Shiny.setInputValue('beta_badge_clicked', Math.random())"
         )
     ),
-    # Home -----
+    # Home Tab (Landing Page) ***********************************
     nav_panel(
         title = "Home", icon = icon("house"),
         tags$head(
@@ -50,7 +49,7 @@ ui <- page_navbar(
 
         # Create a responsive row with three columns for the tools
         fluidRow(
-            # Survival Analysis Column
+            ## Survival Analysis Column ********************************
             column(
                 4,
                 div(
@@ -69,7 +68,7 @@ ui <- page_navbar(
                 )
             ),
 
-            # t-SNE Dimensionality Reduction Column
+            ## t-SNE Dimensionality Reduction Column *******************************
             column(
                 4,
                 div(
@@ -88,7 +87,7 @@ ui <- page_navbar(
                 )
             ),
 
-            # mRNA Expression Boxplots Column
+            ## mRNA Expression Boxplots Column ***************************************
             column(
                 4,
                 div(
@@ -135,6 +134,7 @@ ui <- page_navbar(
         p(
             "Dive in by navigating the tabs above. Whether you're a researcher seeking novel hypotheses, a clinician refining diagnostic approaches, or a student learning tumor biology, this app offers a hands-on experience with real-world data."
         ),
+        ## Footer with logos and timestamp *******************************************************************
         span(tagList(
             br(),
             img(src = "KY Pediatric Cancer Research - Final.png", class = "bouncy", style = "width:25%; object-fit: contain;"),
@@ -153,7 +153,7 @@ ui <- page_navbar(
         ), style = "display: block; width: 100%; font-size: 1.5em; color: black; background: white; text-align: center; border-radius: 50px; border: 2px solid white; padding: 1em; margin: 1em 0;"),
         br()
     ),
-    # Survival Analysis Tab -----
+    # Survival Analysis Tab ******************************************************************************
     nav_panel(
         title = "Survival Analysis", icon = icon("heartbeat"), id = "goto_survival",
         sidebarLayout(
@@ -268,7 +268,7 @@ ui <- page_navbar(
             )
         )
     ),
-    # t-SNE Dimensionality Reduction Tab -----
+    # t-SNE Dimensionality Reduction Tab ***********************
     nav_panel(
         title = "t-SNE Dimensionality Reduction", icon = icon("th"),
         fluidPage(
@@ -289,7 +289,7 @@ ui <- page_navbar(
             )
         )
     ),
-    # mRNA Expression Boxplots Tab -----
+    # mRNA Expression Boxplots Tab ***********************
     nav_panel(
         title = "mRNA Expression Boxplots", icon = icon("vial"),
         sidebarLayout(
@@ -364,22 +364,19 @@ ui <- page_navbar(
             )
         )
     ),
-
-    # Info Tab -----
+    # Info Tab *************************
     nav_menu(
         title = "Info", icon = icon("info-circle"),
         # align = "right",
         nav_item(link_atlas_source),
         nav_item(link_atlas_data)
     ),
-
-    # Contact Tab -----
+    # Contact Tab ***********************
     nav_panel(
         title = "Contact", icon = icon("envelope"),
         fluidPage(
             # h2("Contact Information"),
             # p("This section will contain contact information and ways to get in touch with the project team."),
-
             # Layout without styling
             fluidRow(
                 column(

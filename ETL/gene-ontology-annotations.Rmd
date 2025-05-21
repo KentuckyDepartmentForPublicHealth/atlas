@@ -123,7 +123,7 @@ message("Biological process finished.")
 
 
 ```{r}
-message("Creating vector for app..")
+message("Creating valid genes vector for app..")
 # all_possible_genes <- select(gene_annotations, SYMBOL) %>%
 #   filter(!is.na(SYMBOL)) %>%
 #   pull(SYMBOL)
@@ -141,7 +141,7 @@ message("Created vector.")
 # Save
 
 ```{r}
-# save(gene_annotations, go_to_genes_list, all_valid_genes, file = "dat/annotations.RData")
+save(gene_annotations, go_to_genes_list, all_valid_genes, file = "dat/annotations.RData")
 
 message("Annotation pipeline finished.")
 ```
