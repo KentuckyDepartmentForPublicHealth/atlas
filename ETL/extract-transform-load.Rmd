@@ -1,5 +1,7 @@
+ <!-- This script transforms original atlas data into the data used in the RShiny app  -->
 
 # System
+
 
 ```{r options-libraries-functions}
 message("ETL begin..")
@@ -12,17 +14,10 @@ source("ETL/etl-tools.R")
 ## Load
 
 ```{r data}
-message("Loading data..")
+message("Loading original atlas data..")
 
 # original sample data; n=7375
 load("dat/atlasData.RData")
-# cleaned
-load("dat/atlasDataClean.RData")
-# mRNA expression data n=20360 genes
-load("dat/geneExpressionData.RData")
-# gene annotations
-load("dat/annotations.RData")
-
 
 message("Loaded data.")
 ```
@@ -90,7 +85,6 @@ cleanNames <- c(
 
 names(atlasDataClean) <- cleanNames
 
-
 colNames <- tibble(row = 1:length(oldNames), oldNames, cleanNames)
 
 message("Rename finished.")
@@ -108,8 +102,6 @@ atlasDataClean <- atlasDataClean %>%
       str_to_upper # ALL CAPS for only char data
     )
   )
-
-
 
 message("Transform finished.")
 ```
@@ -160,7 +152,6 @@ message("Recode finished.")
 ```{r}
 message("Insert begin..")
 
-
 atlasDataClean <- atlasDataClean %>%
   mutate(
     isNeoplasm = factor(ifelse(diagnosisFinal %in% toupper(c(
@@ -181,7 +172,6 @@ message("Filter begin..")
 atlasDataClean <- atlasDataClean %>%
    filter(sampleAnalysisGroup %notin% 'TEST - NOT CLASSIFIED') # n=79 samples unable to assign a confident final diagnosis
 
-
 # verifies record deletion
 # select(atlasDataClean, sampleAnalysisGroup, diagnosisFinal) %>% filter(sampleAnalysisGroup == 'TEST - NOT CLASSIFIED') %>% view
 
@@ -193,8 +183,6 @@ message("Filter finished.")
 
 ```{r}
 message("Select begin..")
-
-
 
 atlasDataClean <- atlasDataClean %>%
   select(everything())

@@ -1,3 +1,6 @@
+# Note: Not all functions are used in the ETL process
+# But are here for interactive development and testing
+
 message("Loading system options, libraries, and functions..")
 
 
